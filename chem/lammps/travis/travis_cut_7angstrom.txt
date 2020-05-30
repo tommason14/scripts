@@ -1,0 +1,96 @@
+! TRAVIS input file
+! Created with TRAVIS version compiled at Apr 12 2020 14:03:53
+! Source code version: Jan 01 2019
+! Input file written at Thu May 14 11:16:53 2020.
+! I have acknowledged this note (y/n). [yes] 
+
+! Use the advanced mode until the analysis selection menu (y/n)? [no] 
+
+! Use these values (y) or enter different values (n)? [yes] 
+
+! Update cell geometry in every time step (i.e., NPT ensemble) (y) or use fixed cell (n)? [yes] 
+
+! Create images of the structural formulas (y/n)? [no] 
+
+! Accept these molecules (y) or change something (n)? [yes] 
+
+! Which functions to compute (comma separated)?
+cut
+! Use the advanced mode for the main part (y/n)? [no] 
+
+! Which of the molecules should be the reference molecule (C5H14NO=1, C2H3O2=2)? 
+1
+! Show reference molecule itself (y/n)? [yes] 
+
+! Center reference molecule in the box (y/n)? [yes] 
+
+! Fix rotational freedom of the reference molecule (y/n)? [no] 
+
+! How many clusters to create? [100] 
+50
+! How many time steps to use for cluster creation? [501] 
+
+! Use neighboring C5H14NO molecules (y/n)? [yes] 
+
+! Do you want to define a distance condition (y/n)? [yes] 
+
+! Which atom(s) to take from RM C5H14NO (e.g. "C1,C3-5,H", "*"=all)? [#2]
+
+! Which atom(s) to take from OM C5H14NO (e.g. "C1,C3-5,H", "*"=all)? [#2]
+
+! Enter another set of atoms for this condition (y/n)? [no] 
+
+! Enter min./max. distance (0) or min./max. nearest neighbor count (1)? [0] 
+
+! Enter the minimal distance in pm: [0] 
+
+! Enter the maximal distance in pm: [400] 
+700
+! Enter another distance interval (y/n)? [no] 
+
+! Do you want to define an angular condition (y/n)? [no] 
+
+! Add another condition to this set of conditions (y/n)? [no] 
+
+! Enter an additional set of conditions (y/n)? [no] 
+
+! Invert this condition (only add bin entries if failed) (y/n)? [no] 
+
+! Use neighboring C2H3O2 molecules (y/n)? [yes] 
+
+! Do you want to define a distance condition (y/n)? [yes] 
+
+! Which atom(s) to take from RM C5H14NO (e.g. "C1,C3-5,H", "*"=all)? [#2]
+
+! Which atom(s) to take from OM C2H3O2 (e.g. "C1,C3-5,H", "*"=all)? [#2]
+
+! Enter another set of atoms for this condition (y/n)? [no] 
+
+! Enter min./max. distance (0) or min./max. nearest neighbor count (1)? [0] 
+
+! Enter the minimal distance in pm: [0] 
+
+! Enter the maximal distance in pm: [400] 
+700
+! Enter another distance interval (y/n)? [no] 
+
+! Do you want to define an angular condition (y/n)? [no] 
+
+! Add another condition to this set of conditions (y/n)? [no] 
+
+! Enter an additional set of conditions (y/n)? [no] 
+
+! Invert this condition (only add bin entries if failed) (y/n)? [no] 
+
+! Write also virtual atoms (center of mass, ...) (y/n)? [no] 
+
+! Write detailed (long) comment lines into output xyz file (y/n)? [yes] 
+
+! Put the center of the system to (0|0|0) (y) or to (x/2|y/2|z/2) (n)? [yes] 
+
+! In which time step to start processing the trajectory? [1] 
+
+! How many time steps to use (from this position on)? [all] 
+
+! Use every n-th time step from the trajectory? [1] 
+

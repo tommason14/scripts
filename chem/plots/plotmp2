@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# if no filename passed in, read from stdin
+
+if [ $# -eq 0 ]
+then
+  grep 'E(MP2)' | sed '/NaN/d' | awk '{print $3}' | plotgnu
+else
+  grep 'E(MP2)' "$1" | sed '/NaN/d' | awk '{print $3}' | plotgnu
+fi

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+command="sacct -S 2018-08-01 -E 2019-08-28 --format=WorkDir%130,Elapsed,ExitCode,AllocNodes,AllocCPUS | sed '/batch/d;/extern/d;/orte/d' | grep polymer"
+
+eval $command
+# eval $command | ./sacct_time
+# eval $command | ./sacct_cpus

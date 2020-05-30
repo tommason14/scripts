@@ -1,0 +1,12 @@
+#!/bin/bash
+
+[[ $USER =~ tmason ]] && submit="sbatch" || submit="qsub"
+
+cwd=$(pwd)
+for f in $(find . -path "*job")
+do
+    cd "$(dirname $f)"
+    logs_in_dir=$(ls *log 2>/dev/null | wc -l)
+    [[ $logs_in_dir -eq 0 ]] && $submit "$(basename $f)"
+    cd $cwd
+done

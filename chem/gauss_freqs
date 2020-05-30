@@ -1,0 +1,48 @@
+#!/bin/bash
+
+no_imaginary=()
+contains_imaginary=()
+err=()
+
+for f in $(find . -path "*log")
+do
+
+if [[ $(tail $f | grep 'Normal termination' | wc -l) -gt 0 ]]; then
+  imaginary=$(grep 'Frequencies --' $f | tr -s [:blank:] | cut -d ' ' -f 4- | xargs printf '%s\n' | grep "-" | wc -l)
+  if [[ $imaginary -gt 0 ]]; then
+    contains_imaginary+=($f)
+  else
+    no_imaginary+=($f)
+  fi
+else
+  err+=($f)
+fi
+
+done
+
+if [[ ${#no_imaginary[@]} -gt 0 ]]
+then
+  echo 'No imaginary frequencies (ground states):'
+  printf '\t%s\n' ${no_imaginary[@]}
+fi
+
+if [[ ${#contains_imaginary[@]} -gt 0 ]]
+then
+  echo "Imaginary frequencies found (not ground states):"
+  for file in ${contains_imaginary[@]}
+  do
+    printf '  %s\n' $file
+    grep 'Frequencies --' $file |\
+    tr -s [:blank:] |\
+    cut -d ' ' -f 4- |\
+    xargs printf "%s\n" |\
+    grep '^-' |\
+    xargs printf '    %s\n'
+  done 
+fi
+
+if [[ ${#err[@]} -gt 0 ]]
+then
+  echo "Errored or incomplete:"
+  printf '\t%s\n' ${err[@]}
+fi

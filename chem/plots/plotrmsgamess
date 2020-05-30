@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [ $# -eq 0 ]
+then
+  grep 'R.M.S.=' | awk '{print $NF}' | plotgnu
+else
+  grep 'R.M.S.=' "$1" | awk '{print $NF}' | plotgnu
+fi

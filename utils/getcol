@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+[[ $# -eq 0 ]] && 
+  echo "Syntax: getcol [-delim] [col]" &&
+  echo "i.e. 'getcol -, 1' to split on commas and take the first column" &&
+  echo "or 'getcol 3' to split on whitespace and take the third column" &&
+  return 1 
+if [[ $1 =~ ^- ]]; then 
+  delim="${1#-}"
+  col="$2"
+else 
+  delim=" " 
+  col="$1"
+fi
+awk -v col="$col" -F "$delim" '{print $col}'

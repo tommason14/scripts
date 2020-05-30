@@ -1,0 +1,235 @@
+#!/usr/bin/env python3
+
+import os
+import glob
+import subprocess
+from tqdm import tqdm
+from shutil import copyfile
+import sys
+
+
+def check_cli_args():
+    """
+    Checks command line arguments to make sure a file is passed in with some job settings.
+    i.e. script.py settings.py
+    """
+    _string = f"""Syntax: ./{os.path.basename(__file__)} settings_file.py
+
+  Make sure the settings file creates a job, for example, by calling
+  GamessJob/OrcaJob in that file.
+
+  Example file:
+    from chem_assistant import Settings,GamessJob
+    from glob import glob
+
+    sett = Settings()
+    sett.input.pcm.solvnt = 'C2H5OH'
+
+    GamessJob(glob('*xyz')[0], fmo=True, settings=sett)
+    """
+    if len(sys.argv) != 2 or "-h" in sys.argv[1]:
+        sys.exit(_string)
+
+
+def check_user_input(user_input, condition, if_error):
+    """
+    Uses a try/except statement to create a scenario where the
+    end user cannot give unexpected input.
+    Give the condition referring to an item in a lambda expression
+    i.e. lambda item: item.endswith('.csv'), or lambda item: item in range(...)
+
+    Usage:
+        >>> check_user_input('Filename of output', lambda item: item.endswith('.csv'), "Please print a name ending in '.csv'")
+        # Produces:
+        while not correct:
+            try:
+                item = input('Filename of output: ')
+            except ValueError:
+                print("Please enter a filename ending in '.csv'")
+            if not filename.endswith('.csv'):
+                print("Please enter a filename ending in '.csv'")
+            else:
+                correct = True
+        return item
+    """
+    f = condition
+    correct = False
+    while not correct:
+        try:
+            item = input(user_input + ": ")
+        except ValueError:
+            print(if_error)
+        if not f(item):
+            print(if_error)
+        else:
+            correct = True
+    return item
+
+
+def run_script_to_check_for_eqm():
+    print("Running chem_assist --equil-coords... ", end="")
+    os.system("chem_assist --equil-coords > /dev/null")
+    print("Done")
+
+
+def find_configs():
+    """
+    Returns all directories in the current working directory:
+    assumes that these will be individual configs. Checks to
+    see if there is an .inp/.job file in the directory below
+    """
+    return [
+        d
+        for d in glob.glob("*/")
+        if any(f.endswith(x) for f in os.listdir(d) for x in ("inp", "job"))
+    ]
+
+
+def find_logs():
+    """
+    Returns all log files
+    """
+    return glob.glob("**/*log", recursive=True)
+
+
+def map_logs_to_each_config(configs, logs):
+    """
+    For each config (each subdirectory in the cwd),
+    see if the log file is a descendant of that config.
+    If it is, put it in a list associated with that
+    config
+    """
+    conf_dict = {conf[:-1]: [] for conf in configs}
+
+    for log in logs:
+        for k, v in conf_dict.items():
+            if f"{k}/" in log:
+                v.append(log)
+
+    return conf_dict
+
+
+def find_calc_type(log):
+    """
+    Reads first line of log file to find
+    the software used
+    """
+    with open(log, "r") as f:
+        first_5_lines = f.readlines()[:5]
+    software = {"GAMESS": ["GAMESS"], "Gaussian": ["Gaussian", "g16", "checkpoint"]}
+
+    for calc_type, options in software.items():
+        if any(value in line for line in first_5_lines for value in options):
+            return calc_type
+
+
+def equilibrated(log):
+    """
+    Checks to see if the structure has been optimised.
+    """
+
+    term_to_search_for = {
+        "GAMESS": "EQUILIBRIUM GEOMETRY LOCATED",
+        "Gaussian": "Optimization completed",
+    }
+
+    calc_type = find_calc_type(log)
+    lookup = term_to_search_for[calc_type]
+
+    # grep exit codes:
+    #    0: found data i.e optimised
+    #    1: no data i.e. not optimised
+    # subprocess.CalledProcessError called if non-zero exit code returned
+
+    try:
+        output = subprocess.check_output(
+            f"grep '{lookup}' {log}", stderr=subprocess.STDOUT, shell=True
+        ).decode("utf-8")
+        return True
+    except subprocess.CalledProcessError:
+        return False
+
+
+def check_configs_for_equilibration(config_dict):
+    """
+    Loops through the dictionary of the form
+        { 'config' : [file1, file2, file3] }
+    to see if there is an equilibrated geometry in any of the logs.
+    Returns a dictionary of configs that have reached
+    equilibrium
+    """
+    no_equilibrium = []
+
+    for config, logs in tqdm(config_dict.items()):
+        found_equilibrium = False
+        for log in logs:
+            if equilibrated(log):
+                found_equilibrium = True
+        if not found_equilibrium:
+            no_equilibrium.append(config)
+
+    if len(no_equilibrium) > 0:
+        print("No equilibrium found for:")
+        for f in no_equilibrium:
+            print("\t" + f)
+    else:
+        print("All structures optimised")
+
+    return {k: v for k, v in config_dict.items() if k in no_equilibrium}
+
+
+def find_rerun_dir(unequilibrated_dict):
+    """
+    Returns a dictionary of each configuration
+    with the corresponding directory to resubmit from
+    """
+    newdirs = {}
+
+    for config, coord_list in unequilibrated_dict.items():
+        if len(coord_list) > 0:
+            final_log = max(coords for coords in coord_list)
+            rerun_coord_dir = os.path.dirname(final_log) + "/rerun"
+            newdirs[config] = f"{rerun_coord_dir}"
+    return newdirs
+
+
+def copy_settings_file_to_subfolder(newdirs, settings_file):
+    """
+    Checks for target directory and copies over a settings file
+    """
+    for config, newdir in newdirs.items():
+        copyfile(settings_file, f"{newdir}/{settings_file}")
+
+
+def make_new_files(newdirs, settings_file):
+    """
+    Asks the user if they want the new files creating
+    """
+    make_new_files = check_user_input(
+        "Make new files? [Y/N]: ",
+        lambda user_input: user_input.lower() in ("y", "n"),
+        "Please enter 'Y' or 'N'",
+    )
+    if make_new_files.lower() == "y":
+        cwd = os.getcwd()
+        for newdir in newdirs.values():
+            os.chdir(newdir)
+            os.system(f"python3 {settings_file}")
+            os.chdir(cwd)
+
+
+def main():
+    check_cli_args()
+    settings_file = sys.argv[1]
+    run_script_to_check_for_eqm()
+    configs = find_configs()
+    logs = find_logs()
+    config_dict = map_logs_to_each_config(configs, logs)
+    unequilibrated_dict = check_configs_for_equilibration(config_dict)
+    if len(unequilibrated_dict) > 0:
+        new_dirs = find_rerun_dir(unequilibrated_dict)
+        copy_settings_file_to_subfolder(new_dirs, settings_file)
+        make_new_files(new_dirs, settings_file)
+
+
+main()

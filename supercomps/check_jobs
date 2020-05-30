@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# how many jobs to look at ?
+
+num_jobs=""
+[ $# -gt 0 ] && num_jobs=$1
+if [ $num_jobs = "" ]
+then
+  echo "How many jobs to check? [1]"
+  read num_jobs
+fi
+
+# if enter pressed
+[ $num_jobs = "" ] && num_jobs="1"
+
+if ! (env | grep -Fq SLURM || env | grep -Fq TACC)
+then
+  echo "Error: Only set up for SLURM" && exit 1
+fi
+
+jobs=$(squeue -u $USER | grep $USER | awk '{print $1}')
+
+echo $jobs | head -n $num_jobs | xargs -I{} scontrol show jobid {}  

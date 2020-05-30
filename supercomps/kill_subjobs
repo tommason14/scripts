@@ -1,0 +1,3 @@
+#!/bin/sh
+
+ps | grep subjobs.sh | awk '{print $1}' | xargs kill -9

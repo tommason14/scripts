@@ -1,0 +1,2 @@
+#!/bin/sh
+gnuplot -e "set terminal dumb; plot '-' with lines notitle"

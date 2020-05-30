@@ -1,0 +1,11 @@
+#!/bin/sh
+
+extras="*.bbl *.log *.blg *.out *.lof *.lot *.toc *.aux"
+printf '%s\n' ${extras[@]} | xargs -I {} bash -c "[[ -f {} ]] && rm {}"
+
+xelatex $1
+bibtex ${1%.tex}
+xelatex $1
+xelatex $1
+
+printf '%s\n' ${extras[@]} | xargs -I {} bash -c "[[ -f {} ]] && rm {}"

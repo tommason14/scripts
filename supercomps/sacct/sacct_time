@@ -1,0 +1,54 @@
+#!/bin/bash
+times=$(awk '{print $2}')
+more_than_one_day(){
+  # deal with jobs that last for more than one day, printed as days-hours:mins:secs
+  long_days=$(printf '%s\n' $times | sed -n '/-/p' | cut -d '-' -f 1 | awk '{sum += $1} END {print sum}')
+  # if no runs longer than one day, exit here
+  if [[ $(printf '%s\n' $long_days | wc -c) -eq 1 ]]
+  then 
+    echo '00:00:00' 
+  else
+    long_days_in_hours=$(echo "$long_days * 24" | bc)
+    long_from_output=$(printf '%s\n' $times | sed -n '/-/p' | cut -d '-' -f 2 | awk -F ':' '{hours += $1; mins += $2; secs += $3 } END {print hours,mins,secs}')
+    no_days=$(convert_summed_to_correct $long_from_output)
+    # add hours from the days-... to the total hours
+    long_hours=$(( $long_days_in_hours + $(printf '%s' $no_days | awk -F ':' '{print $1}') )) 
+    printf '%s:' $long_hours && printf '%s' $no_days | awk -F ':' '{print $2,$3}' OFS=':'
+  fi
+}
+
+less_than_one_day(){
+ # deal with jobs running for less than one day, with times printed as hours:mins:secs
+  from_output=$(printf '%s\n' $times | sed '/-/d' | awk -F ':' '{hours += $1; mins += $2; secs += $3} END {print hours,mins,secs}')
+  convert_summed_to_correct $from_output
+}
+
+convert_summed_to_correct(){
+# converting 72 mins -> 1h 12 mins 
+# and 68 secs -> 1min 8 secs
+  hours=$1
+  mins=$2
+  secs=$3
+  # convert seconds to mins + seconds
+  mins_to_add=$(( $secs / 60 ))
+  secs_left=$(( $secs % 60 ))
+  hours_to_add=$(( $mins / 60 ))
+  mins_left=$(( $mins % 60 ))
+  
+  summed_hours=$(( $days_in_hours + $hours + $hours_to_add ))
+  summed_mins=$(( $mins_left + $mins_to_add ))
+
+  # total mins now might be above 60 
+  additional_hours=$(( $summed_mins / 60 ))
+  total_mins=$(( $summed_mins % 60 ))
+  total_hours=$(( $summed_hours + $additional_hours ))
+  echo "$total_hours:$total_mins:$secs_left"
+}
+
+
+time="$(more_than_one_day) $(less_than_one_day)"
+summed_total=$(printf '%s\n' $time | awk -F ':' '{hours += $1; mins += $2; secs += $3} END {print hours,mins,secs}')
+
+total_time=$(convert_summed_to_correct $summed_total)
+
+echo "Total time [h:m:s] = $total_time"

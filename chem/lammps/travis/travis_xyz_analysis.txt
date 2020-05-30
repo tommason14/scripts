@@ -1,0 +1,44 @@
+! TRAVIS input file
+! Created with TRAVIS version compiled at Aug  2 2019 11:20:04
+! Source code version: Jan 01 2019
+! Input file written at Tue Mar 10 16:56:30 2020.
+traj.lmp
+! I have acknowledged this note (y/n). [yes] 
+
+! Use the advanced mode until the analysis selection menu (y/n)? [no] 
+
+! Use these values (y) or enter different values (n)? [yes] 
+
+! Update cell geometry in every time step (i.e., NPT ensemble) (y) or use fixed cell (n)? [yes] 
+
+! Create images of the structural formulas (y/n)? [no] 
+
+! Accept these molecules (y) or change something (n)? [yes] 
+
+! Which functions to compute (comma separated)?
+proc
+! Use the advanced mode for the main part (y/n)? [no] 
+
+! Write also virtual atoms (center of mass, ...) (y/n)? [no] 
+
+! Put the center of the system to (0|0|0) (0), to (x/2|y/2|z/2) (1), or leave coords unchanged (2)? [1] 
+
+! Put a specific atom into the box center (y/n)? [no] 
+
+! Save all atoms in the system (y/n)? [yes] 
+
+! Try to unwrap the trajectory (y/n)? [no] 
+
+! Change atom labels of some atoms in output trajectory (y/n)? [no] 
+
+! Wrap the molecules into the box (y/n)? [yes] 
+
+! Remove center of mass movement of the box (y/n)? [yes] 
+
+! In which time step to start processing the trajectory? [1] 
+
+! How many time steps to use (from this position on)? [all] 
+
+! Use every n-th time step from the trajectory? [1] 
+
+

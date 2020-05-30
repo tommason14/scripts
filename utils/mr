@@ -1,0 +1,2 @@
+#!/bin/sh    
+Rscript -e "require(rmarkdown); render(\"$1\")"

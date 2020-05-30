@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# on gadi, USER = tm3124
+[[ $USER =~ tmason ]] && submit="sbatch" || submit="qsub"
+
+cwd=$(pwd)
+# accept stdin from find command, and for each item, move to subdir and then submit job if no log present
+
+while read line
+do
+  cd "$(dirname "$line")"
+  log=$(ls *log 2>/dev/null | wc -l)
+  [[ $log -eq 0 ]] && $submit "$(basename "$line")"
+  cd $cwd
+done < /dev/stdin

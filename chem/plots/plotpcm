@@ -1,0 +1,9 @@
+#!/bin/sh
+
+if [ $# -eq 0 ]
+then
+  grep 'EMP2+EPCM' | awk '{print $3}' | plotgnu
+else
+  grep 'EMP2+EPCM' "$1" | awk '{print $3}' | plotgnu
+fi
+

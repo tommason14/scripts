@@ -1,0 +1,5 @@
+#!/bin/bash
+
+total_cpus=$(awk '{cpus += $NF} END {print cpus}')
+
+echo "Total CPUs = $total_cpus"

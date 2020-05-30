@@ -1,0 +1,22 @@
+#!/bin/bash
+
+SCR_DIR="/home/$USER/scratch"
+cd $SCR_DIR
+
+all_folders=$(du -h . -d 1 | sed '$d' | awk '{print $2}')
+temps=$(printf "%s\n" ${all_folders[@]} | sed 's;./;;' | grep '^[0-9]')
+
+jobid_list=$(squeue -u $USER | tail -n +2 | awk '{print $1}')
+
+jobids="${jobid_list[@]}" # string of all currently running/queued jobs
+
+to_remove=()
+for item in ${temps[@]}
+do
+if ! [[ $jobids =~ "$item" ]] # if item not in jobid string
+then
+  to_remove+=($item)
+fi
+done 
+
+printf "%s\n" ${to_remove[@]} | xargs -I{} rm -r {}

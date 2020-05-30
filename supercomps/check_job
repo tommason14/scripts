@@ -1,0 +1,8 @@
+#!/bin/sh
+
+[ $# -ne 1 ] || [ $1 = '-h' ] && echo "Syntax: check_job jobid" && exit 1
+
+if (env | grep -Fq SLURM || env | grep -Fq TACC)
+then
+  scontrol show jobid "$1"  
+fi

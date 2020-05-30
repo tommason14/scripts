@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# convert molden output, tab separated, to a csv with headers
+
+[[ $# -ne 1 || $@ == *"-h"* ]] && echo 'Syntax: molden2csv [csv]' && exit 1
+
+( echo 'Wave,Int' && cat $1 | awk '{OFS=","; print $1,$2}' ) > tmp.out.csv
+mv tmp.out.csv $1

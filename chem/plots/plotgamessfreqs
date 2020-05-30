@@ -1,0 +1,12 @@
+#!/bin/sh
+
+if [ $# -eq 0 ]
+then
+  $sed -n '/FREQ(CM\*\*-1)/,/^$/{//!p;}' |
+  awk '{print $2,$NF}' |
+  plotgnu
+else
+  $sed -n '/FREQ(CM\*\*-1)/,/^$/{//!p;}' "$1" |
+  awk '{print $2,$NF}' |
+  plotgnu
+fi

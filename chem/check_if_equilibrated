@@ -1,0 +1,201 @@
+#!/usr/bin/env python3
+
+import os
+import glob
+import subprocess
+from tqdm import tqdm
+from shutil import copyfile
+
+
+def check_user_input(user_input, condition, if_error):
+    """
+    Uses a try/except statement to create a scenario where the 
+    end user cannot give unexpected input. 
+    Give the condition referring to an item in a lambda expression 
+    i.e. lambda item: item.endswith('.csv'), or lambda item: item in range(...)
+
+    Usage:
+        >>> check_user_input('Filename of output', lambda item: item.endswith('.csv'), "Please print a name ending in '.csv'")
+        # Produces:
+        while not correct:
+            try:
+                item = input('Filename of output: ')
+            except ValueError:
+                print("Please enter a filename ending in '.csv'")
+            if not filename.endswith('.csv'):
+                print("Please enter a filename ending in '.csv'")
+            else:
+                correct = True
+        return item
+    """
+    f = condition
+    correct = False
+    while not correct:
+        try:
+            item = input(user_input + ": ")
+        except ValueError:
+            print(if_error)
+        if not f(item):
+            print(if_error)
+        else:
+            correct = True
+    return item
+
+
+def run_script_to_check_for_eqm():
+    print("Running chem_assist --equil-coords... ")
+    os.system("chem_assist --equil-coords")
+
+
+def find_configs():
+    """
+    Returns all directories in the current working directory:
+    assumes that these will be individual configs. Checks to 
+    see if there is an .inp/.job file in the directory below
+    """
+    return [
+        d
+        for d in glob.glob("*/")
+        if any(f.endswith(x) for f in os.listdir(d) for x in ("inp", "job"))
+    ]
+
+
+def find_logs():
+    """
+    Returns all log files
+    """
+    return [log for log in glob.glob("**/*[log|out]", recursive=True) if log != 'freq.log']
+
+
+def map_logs_to_each_config(configs, logs):
+    """
+    For each config (each subdirectory in the cwd),
+    see if the log file is a descendant of that config.
+    If it is, put it in a list associated with that 
+    config
+    """
+    conf_dict = {conf[:-1]: [] for conf in configs}
+
+    for log in logs:
+        for k, v in conf_dict.items():
+            if f"{k}/" in log:
+                v.append(log)
+
+    return conf_dict
+
+
+def find_calc_type(log):
+    """
+    Reads first line of log file to find
+    the software used
+    """
+    with open(log, "r") as f:
+        first_line = f.readline()
+
+    software = {"GAMESS": ["GAMESS"], "Gaussian": ["Gaussian", "g16", "checkpoint"]}
+
+    for calc_type, options in software.items():
+        if any(value in first_line for value in options):
+            return calc_type
+
+
+def equilibrated(log):
+    """
+    Checks to see if the structure has been optimised.
+    """
+
+    term_to_search_for = {
+        "GAMESS": "EQUILIBRIUM GEOMETRY LOCATED",
+        "Gaussian": "Optimization completed",
+    }
+
+    calc_type = find_calc_type(log)
+    lookup = term_to_search_for[calc_type]
+
+    # grep exit codes:
+    #    0: found data i.e optimised
+    #    1: no data i.e. not optimised
+    # subprocess.CalledProcessError called if non-zero exit code returned
+
+    try:
+        output = subprocess.check_output(
+            f"grep '{lookup}' {log}", stderr=subprocess.STDOUT, shell=True
+        ).decode("utf-8")
+        return True
+    except subprocess.CalledProcessError:
+        return False
+
+
+def check_configs_for_equilibration(config_dict):
+    """
+    Loops through the dictionary of the form
+        { 'config' : [file1, file2, file3] }
+    to see if there is an equilibrated geometry in any of the logs.
+    Returns a dictionary of configs that have not reached
+    equilibrium
+    """
+    no_equilibrium = []
+
+    for config, logs in tqdm(config_dict.items()):
+        found_equilibrium = False
+        for log in logs:
+            if equilibrated(log):
+                found_equilibrium = True
+        if not found_equilibrium:
+            no_equilibrium.append(config)
+
+    if len(no_equilibrium) > 0:
+        print("No equilibrium found for:")
+        for f in no_equilibrium:
+            print("\t" + f)
+    else:
+        print("All structures optimised")
+
+    return {k: v for k, v in config_dict.items() if k in no_equilibrium}
+
+
+def find_rerun_coords(unequilibrated_dict):
+    """
+    Returns a dictionary of each configuration
+    with the corresponding coordinates to resubmit
+    """
+    newxyz_files = {}
+
+    for config, coord_list in unequilibrated_dict.items():
+        if len(coord_list) > 0:
+            final_log = max(coords for coords in coord_list)
+            rerun_coord_dir = os.path.dirname(final_log) + "/rerun"
+            xyzfile = [f for f in os.listdir(rerun_coord_dir)
+                      if f.endswith("xyz")][0]
+            newxyz_files[config] = f"{rerun_coord_dir}/{xyzfile}"
+    return newxyz_files
+
+
+def copy_xyzs_to_new_subfolder(new_xyz_dict):
+    """
+    Checks for target directory and copies over xyz files
+    """
+    newdir = os.path.join(os.getcwd(), "rerun_xyzs")
+    if not os.path.isdir(newdir):
+        os.mkdir(newdir)
+    for config, xyz in new_xyz_dict.items():
+        copyfile(xyz, f'{newdir}/{config}.xyz')
+
+
+def main():
+    # run_script_to_check_for_eqm()
+    configs = find_configs()
+    logs = find_logs()
+    config_dict = map_logs_to_each_config(configs, logs)
+    unequilibrated_dict = check_configs_for_equilibration(config_dict)
+    if len(unequilibrated_dict) > 0:
+        copy = check_user_input(
+            "Copy reruns to new folder? [Y/N] ",
+            lambda item: item.lower() in ("y", "n"),
+            "Please enter 'Y' or 'N'",
+        )
+        if copy.lower() == 'y':
+            new_xyz_dict = find_rerun_coords(unequilibrated_dict)
+            copy_xyzs_to_new_subfolder(new_xyz_dict)
+
+main()

@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+sinfo | grep --color=auto $1 | awk '{print $4,$5}' | column -t
