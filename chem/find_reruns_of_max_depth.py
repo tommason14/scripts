@@ -18,7 +18,8 @@ configs = configs.decode('utf-8').split('\n')[:-1]
 
 rm = ('.', 'reruns')
 for removal in rm:
-    configs.remove(removal)
+    if removal in configs:
+        configs.remove(removal)
 
 configs={config:[] for config in configs}
 
