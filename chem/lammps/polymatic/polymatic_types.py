@@ -33,7 +33,7 @@ with open(args.inp) as inpfile:
             if "Masses" in line:
                 found_masses = True
                 continue
-            if found_masses and "Bond Coeffs" in line:
+            if found_masses and "Bond Coeffs" in line or 'Pair Coeffs' in line:
                 found_masses = False
                 found_bonds = True
                 continue
@@ -45,8 +45,10 @@ with open(args.inp) as inpfile:
                 found_angles = False
                 found_dihedrals = True
                 continue
-            if found_dihedrals and "Improper Coeffs" in line:
+            if found_dihedrals and re.search('^\s*[A-Z]', line):
                 found_dihedrals = False
+                continue
+            if 'Improper Coeffs' in line:
                 found_impropers = True
                 continue
             if found_impropers and re.search('^\s*[A-Z]', line):
@@ -85,6 +87,9 @@ alldata = {
     "dihedral types": dihedrals,
     "improper types": impropers,
 }
+
+# if no impropers...
+alldata = {k: v for k,v in alldata.items() if len(v) > 0}
 
 with open(args.out, "w") as out:
     for string, data in alldata.items():
