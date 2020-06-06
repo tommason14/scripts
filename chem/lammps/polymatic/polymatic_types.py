@@ -95,5 +95,5 @@ with open(args.out, "w") as out:
     for string, data in alldata.items():
         out.write(f"{string}\n")
         for count, item in data.items():
-            out.write(f"{count:<5} {item}\n")
+            out.write(f"{count:<5} {item.replace('-', ',')}\n")
         out.write("#\n")
