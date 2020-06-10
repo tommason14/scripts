@@ -1,2 +1,5 @@
-#!/bin/sh    
-Rscript -e "require(rmarkdown); render(\"$1\")"
+#!/bin/sh
+rmd="$1"
+html="${rmd%.*}.html"
+Rscript -e "require(rmarkdown); render('$rmd')" &&
+osascript -e 'display notification "${html} updated" with title "Rmarkdown"'
