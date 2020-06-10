@@ -4,14 +4,9 @@ import argparse
 import sys
 import re
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--inp", "-i", help="Lammps data file name")
-parser.add_argument("--out", "-o", help="Polymatic types file name")
-args = parser.parse_args()
-
-if len(sys.argv) < 3:
-    parser.print_help()
-    sys.exit()
+if len(sys.argv) < 2 or sys.argv[1] == '-h':
+    sys.exit('Syntax: polymatic_types.py <lammps_input>')
+inp = sys.argv[1]
 
 found_masses = False
 found_bonds = False
@@ -27,7 +22,7 @@ angles = {}
 dihedrals = {}
 impropers = {}
 
-with open(args.inp) as inpfile:
+with open(inp) as inpfile:
     for line in inpfile:
         if is_data(line):
             if "Masses" in line:
@@ -91,9 +86,9 @@ alldata = {
 # if no impropers...
 alldata = {k: v for k,v in alldata.items() if len(v) > 0}
 
-with open(args.out, "w") as out:
-    for string, data in alldata.items():
-        out.write(f"{string}\n")
-        for count, item in data.items():
-            out.write(f"{count:<5} {item.replace('-', ',')}\n")
-        out.write("#\n")
+# print to stdout
+for string, data in alldata.items():
+    print(string)
+    for count, item in data.items():
+        print(f"{count:<5} {item.replace('-', ',')}")
+    print("#")
