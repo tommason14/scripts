@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # Take in a labelled xyz of a single molecule along with
 # a GAMESS geodesic charge log file of the same xyz. Also
@@ -59,6 +59,23 @@ packmol < pack.inp
 
 # now create data file of the large system, using the modified force field
 "$scriptlocation"/lmp_gaff.py system.xyz "$mod_ff"
+
+# add molecule IDs to the large system file...otherwise they will all be 1
+# currently only works for one molecule in pack.inp!
+num_mols=$(grep number pack.inp | awk '{print $2}')
+num_atoms=$(head -1 system.xyz)
+repeat=$(( $num_atoms / $num_mols ))
+mol_id=$(for i in $(seq $num_mols); do for j in $(seq $repeat); do echo $i; done; done)
+
+# replace columns in atom sections
+$sed '/Atoms/q' system.data > tmpb4atoms
+$grep -E '^([0-9]+\s+){3}(-?[0-9]+\.[0-9]+\s+){4}#\s?[A-z0-9]' system.data > tmpatoms
+paste <(awk '{print $1}' tmpatoms) <(printf '%s\n' $mol_id) <(awk '{for(i=3; i <= NF; ++i) printf "%s ", $i; print ""}' tmpatoms) > tmptmpatoms
+# format atoms section
+paste <(sed 's/#.*//' tmptmpatoms | column -t) <($grep -Po '\#.*' tmptmpatoms) | $sed 's/\s\+\#/   \#/' > tmpatoms
+sed -ne '/Bonds/,$ p' system.data > tmpafteratoms
+cat tmpb4atoms <(echo) tmpatoms <(echo) tmpafteratoms > system.data
+rm tmpb4atoms tmpatoms tmptmpatoms tmpafteratoms
 
 [ ! -d rundir ] && mkdir rundir
 mv system.data rundir/
