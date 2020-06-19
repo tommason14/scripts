@@ -42,7 +42,6 @@ with open(inp) as inpfile:
                 continue
             if found_dihedrals and re.search('^\s*[A-Z]', line):
                 found_dihedrals = False
-                continue
             if 'Improper Coeffs' in line:
                 found_impropers = True
                 continue
