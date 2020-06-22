@@ -25,28 +25,30 @@ impropers = {}
 with open(inp) as inpfile:
     for line in inpfile:
         if is_data(line):
+            if found_masses and re.search('^\s*[A-Z]', line):
+                found_masses = False
+            if found_bonds and re.search('^\s*[A-Z]', line):
+                found_bonds = False
+            if found_angles and re.search('^\s*[A-Z]', line):
+                found_angles = False
+            if found_dihedrals and re.search('^\s*[A-Z]', line):
+                found_dihedrals = False
+            if found_impropers and re.search('^\s*[A-Z]', line):
+                found_impropers = False
             if "Masses" in line:
                 found_masses = True
                 continue
-            if found_masses and "Bond Coeffs" in line or 'Pair Coeffs' in line:
-                found_masses = False
+            if "Bond Coeffs" in line:
                 found_bonds = True
                 continue
-            if found_bonds and "Angle Coeffs" in line:
-                found_bonds = False
+            if "Angle Coeffs" in line:
                 found_angles = True
                 continue
-            if found_angles and "Dihedral Coeffs" in line:
-                found_angles = False
+            if "Dihedral Coeffs" in line:
                 found_dihedrals = True
                 continue
-            if found_dihedrals and re.search('^\s*[A-Z]', line):
-                found_dihedrals = False
             if 'Improper Coeffs' in line:
                 found_impropers = True
-                continue
-            if found_impropers and re.search('^\s*[A-Z]', line):
-                found_impropers = False
                 continue
             if found_masses:
                 if len(line.split()) > 2:
