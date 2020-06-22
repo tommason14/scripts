@@ -64,13 +64,13 @@ lines = (
 open("tempfile", "w+").write(lines)
 
 # OPEN VMD WITH EDITTED XYZ AND COMMAND FILE
-user = sp.check_output('echo $USER', shell = True).decode('utf8').strip()
-if user == 'tommason':
+user = sp.check_output("echo $USER", shell=True).decode("utf8").strip()
+if user == "tommason":
     vmd = "/Applications/VMD\ 1.9.4a38.app/Contents/vmd/vmd_MACOSXX86_64"
-elif user == 'tmas0023':
+elif user == "tmas0023":
     vmd = "/Applications/VMD\ 1.9.3.app/Contents/vmd/vmd_MACOSXX86"
 else:
-    vmd = "vmd" # module loaded
+    vmd = "vmd"  # module loaded
 cmd = f"{vmd} -dispdev none -m topo-in.xyz -e tempfile"
 sp.check_output(cmd, shell=True)
 
