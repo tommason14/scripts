@@ -2,4 +2,6 @@
 
 [[ $# -eq 0 ]] && echo "Syntax: travis_xyz_analysis traj.lmp" && exit 1
 
+[[ $# -eq 2 && $2 == "drude" ]] && 
+travis -p "$1" -i "$(dirname $0)/travis_xyz_drude_analysis.txt" ||
 travis -p "$1" -i "$(dirname $0)/travis_xyz_analysis.txt"
