@@ -4,6 +4,17 @@ kj2kcal = 4.1868
 factor = 2
 # path_to_ff = os.path.join(os.path.dirname(__file__), "gaff.ff")
 
+def getMass(Atom, path_to_ff):
+    with open(path_to_ff, 'r') as f:
+        for line in f:
+            if re.search("^" + Atom + "\s", line):
+                line = line.split()
+                return float(line[2])
+                
+            # IF GET TO BOND SECTION
+            elif re.search("^\s*BONDS", line):
+                sys.exit("Could not find atom {}".format(Atom))
+
 # GROUPS FOR BONDS, ANGLES, DIHEDRALS, IMPROPERS
 def getGroup(Atom, path_to_ff):
 

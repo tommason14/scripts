@@ -1,0 +1,4 @@
+#!/bin/sh
+xyz="$1"
+pdb="${xyz%.*}.pdb"
+obabel -ixyz $xyz -opdb > $pdb

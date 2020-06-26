@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 
-from get_coeffs_gaff import getAtomData, getBond, getImproper
-from get_coeffs_gaff import getAngle, getDihedral
-from get_coeffs_gaff import getAtomPartialCharge
+from get_coeffs_gaff import (
+    getAtomData,
+    getBond,
+    getImproper,
+    getAngle,
+    getDihedral,
+    getAtomPartialCharge,
+    getMass,
+)
 import subprocess as sp
 import glob, re, sys
 
@@ -245,6 +251,32 @@ for i in range(len(newLines)):
 
     elif re.search("^\s*#\s*$", newLines[i]):
         newLines[i] = "\n"
+
+# Masses not added by topotools with polymatic labels (lc1 etc...)
+# need pair coeffs first to find the atom labels
+found_pairs = False
+masses = []
+for line in newLines:
+    if 'Pair Coeffs' in line:
+        found_pairs = True
+        continue
+    if 'Bond Coeffs' in line:
+        break
+    if found_pairs and not re.search('^\s*$', line):
+        line = line.split()
+        newline = [line[0], getMass(line[-1], ff), line[-1]]
+        newline = "{:4} {:>9.4f}    # {}\n".format(*newline)
+        masses.append(newline)
+masses = ['\n', 'Masses\n', '\n'] + masses
+
+# add after box length
+zlo = 0
+for ind, line in enumerate(newLines, 1):
+    if 'zlo' in line:
+        zlo = ind
+        break
+newLines = newLines[:zlo] + masses + newLines[zlo:]
+
 
 # REMOVE EXCESS FILES
 sp.check_output("rm topo-in.xyz topo.out tempfile", shell=True)
