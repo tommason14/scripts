@@ -7,12 +7,13 @@ an ID of 1. Reads pack.inp to generate the new molecule ID list.
 Assumes that the simulation was created from xyz files.
 """
 from autochem import read_file
+import os
 import subprocess as sp
 import sys
 import re
 
 if not 2 <= len(sys.argv) <= 3:
-    sys.exit(f'Syntax: {__file__} lammps_file [output_file]')
+    sys.exit(f'Syntax: {os.path.basename(__file__)} lammps_file [output_file]')
 
 lammps = sys.argv[1]
 if len(sys.argv) == 2:
