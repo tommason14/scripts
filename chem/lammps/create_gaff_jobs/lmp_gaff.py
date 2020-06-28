@@ -285,8 +285,8 @@ sp.check_output("rm topo-in.xyz topo.out tempfile", shell=True)
 # lammps doesn't mind it
 newLines.insert(1, "\n")
 
-# WRITE .data FILE
-open(Name + ".data", "w+").writelines(newLines)
+# WRITE .lmps FILE
+open(Name + ".lmps", "w+").writelines(newLines)
 
 # PRINT SUM OF PARTIAL CHARGES
 print(f"{File}   Charge: {sum(pcharges):5.5}")
