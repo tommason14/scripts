@@ -199,8 +199,7 @@ def bonds_from_ff(atoms, linkers, ff):
     return ret
 
 
-def angles_from_ff(atoms, linkers, ff):
-    # Does this account for when LC1 and LC2 both need to be included ?
+def angles_from_ff(atoms, linkers, ff, params_in_original_datafile):
     ff_angles = []
     found = False
     for line in read_file(ff):
@@ -212,25 +211,55 @@ def angles_from_ff(atoms, linkers, ff):
             line = line.split()
             if all(x in atoms for x in line[:3]):
                 ff_angles.append(line[:3] + line[4:6])
+
+    orig_atoms = []
+    for ang in params_in_original_datafile:
+        for atom in ang.split("-"):
+            if atom not in orig_atoms:
+                orig_atoms.append(atom)
+    all_atoms = []
+    for atom in atoms + orig_atoms:
+        if atom not in all_atoms:
+            all_atoms.append(atom)
+    all_combos = list(list(i) for i in itertools.product(all_atoms, repeat=3))
+    with_types_that_exist = []
+    for combo in all_combos:
+        with_types_that_exist.append([linkers[i] if i in linkers else i for i in combo])
+
     # add on linkers by copying lines that include the type after forming
     # the angle
-    initial = ff_angles.copy()
-    additional = []
-    for linker, newtype in linkers.items():
-        for angle in ff_angles:
-            if newtype in angle[:3]:
-                tmp = angle.copy()
-                # need to replace C3 once, and twice
-                # but also replace backwards, so that we get C3 LC1 HC and LC1 C3 Hc
-                tmp_rev = angle[::-1]
-                for ind, i in enumerate(angle):
-                    if i == newtype:
-                        tmp[ind] = linker
-                        additional.append(tmp.copy())
-                for ind, i in enumerate(angle[::-1]):
-                    if i == newtype:
-                        tmp_rev[ind] = linker
-                        additional.append(tmp_rev.copy()[::-1])
+    angles_with_params = []
+    for line in ff_angles:
+        for combo, types_that_exist in zip(all_combos, with_types_that_exist):
+            if line[:3] == types_that_exist:
+                params = line[3:]
+                angles_with_params.append(combo + params)
+                angles_with_params.append(types_that_exist + params)
+                possibility = []
+                tmpval = combo
+                # find each possible different combination,
+                # i.e. for combo = [LC1, LC2, CA] and
+                # types_that_exist = [C3, C3, CA],
+                # also include LC1, C3, CA and
+                #              C3, LC2, CA
+                for idx, data in enumerate(zip(combo, types_that_exist)):
+                    with_linker, without_linker = data
+                    if with_linker != without_linker:
+                        # change one value and add it
+                        to_add = tmpval.copy()
+                        to_add[idx] = without_linker
+                        possibility.append(to_add)
+                for p in possibility:
+                    angles_with_params.append(p + params)           
+
+    # prevent duplicates...
+    checked = []
+    ret = []
+    for angle in angles_with_params:
+        if angle[:3] not in checked:
+            checked.append(angle[:3])
+            ret.append(angle)
+    return ret
 
     ff_angles = initial + additional
     ret = []
@@ -571,7 +600,7 @@ def main():
     params = params_from_initial_datafile(args.lammps)
     addn_atoms, addn_pairs = atoms_from_ff(atom_types_to_add, args.forcefield)
     addn_bonds = bonds_from_ff(atom_types_to_add, linkers, args.forcefield)
-    addn_angles = angles_from_ff(atom_types_to_add, linkers, args.forcefield)
+    addn_angles = angles_from_ff(atom_types_to_add, linkers, args.forcefield, params["angles"])
     addn_dihs = dihs_from_ff(atom_types_to_add, linkers, args.forcefield, params["dihs"])
     addn_imps = imps_from_ff(atom_types_to_add, linkers, args.forcefield, params["imps"])
 
