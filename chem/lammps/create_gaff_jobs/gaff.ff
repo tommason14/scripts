@@ -5822,3 +5822,4 @@ HC   O    C    OS     cvff 1.1  -1  2   #
 N2   C2   CA   N2     cvff 1.1  -1  2   # dac guess, 9/94
 N2   CA   CA   N2     cvff 1.1  -1  2   # dac guess, 9/94
 NA   N2   CA   N2     cvff 1.1  -1  2   # dac, 10/94
+X    X    X    X      cvff 1.1  -1  2   # TOM- failsafe
