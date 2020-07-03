@@ -1,6 +1,17 @@
 #!/usr/bin/env bash 
 
-# make sure pack.inp writes to pack.xyz
+packinp=$(ls pack.inp 2> /dev/null | wc -l)
+gaff=$(ls gaff.ff 2> /dev/null | wc -l)
+polym=$(ls polym.in 2> /dev/null | wc -l)
+
+[[ $packinp -eq 0 || $gaff -eq 0 || $polym -eq 0 ]] &&
+echo "Make sure you have the following files in this dir:" &&
+echo "- pack.inp" &&
+echo "- gaff.ff" &&
+echo "- polym.in" &&
+echo "Make sure that pack.inp outputs a file named pack.xyz after" &&
+echo "packmol has finished" &&
+exit 1
 
 # need additional params for polymatic
 mkdir small
