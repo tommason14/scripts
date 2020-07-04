@@ -19,6 +19,7 @@ import sys
 import re
 import argparse
 
+
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -250,7 +251,7 @@ def angles_from_ff(atoms, linkers, ff, params_in_original_datafile):
                         to_add[idx] = without_linker
                         possibility.append(to_add)
                 for p in possibility:
-                    angles_with_params.append(p + params)           
+                    angles_with_params.append(p + params)
 
     # prevent duplicates...
     checked = []
@@ -405,7 +406,7 @@ def add_atoms(datafile, atoms, original):
     atoms_to_add = [i for i in atoms if i[0] not in original]
     found = False
     num = 0
-    total = 0
+    total = len(original)
     first_newline_skipped = False
     # loop over original file and then add to the copy in the correct place
     for idx, i in enumerate(datafile):
@@ -422,11 +423,11 @@ def add_atoms(datafile, atoms, original):
                 continue
             if i == "\n" and first_newline_skipped:
                 for new, val in enumerate(atoms_to_add, 1):
+                    total += 1
                     df.insert(
                         idx - 1 + new,
-                        "{:<4} {:>9.4f}    # {}\n".format(num + new, float(val[1]), val[0]),
+                        "{:<4} {:>9.4f}    # {}\n".format(total, float(val[1]), val[0]),
                     )
-                    total = num + new
     return df, total
 
 
@@ -435,7 +436,7 @@ def add_pairs(datafile, pairs, original):
     pairs_to_add = [i for i in pairs if i[0] not in original]
     found = False
     num = 0
-    total = 0
+    total = len(original)
     first_newline_skipped = False
     # loop over original file and then add to the copy in the correct place
     for idx, i in enumerate(datafile):
@@ -452,13 +453,13 @@ def add_pairs(datafile, pairs, original):
                 continue
             if i == "\n" and first_newline_skipped:
                 for new, val in enumerate(pairs_to_add, 1):
+                    total += 1
                     df.insert(
                         idx - 1 + new,
                         "{:<4} {:>10.3f} {:>9.5f}    # {}\n".format(
-                            num + new, float(val[1]), float(val[2]), val[0]
+                            total, float(val[1]), float(val[2]), val[0]
                         ),
                     )
-                    total = num + new
     return df, total
 
 
@@ -467,7 +468,7 @@ def add_bonds(datafile, bonds, original):
     bonds_to_add = [i for i in bonds if f"{i[0]}-{i[1]}" not in original]
     found = False
     num = 0
-    total = 0
+    total = len(original)
     first_newline_skipped = False
     # loop over original file and then add to the copy in the correct place
     for idx, i in enumerate(datafile):
@@ -484,13 +485,13 @@ def add_bonds(datafile, bonds, original):
                 continue
             if i == "\n" and first_newline_skipped:
                 for new, val in enumerate(bonds_to_add, 1):
+                    total += 1
                     df.insert(
                         idx - 1 + new,
                         "{:<4} {:>9.1f} {:>10.3f}    # {}-{}\n".format(
-                            num + new, float(val[2]), float(val[3]), val[0], val[1]
+                            total, float(val[2]), float(val[3]), val[0], val[1]
                         ),
                     )
-                    total = num + new
     return df, total
 
 
@@ -499,7 +500,7 @@ def add_angles(datafile, angles, original):
     angles_to_add = [i for i in angles if f"{i[0]}-{i[1]}-{i[2]}" not in original]
     found = False
     num = 0
-    total = 0
+    total = len(original)
     first_newline_skipped = False
     # loop over original file and then add to the copy in the correct place
     for idx, i in enumerate(datafile):
@@ -516,13 +517,13 @@ def add_angles(datafile, angles, original):
                 continue
             if i == "\n" and first_newline_skipped:
                 for new, val in enumerate(angles_to_add, 1):
+                    total += 1
                     df.insert(
                         idx - 1 + new,
                         "{:<4} {:>9.1f} {:>10.3f}    # {}-{}-{}\n".format(
-                            num + new, float(val[3]), float(val[4]), val[0], val[1], val[2]
+                            total, float(val[3]), float(val[4]), val[0], val[1], val[2]
                         ),
                     )
-                    total = num + new
     return df, total
 
 
@@ -531,7 +532,7 @@ def add_dihs(datafile, dihs, original):
     dihs_to_add = [i for i in dihs if f"{i[0]}-{i[1]}-{i[2]}-{i[3]}" not in original]
     found = False
     num = 0
-    total = 0
+    total = len(original)
     first_newline_skipped = False
     # loop over original file and then add to the copy in the correct place
     for idx, i in enumerate(datafile):
@@ -548,14 +549,14 @@ def add_dihs(datafile, dihs, original):
                 continue
             if i == "\n" and first_newline_skipped:
                 for new, val in enumerate(dihs_to_add, 1):
+                    total += 1
                     params = " ".join(val[4:])
                     df.insert(
                         idx - 1 + new,
                         "{:<4} {}  # {}-{}-{}-{}\n".format(
-                            num + new, params, val[0], val[1], val[2], val[3]
+                            total, params, val[0], val[1], val[2], val[3]
                         ),
                     )
-                    total = num + new
     return df, total
 
 
@@ -564,7 +565,7 @@ def add_imps(datafile, imps, original):
     imps_to_add = [i for i in imps if f"{i[0]}-{i[1]}-{i[2]}-{i[3]}" not in original]
     found = False
     num = 0
-    total = 0
+    total = len(original)
     first_newline_skipped = False
     # loop over original file and then add to the copy in the correct place
     for idx, i in enumerate(datafile):
@@ -581,14 +582,14 @@ def add_imps(datafile, imps, original):
                 continue
             if i == "\n" and first_newline_skipped:
                 for new, val in enumerate(imps_to_add, 1):
+                    total += 1
                     params = " ".join(val[4:])
                     df.insert(
                         idx - 1 + new,
                         "{:<4} {}  # {}-{}-{}-{}\n".format(
-                            num + new, params, val[0], val[1], val[2], val[3]
+                            total, params, val[0], val[1], val[2], val[3]
                         ),
                     )
-                    total = num + new
     return df, total
 
 

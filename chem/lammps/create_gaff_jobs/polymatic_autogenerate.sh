@@ -26,7 +26,7 @@ cd small
 { packmol < pack.inp
 lmp_gaff.py pack.xyz gaff.ff # creates pack.lmps
 } > /dev/null
-echo "Finding parameters that Polymatic needs. Will take about a minute..."
+echo "Finding parameters that Polymatic needs. Could take about a minute..."
 add_additional_params.py -l pack.lmps -f gaff.ff -p polym.in
 # additional params now in small/pack.lmps
 cd ..
@@ -55,4 +55,4 @@ cat tmp.start <(echo "$newtypes") tmp.boxsize <(printf "\n$newparams\n\n") tmp.e
 mv tmp.final pack.lmps
 # Clean up
 rm tmp* 
-rm -rf small
+# rm -rf small
