@@ -13,15 +13,12 @@ else:
     output = sys.argv[2]
 
 masses = {
-    'H': 1.0075,
     'H': 1.008,
-    'C': 12.011,
     'C': 12.01,
-    'N': 14.007,
-    'O': 15.999,
+    'N': 14.01,
     'O': 16,
-    'S': 32.065,
     'S': 32.06,
+    'Cl': 35.45,
 }
 
 coords = []
@@ -36,7 +33,10 @@ with open(lammps) as f:
         if found_m and re.search('^\s*[A-Z]', line):
             found_m = False
         if found_m and not re.search('^\s*$', line):
-            num, mass = line.split()
+            try:
+                num, mass = line.split()
+            except ValueError:
+                num, mass, *_ = line.split()
             # keep num as string to lookup later
             mass = float(mass)
             for element, reference_mass in masses.items():

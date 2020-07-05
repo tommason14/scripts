@@ -1,0 +1,8 @@
+#!/bin/sh
+
+lmps="$1"
+xyz="${lmps%.*}.xyz"
+
+xyz_from_lammps_datafile.py $lmps
+xyz_to_pdb $xyz
+

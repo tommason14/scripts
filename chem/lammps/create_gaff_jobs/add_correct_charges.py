@@ -7,7 +7,6 @@ mail: tommason14@gmail.com
 Github: https:github.com/tommason14
 Description: Search pack.inp for the required number of atoms, and takes in a GAMESS
 geodesic charge log file of the monomer(s) used to create the lammps system.
-Expects charge log files in the form of ____spec.log.
 """
 from autochem import read_file, eof
 import os
@@ -46,10 +45,10 @@ def find_structures():
 
 def ask_user_for_charges(mols):
     """
-    Reads cwd for files ending in spec.log, then asks user to assign them to the molecules
+    Reads cwd for files ending in .log, then asks user to assign them to the molecules
     stored in the mols dictionary
     """
-    charge_logs = glob('*spec.log')
+    charge_logs = glob('*.log')
     menu = ''
     for idx, log in enumerate(charge_logs, 1):
         menu += f'({idx}) {log}\n'
