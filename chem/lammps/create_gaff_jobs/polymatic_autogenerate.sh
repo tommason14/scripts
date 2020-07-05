@@ -55,4 +55,4 @@ cat tmp.start <(echo "$newtypes") tmp.boxsize <(printf "\n$newparams\n\n") tmp.e
 mv tmp.final pack.lmps
 # Clean up
 rm tmp* 
-# rm -rf small
+rm -rf small

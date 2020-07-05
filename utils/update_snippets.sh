@@ -14,4 +14,4 @@ git commit -m "Snippets updated"
 git push 
 
 # Pull changes into $HOME/.vim/bundle
-$EDITOR -c ":PluginUpdate vim-snippets" -c ":q" -c ":q"
+vim -c ":PluginUpdate vim-snippets" -c ":q" -c ":q"
