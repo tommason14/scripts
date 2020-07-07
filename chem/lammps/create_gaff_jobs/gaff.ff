@@ -2,7 +2,7 @@
 
 ATOMS
 # charge needs filling in ...
-
+MNA   MNA    22.990  1.00    lj    0.00277  3.33             # OPLS (metal so MNA to not conflict with nitrogen)
 C     C     12.01  0.000000  lj   0.0860   3.39966950842    # OPLS
 C1    C1    12.01  0.000000  lj   0.2100   3.39966950842    # cp C DLM 11/2007 well depth from OPLS replacing 0.0860
 C2    C2    12.01  0.000000  lj   0.0860   3.39966950842    # sp2 atom in the middle of C=CD-CD=C
