@@ -204,7 +204,6 @@ def makeFFNonBonded(atomList, atomTypeList, outputPath):  # A function that orga
         atomicMass = format(float(atom[7]), '.3f')  # The atomic mass is defined as the atomic mass from the atomic list to 3 decimal places, and the spacing is corrected
         while len(atomicMass) < 8:
             atomicMass = ' ' + atomicMass
-        print(">>> Charge", format(float(atom[6]), '.4f'))
         if float(atom[6]) >= 0:  # Atomic charge is defined to 2 decimal places, with a slight change in output based on the presence of the '-' character
             atomicCharge = format(float(atom[6][1:]), '.4f')
         elif float(atom[6]) < 0:
