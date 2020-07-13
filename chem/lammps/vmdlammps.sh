@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # Opens a lammps data file in VMD
 
@@ -7,11 +7,6 @@
 data="$1"
 [ ! -f "$data" ] && echo "Error: $data doesn't exist" && exit 1
 
-[ -f tmpdvmd ] && rm tmpvmd
-cat << EOF >> tmpvmd
-package require topotools
-topo readlammpsdata $data
-EOF
 
 if [ "$USER" = "tommason" ]
 then
@@ -23,6 +18,19 @@ else
   vmd="vmd" # module loaded
 fi
 
+# Open directly if possible. If a datafile is entered, use topotools
+topo(){
+[ -f tmpvmd ] && rm tmpvmd
+cat << EOF >> tmpvmd
+package require topotools
+topo readlammpsdata $data
+EOF
+
 "$vmd" -e tmpvmd
 
 rm tmpvmd
+}
+
+grep -Fq 'xlo xhi' "$data" && topo && exit 1 ||
+[[ $data =~ lmp$ || $data =~ lmps$ ]] && "$vmd" -lammpstrj "$data" || "$vmd" "$data"
+

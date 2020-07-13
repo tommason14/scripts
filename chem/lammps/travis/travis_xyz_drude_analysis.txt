@@ -1,9 +1,9 @@
 ! TRAVIS input file
-! Created with TRAVIS version compiled at Aug  2 2019 11:20:04
+! Created with TRAVIS version compiled at Apr 12 2020 14:03:53
 ! Source code version: Jan 01 2019
-! Input file written at Thu Jun 25 10:46:57 2020.
+! Input file written at Mon Jul 13 13:01:16 2020.
 ! I have acknowledged this note (y/n). [yes] 
-y
+
 ! Use the advanced mode until the analysis selection menu (y/n)? [no] 
 
 ! Use these values (y) or enter different values (n)? [yes] 
@@ -15,6 +15,8 @@ y
 ! Create images of the structural formulas (y/n)? [no] 
 
 ! Accept these molecules (y) or change something (n)? [yes] 
+
+! Molecule 1 (C7D11H17NO3): Is this an infinite polymer/lattice (y/n)? [yes] 
 
 ! Which functions to compute (comma separated)?
 proc
@@ -42,5 +44,3 @@ proc
 
 ! Use every n-th time step from the trajectory? [1] 
 
-! Do you want to write an input file for this session (y/n)?
-n
