@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-File: add_atom_types_to_lammps_datafile.py
+File: add_atomic_symbols_to_lammps_datafile.py
 Author: Tom Mason
 Email: tommason14@gmail.com
 Github: https:github.com/tommason14
