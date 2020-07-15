@@ -1,8 +1,3 @@
 #!/bin/sh
 
-if [ $# -eq 0 ]
-then
-  grep 'E corr MP2(2)=' | awk '{print $NF}' | plotgnu
-else
-  grep 'E corr MP2(2)=' "$1" | awk '{print $NF}' | plotgnu
-fi
+grep 'E corr MP2(2)=' ${1:-/dev/stdin} | awk '{print $NF}' | plotgnu

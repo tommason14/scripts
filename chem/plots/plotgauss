@@ -1,8 +1,3 @@
 #!/bin/sh
 
-if [ $# -eq 0 ]
-then
-  grep 'SCF Done' | awk '{print $6}' | plotgnu
-else
-  grep 'SCF Done' "$1" | awk '{print $6}' | plotgnu
-fi
+grep 'SCF Done' ${1:-/dev/stdin} | awk '{print $6}' | plotgnu

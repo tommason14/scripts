@@ -1,8 +1,3 @@
 #!/bin/sh
 
-if [ $# -eq 0 ]
-then
-  sed -n '/Geometry convergence/,/\.\./p'
-else
-  sed -n '/Geometry convergence/,/\.\./p' "$1"
-fi
+sed -n '/Geometry convergence/,/\.\./p' ${1:-/dev/stdin}
