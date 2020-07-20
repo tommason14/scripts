@@ -1,0 +1,3 @@
+#!/bin/sh
+[ $# -ne 1 ] && printf "Reads xyz and prints molecular mass\nSyntax: mass molecule.xyz\n" && exit 1
+python3 -c "from autochem import Molecule; mol = Molecule('$1'); print(mol.mass)"
