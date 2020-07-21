@@ -4,6 +4,10 @@
 # Sort by timestep, the first value of the thermo_style command
 # Print to first argument, or data.csv otherwise.
 
+[ $# -eq 0 ] || [ $1 == "lammps.out" ] || [ $1 == "log.lammps" ] && 
+echo "Pass in log or lammps to take data from log.lammps* or lammps*.out
+Syntax: $(basename $0) [log|lammps] <csvfile>" && exit 1
+
 printf "Reminder that if you have multiple log files, 
 renumber the first lammps.out or log.lammps to lammps1.out or log.lammps1 ...
 Continue? [Y] "
@@ -11,10 +15,6 @@ read option
 [ ! "$option" = "Y" ] && [ ! "$option" = "y" ] && [ ! "$option" = "" ] && exit 1
 
 [ $USER == "tommason" ] || [ $USER == "tmas0023" ] && sed="gsed" || sed="sed"
-
-[ $# -eq 0 ] && echo "
-Pass in log or lammps to take data from log.lammps* or lammps*.out
-Syntax: $(basename $0) [log|lammps] <csvfile>" && exit 1
 
 choice=$1
 output=${2-data.csv}
