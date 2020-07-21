@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+[[ $# -eq 0 || $1 == "-h" ]] &&
+echo "Combine two csvs of lammps results together.
+The timestep must be the first column of the thermo output.
+Syntax: $(basename $0) csv1 csv2" && exit 1
+
+increment=$(tail -2 ../data.csv | cut -d, -f1 | tr '\n' ' ' | sed 's/\s*$//;s/ / - /' | bc | sed 's/^-//')
+end_run1=$(tail -1 $1 | cut -d, -f1)
+cat $1 <(tail -n +2 $2 | awk -v "end_run1=$end_run1" -v "inc=$increment" '$1=$1+end_run1+inc' FS=, OFS=,)

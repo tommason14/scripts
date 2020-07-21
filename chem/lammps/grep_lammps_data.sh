@@ -1,31 +1,26 @@
 #!/bin/sh
 
-# Grep data from all log.lammps* files or lammps*.out.
+# Grep data from all lammps*.out.
 # Sort by timestep, the first value of the thermo_style command
-# Print to first argument, or data.csv otherwise.
 
-[ $# -eq 0 ] || [ $1 == "lammps.out" ] || [ $1 == "log.lammps" ] && 
-echo "Pass in log or lammps to take data from log.lammps* or lammps*.out
-Syntax: $(basename $0) [log|lammps] <csvfile>" && exit 1
+[ "$1" = "-h" ] && echo "Returns data from lammps*out files." && exit 1
 
-printf "Reminder that if you have multiple log files, 
-renumber the first lammps.out or log.lammps to lammps1.out or log.lammps1 ...
+if [ $(find . -maxdepth 1 -name "lammps*out" | wc -l) -gt 1 ]
+then
+printf "You have multiple log files, make sure you renumber the first lammps.out to lammps1.out.
 Continue? [Y] "
 read option
 [ ! "$option" = "Y" ] && [ ! "$option" = "y" ] && [ ! "$option" = "" ] && exit 1
+fi
 
 [ $USER == "tommason" ] || [ $USER == "tmas0023" ] && sed="gsed" || sed="sed"
-
-choice=$1
-output=${2-data.csv}
-echo "Writing lammps data to $output"
 
 # data- assumes Step is the first value of thermo_style.
 # If log is not the first file, and rerun was started with a 
 # data file, the Step number starts at 0, when we want it to start at the
 # next timestep. So append to data.tmp sequentially.
 [ -f data.tmp ] && rm data.tmp
-for f in $(ls "$choice"* | sort -n)
+for f in $(find . -maxdepth 1 -name "lammps*out" | sort -n)
 do
   lines="$(sed -n '/Step/,/Loop/p' $f |
     grep -v 'Step\|Loop' |
@@ -46,11 +41,12 @@ do
 done
 
 # find the header from first output
-ls "$choice"* |
+first=$(find . -maxdepth 1 -name "lammps*out" | sort -n | head -1)
+ls "$first" |
   sort -n |
   head -1 |
   xargs grep Step |
   $sed 's/^\s\+//;s/\s\+$//;s/\s\+/,/g' > header.tmp
-cat header.tmp data.tmp > $output
+cat header.tmp data.tmp 
 
 rm header.tmp data.tmp

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-[[ $# -eq 0 || $1 == '-h' ]] && echo "Syntax: $(basename $0)
-lammps_dump" && exit 1
+[[ $# -eq 0 || $1 == '-h' ]] &&
+echo "Finds box size by averaging last 30 timesteps printed, cube-rooting the volume.
+Assumes volume is the second to last column of the thermo output.
+Syntax: $(basename $0) lammps.out" && exit 1
 
-# all x components to average over, then find xhi - xlo and average
-sed -n '/ITEM: BOX/{n;p}' $1 | awk '{sum+=($2 - $1)} END {print sum/NR}'
+grep '^\s\+[0-9]\+\s\+[0-9]\+' $1 | tail -30 | awk '{vol+=$(NF-1)} END {print (vol/NR)**(1/3)}'
