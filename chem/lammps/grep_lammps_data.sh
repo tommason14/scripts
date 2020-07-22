@@ -10,7 +10,7 @@ Syntax: $(basename $0) [files]" && exit 1
 
 [ $USER == "tommason" ] || [ $USER == "tmas0023" ] && sed="gsed" || sed="sed"
 
-# data- assumes Step is the first value of thermo_style.
+# Assumes Step is the first value of thermo_style.
 # If log is not the first file, and rerun was started with a 
 # data file, the Step number starts at 0, when we want it to start at the
 # next timestep. So append to data.tmp sequentially.
@@ -26,7 +26,6 @@ do
   # extract from "Setting up Verlet run..." onwards because 
   # minimisation is finished by that point
   lines="$(sed -n '/Setting up Verlet run .../,/Loop/p' $f |
-    grep -v 'Step\|Loop' |
     grep '^\s\+[0-9]\+\s\+-*[0-9]\+' |
     $sed 's/^\s\+//;s/\s\+$//;s/\s\+/,/g')"
   # if more than one file
@@ -36,17 +35,15 @@ do
   # bc fails here if all on one line, not sure why
   increment="$(tail -2 data.tmp | cut -d, -f1 | tr '\n' ' ' | $sed 's/\s*$//;s/ / - /')"
   increment="$(echo $increment | bc | $sed 's/^-//')"
-  # If run was from a restart, timesteps continue from last run.
-  # check first line of new data- first timestep will be the same as the last
-  # of the previous run
-  first_of_new_run="$(echo $lines | head -1 | cut -d, -f1 | $sed 's/^\s*//;s/\s*$//')" 
-  [ "$first_of_new_run" = "$laststep" ] &&
-    # continue from restart
-    # density of 0th step is the same as the end of the last run, so drop the first line 
-    echo "$lines" | tail -n +2 | awk -F"," -v inc="$increment" '$1+=inc' OFS="," >> data.tmp ||
+  # If run was from a restart, sometimes there will be a few timesteps
+  # duplicated, so instead of taking the first timestep of the new run, take
+  # the last step of the old run and use that as the start of the new run,
+  # then increment by the $increment * line number of the new data
+  grep -q "Reading restart file" $f &&
+    echo "$lines" | awk -F"," -v last="$laststep" -v inc="$increment" '$1=last+(inc*NR)' OFS="," >> data.tmp ||
     # adding on a new run that starts from 0, so add on last timestep
     echo "$lines" | awk -F"," -v last="$laststep" -v inc="$increment" '$1+=last+inc' OFS="," >> data.tmp 
-  ) || printf "%s\n" "$lines" > data.tmp
+  ) || printf "%s\n" "$lines" > data.tmp # write data from first file to data.tmp
 done
 
 cat header.tmp data.tmp 
