@@ -3,15 +3,10 @@
 # Grep data from all lammps*.out.
 # Sort by timestep, the first value of the thermo_style command
 
-[ "$1" = "-h" ] && echo "Returns data from lammps*out files." && exit 1
-
-if [ $(find . -maxdepth 1 -name "lammps*out" | wc -l) -gt 1 ]
-then
-printf "You have multiple log files, make sure you renumber the first lammps.out to lammps1.out.
-Continue? [Y] "
-read option
-[ ! "$option" = "Y" ] && [ ! "$option" = "y" ] && [ ! "$option" = "" ] && exit 1
-fi
+[ "$1" = "-h" ] || [ $# -eq 0 ] &&
+echo "Returns data from lammps.out files in the order given as arguments.
+Accounts for restarts and new runs, so the timesteps will always be consecutive.
+Syntax: $(basename $0) [files]" && exit 1
 
 [ $USER == "tommason" ] || [ $USER == "tmas0023" ] && sed="gsed" || sed="sed"
 
@@ -23,11 +18,10 @@ fi
 # find the header from first output
 # need the tail because minimisation
 # also prints out thermo data but with fewer columns
-first=$(find . -maxdepth 1 -name "lammps*out" | sort -n | head -1)
-grep "Step" "$first"| tail -1 | $sed 's/^\s\+//;s/\s\+$//;s/\s\+/,/g' > header.tmp
+grep "Step" "$1" | tail -1 | $sed 's/^\s\+//;s/\s\+$//;s/\s\+/,/g' > header.tmp
 
 [ -f data.tmp ] && rm data.tmp
-for f in $(find . -maxdepth 1 -name "lammps*out" | sort -n)
+for f in "$@"
 do
   # extract from "Setting up Verlet run..." onwards because 
   # minimisation is finished by that point
@@ -39,7 +33,9 @@ do
   [ -f data.tmp ] && [ $(cat data.tmp | wc -l) -gt 0 ] && (
   # take last two lines and find step increment
   laststep="$(tail -n 1 data.tmp | cut -d, -f1 | $sed 's/^\s*//;s/\s*$//')"
-  increment="$(tail -n 2 data.tmp | cut -d, -f1 | tr '\n' ' ' | $sed 's/\s*$//;s/ / - /' | bc | $sed 's/^-//')"
+  # bc fails here if all on one line, not sure why
+  increment="$(tail -2 data.tmp | cut -d, -f1 | tr '\n' ' ' | $sed 's/\s*$//;s/ / - /')"
+  increment="$(echo $increment | bc | $sed 's/^-//')"
   # If run was from a restart, timesteps continue from last run.
   # check first line of new data- first timestep will be the same as the last
   # of the previous run
@@ -49,7 +45,7 @@ do
     # density of 0th step is the same as the end of the last run, so drop the first line 
     echo "$lines" | tail -n +2 | awk -F"," -v inc="$increment" '$1+=inc' OFS="," >> data.tmp ||
     # adding on a new run that starts from 0, so add on last timestep
-    echo "$lines" | tail -n +2 | awk -F"," -v last="$laststep" -v inc="$increment" '$1+=last+inc' OFS="," >> data.tmp 
+    echo "$lines" | awk -F"," -v last="$laststep" -v inc="$increment" '$1+=last+inc' OFS="," >> data.tmp 
   ) || printf "%s\n" "$lines" > data.tmp
 done
 
