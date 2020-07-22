@@ -1,5 +1,0 @@
-#!/bin/sh
-[ $# -eq 0 ] &&
-echo "Navigates to the working directory of a SLURM job.
-Syntax: $(basename $0) SLURM_JOBID" && exit 1
-cd $(scontrol show jobid $1 | grep WorkDir | awk -F'=' '{print $2}')
