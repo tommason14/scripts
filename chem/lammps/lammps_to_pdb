@@ -1,5 +1,7 @@
 #!/bin/sh
 
+[ $# -eq 0 ] || [ "$1" = "-h" ] && echo "Syntax: $(basename $0) lammpsfile" && exit 1
+
 lmps="$1"
 xyz="${lmps%.*}.xyz"
 
