@@ -23,7 +23,7 @@ topo(){
 [ -f tmpvmd ] && rm tmpvmd
 cat << EOF >> tmpvmd
 package require topotools
-topo readlammpsdata $data
+topo readlammpsdata "$data"
 EOF
 
 "$vmd" -e tmpvmd
