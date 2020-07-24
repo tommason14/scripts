@@ -2,7 +2,9 @@
 
 ATOMS
 # charge needs filling in ...
-MNA   MNA    22.990  1.00    lj    0.00277  3.33             # OPLS (metal so MNA to not conflict with nitrogen)
+OW  OW   15.999   -1.04   lj    0.155000     3.153600 # tip4p
+HW  HW    1.008    0.52   lj    0.000000     0.000000 # tip4p
+mNA   mNA    22.990  1.00    lj    0.00277  3.33             # OPLS (metal so MNA to not conflict with nitrogen)
 C     C     12.01  0.000000  lj   0.0860   3.39966950842    # OPLS
 C1    C1    12.01  0.000000  lj   0.2100   3.39966950842    # cp C DLM 11/2007 well depth from OPLS replacing 0.0860
 C2    C2    12.01  0.000000  lj   0.0860   3.39966950842    # sp2 atom in the middle of C=CD-CD=C
@@ -32,7 +34,6 @@ HN    HN    1.008  0.000000  lj   0.0157   1.06907846177    # !Ferguson base pai
 HO    HO    1.008  0.000000  lj   0.0000        0.0         # OPLS Jorgensen, JACS,110,(1988),1657
 HP    HP    1.008  0.000000  lj   0.0157   1.06907846177    # same to hs (be careful !)
 HS    HS    1.008  0.000000  lj   0.0157   1.06907846177    # W. Cornell CH3SH --> CH3OH FEP
-HW    HW    1.008  0.000000  lj   0.0000        0.0         # OPLS Jorgensen, JACS,110,(1988),1657
 HX    HX    1.008  0.000000  lj   0.0157   1.95997717991    # Veenstra et al JCC,8,(1992),963
 F     F     19.00  0.000000  lj    0.061   3.11814551349    # Gough et al. JCC 13,(1992),963.
 CL    CL    35.45  0.000000  lj    0.265   3.47094140587    # Fox, JPCB,102,8070,(98),flex.mdl CHCl3
@@ -54,7 +55,6 @@ NO    NO    14.01  0.000000  lj   0.1700   3.24999852378    # OPLS
 O     O     16.00  0.000000  lj   0.2100   2.95992190115    # OPLS
 OH    OH    16.00  0.000000  lj   0.2104   3.06647338784    # OPLS
 OS    OS    16.00  0.000000  lj   0.1700   3.00001234347    # OPLS ether
-OW    OW    16.00  0.000000  lj   0.1520   3.15075240658    # TIP3P water model
 P2    P2    30.97  0.000000  lj   0.2000   3.74177461619    # JCC,7,(1986),230;
 P3    P3    30.97  0.000000  lj   0.2000   3.74177461619    # JCC,7,(1986),230;
 P4    P4    30.97  0.000000  lj   0.2000   3.74177461619    # JCC,7,(1986),230;
@@ -77,7 +77,7 @@ SY    SY    32.06  0.000000  lj   0.2500   3.56359487256    # W. Cornell CH3SH a
 
 BONDS
 
-OW   HW      cons   553.0  0.9572 # TIP3P_Water 1
+OW   HW      cons   517.6  0.9572 # tip4p
 HW   HW      cons   553.0  1.5136 # TIP3P_Water 1
 BR   BR      harm   123.2  2.5420 # SOURCE1 4 0.0000
 BR   C1      harm   352.7  1.7870 # SOURCE2 4 0.0024
@@ -887,7 +887,7 @@ CQ   NB      harm   486.7  1.3398 # NEW 70
 
 ANGLES
 
-HW   OW   HW       harm  100.00  104.52 # AMBER 1 TIP3P_water
+HW   OW   HW       harm   37.95  104.52 # tip4p
 HW   HW   OW       harm    0.00  127.74 # AMBER 1 (found_in_crystallographic_water_with_3_bonds)
 BR   C1   BR       harm   57.76  180.00 # Guess 0
 BR   C1   C1       harm   54.93  180.00 # SOURCE3 1 0.0000

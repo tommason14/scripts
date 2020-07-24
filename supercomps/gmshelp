@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+[[ $USER == "tmas0023" ]] && doc="/Users/tmas0023/Documents/GAMESS/gamess-standard-sept-2018/INPUT.DOC"
+[[ $HOSTNAME =~ monarch ]] && doc="/usr/local/gamess/16srs1-v2/INPUT.DOC"
+
+if [[ $1 == '-h' || $1 == '-H' ]] 
+then
+  echo "Usage: $(basename $0) [group]"
+  echo " "
+  echo "Don't include the dollar sign in the group."
+  exit 0
+fi
+
+pager="less -i"
+
+if [[ $# -eq 0 ]] 
+then
+   $pager +/module:routine $doc
+else
+   key=`echo $1 | tr '[:lower:]' '[:upper:]'`
+   $pager "+/^.$key group" $doc
+fi

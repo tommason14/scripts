@@ -25,7 +25,7 @@ for f in "$@"
 do
   # extract from "Setting up Verlet run..." onwards because 
   # minimisation is finished by that point
-  lines="$(sed -n '/Setting up Verlet run .../,/Loop/p' $f |
+  lines="$(sed -n '/Setting up Verlet run .../,/Loop/p' "$f" |
     grep '^\s\+[0-9]\+\s\+-*[0-9]\+' |
     $sed 's/^\s\+//;s/\s\+$//;s/\s\+/,/g')"
   # if more than one file
