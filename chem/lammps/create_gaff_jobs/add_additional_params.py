@@ -275,7 +275,7 @@ def compare_db(ff_dihs, all_combos, with_types_that_exist):
     for line in ff_dihs:
         for combo, types_that_exist in zip(all_combos, with_types_that_exist):
             # if all atoms defined, check them against the combos
-            if all(val is not "X" for val in line[:4]):
+            if all(val != "X" for val in line[:4]):
                 if line[:4] == types_that_exist:
                     # variable number of args
                     stop = 0
