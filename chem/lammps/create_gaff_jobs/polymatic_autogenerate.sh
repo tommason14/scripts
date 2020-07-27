@@ -18,7 +18,7 @@ mkdir small
 cp pack.inp small/pack.inp
 cp gaff.ff small/
 # just 1 molecule for each different structure
-sed -i '' 's/number.*/number 1/' small/pack.inp
+$sed -i 's/number.*/number 1/' small/pack.inp
 ls *xyz | xargs -I{} cp {} small/
 cp polym.in small/
 cd small
@@ -30,7 +30,6 @@ echo "Finding parameters that Polymatic needs. Could take about a minute..."
 add_additional_params.py -l pack.lmps -f gaff.ff -p polym.in
 # additional params now in small/pack.lmps
 cd ..
-
 
 ## desired system ##
 echo "Creating desired system"

@@ -179,7 +179,7 @@ def getDihedral(myAtom1, myAtom2, myAtom3, myAtom4, path_to_ff):
                         Atom1, Atom2, Atom3, Atom4
                     )
                 )
-                return ['0', '0.0', '0']
+                return ['1', '0.0', '0', '0.0']
 
 def getImproper(myAtom1, myAtom2, myAtom3, myAtom4, path_to_ff):
 
