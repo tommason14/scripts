@@ -2,9 +2,9 @@
 
 ATOMS
 # charge needs filling in ...
-OW  OW   15.999   -1.04   lj    0.155000     3.153600 # tip4p
-HW  HW    1.008    0.52   lj    0.000000     0.000000 # tip4p
-mNA   mNA    22.990  1.00    lj    0.00277  3.33             # OPLS (metal so MNA to not conflict with nitrogen)
+OW    OW    15.999   -1.04   lj    0.155000     3.153600 # tip4p
+HW    HW    1.008     0.52   lj    0.000000     0.000000 # tip4p
+NAM   NAM   22.990   1.00    lj    0.00277      3.33 # OPLS (metal so NAM to not conflict with nitrogen)
 C     C     12.01  0.000000  lj   0.0860   3.39966950842    # OPLS
 C1    C1    12.01  0.000000  lj   0.2100   3.39966950842    # cp C DLM 11/2007 well depth from OPLS replacing 0.0860
 C2    C2    12.01  0.000000  lj   0.0860   3.39966950842    # sp2 atom in the middle of C=CD-CD=C
@@ -35,10 +35,10 @@ HO    HO    1.008  0.000000  lj   0.0000        0.0         # OPLS Jorgensen, JA
 HP    HP    1.008  0.000000  lj   0.0157   1.06907846177    # same to hs (be careful !)
 HS    HS    1.008  0.000000  lj   0.0157   1.06907846177    # W. Cornell CH3SH --> CH3OH FEP
 HX    HX    1.008  0.000000  lj   0.0157   1.95997717991    # Veenstra et al JCC,8,(1992),963
-F     F     19.00  0.000000  lj    0.061   3.11814551349    # Gough et al. JCC 13,(1992),963.
-CL    CL    35.45  0.000000  lj    0.265   3.47094140587    # Fox, JPCB,102,8070,(98),flex.mdl CHCl3
-BR    BR    79.90  0.000000  lj    0.420   3.59923082129    # Junmei, 2010
-I     I     126.9  0.000000  lj     0.50    3.830864488     # Junmei, 2010
+F     F     19.00  -1.0  lj    0.061   3.11814551349    # Gough et al. JCC 13,(1992),963.
+CL    CL    35.45  -1.0  lj    0.265   3.47094140587    # Fox, JPCB,102,8070,(98),flex.mdl CHCl3
+BR    BR    79.90  -1.0  lj    0.420   3.59923082129    # Junmei, 2010
+I     I     126.9  -1.0  lj     0.50    3.830864488     # Junmei, 2010
 N     N     14.01  0.000000  lj   0.1700   3.24999852378    # OPLS
 N1    N1    14.01  0.000000  lj   0.1700   3.24999852378    # OPLS
 N2    N2    14.01  0.000000  lj   0.1700   3.24999852378    # OPLS

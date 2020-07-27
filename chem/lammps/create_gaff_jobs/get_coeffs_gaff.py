@@ -33,7 +33,6 @@ def getGroup(Atom, path_to_ff):
 
 
 def getAtomData(Atom, path_to_ff):
-
     # GET ATOM DATA FROM ff
     with open(path_to_ff, "r+") as f:
         for line in f:
@@ -95,8 +94,8 @@ def getBond(myAtom1, myAtom2, path_to_ff):
 
             # IF GET TO ANGLE SECTION
             elif re.search("^\s*ANGLES", line):
-                sys.exit("Could not find bond {} {}".format(Atom1, Atom2))
-
+                print("Could not find bond {} {}".format(Atom1, Atom2))
+                return 0.0, 0.0
 
 def getAngle(myAtom1, myAtom2, myAtom3, path_to_ff):
 
@@ -134,8 +133,8 @@ def getAngle(myAtom1, myAtom2, myAtom3, path_to_ff):
 
             # IF GET TO DIHEDRALS SECTION
             elif re.search("^\s*DIHEDRALS", line):
-                sys.exit("Could not find angle {} {} {}".format(Atom1, Atom2, Atom3))
-
+                print("Could not find angle {} {} {}".format(Atom1, Atom2, Atom3))
+                return 0.00, 0.00
 
 def getDihedral(myAtom1, myAtom2, myAtom3, myAtom4, path_to_ff):
 
@@ -175,12 +174,12 @@ def getDihedral(myAtom1, myAtom2, myAtom3, myAtom4, path_to_ff):
 
             # IF GET TO DIHEDRALS SECTION
             elif re.search("^\s*IMPROPER", line):
-                sys.exit(
+                print(
                     "Could not find dihedral {} {} {} {}".format(
                         Atom1, Atom2, Atom3, Atom4
                     )
                 )
-
+                return ['0', '0.0', '0']
 
 def getImproper(myAtom1, myAtom2, myAtom3, myAtom4, path_to_ff):
 
@@ -212,4 +211,5 @@ def getImproper(myAtom1, myAtom2, myAtom3, myAtom4, path_to_ff):
                     ):
                         return line.split()[5:8]
 
-    sys.exit("Could not find improper {} {} {} {}".format(Atom1, Atom2, Atom3, Atom4))
+    print("Could not find improper {} {} {} {}".format(Atom1, Atom2, Atom3, Atom4))
+    return ['0.0', '0', '0']
