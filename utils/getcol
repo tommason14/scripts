@@ -8,8 +8,10 @@
 if [[ $1 =~ ^- ]]; then 
   delim="${1#-}"
   col="$2"
+  file="${3:-/dev/stdin}"
 else 
   delim=" " 
   col="$1"
+  file="${2:-/dev/stdin}"
 fi
-awk -v col="$col" -F "$delim" '{print $col}'
+awk -v col="$col" -F "$delim" '{print $col}' "$file"

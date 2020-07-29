@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
 [[ $1 =~ ^- ]] && delim="${1#-}" || delim=" "
-awk -F "$delim" '{print $NF}'
+awk -F "$delim" '{print $NF}' "${2:-/dev/stdin}"
