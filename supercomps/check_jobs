@@ -6,7 +6,7 @@ num_jobs=""
 [ $# -gt 0 ] && num_jobs=$1
 if [ "$num_jobs" = "" ]
 then
-  echo "How many jobs to check? [1]"
+  printf "How many jobs to check? [1] "
   read num_jobs
 fi
 
