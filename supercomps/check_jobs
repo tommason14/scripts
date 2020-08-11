@@ -20,4 +20,4 @@ fi
 
 jobs=$(squeue -u $USER | grep $USER | awk '{print $1}')
 
-echo $jobs | head -n $num_jobs | xargs -I{} scontrol show jobid {}  
+echo "$jobs" | head -n $num_jobs | xargs -I{} scontrol show jobid {}  
