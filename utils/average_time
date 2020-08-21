@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# Expects a format of HH:MM:SS 
+
+awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
