@@ -64,7 +64,7 @@ done
 #  rename cube files to indicate orbital  #
 ###########################################
 
-cubes=($(find . -name "*cube" | sort -n))
+cubes=($(find . -maxdepth 1 -name "*cube" | sort -n))
 mv "${cubes[0]}" "homo-minus-1.cube"
 mv "${cubes[1]}" "homo.cube"
 mv "${cubes[2]}" "lumo.cube"
