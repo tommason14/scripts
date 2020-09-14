@@ -60,4 +60,14 @@ do
   ./tmp.expect $gbw $orb >/dev/null
 done
 
+###########################################
+#  rename cube files to indicate orbital  #
+###########################################
+
+cubes=($(find . -name "*cube" | sort -n))
+mv "${cubes[0]}" "homo-minus-1.cube"
+mv "${cubes[1]}" "homo.cube"
+mv "${cubes[2]}" "lumo.cube"
+mv "${cubes[3]}" "lumo-plus-1.cube"
+
 rm tmp.expect
