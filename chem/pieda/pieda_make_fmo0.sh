@@ -20,6 +20,8 @@ do
   sed -i 's/RUNTYP=ENERGY/RUNTYP=FMO0/;s/NBODY=[0-9]//' "fmo0/$base.inp"
   # change fmoprp line- assumes one is already present; if not this script will fail!
   sed -i "s/\$FMOPRP.*/\$FMOPRP MAXAOC=$max_ao MODORB=3 MAXIT=200 \$END/" "fmo0/$base.inp"
+  # remove $GDDI line
+  sed -i "/\$GDDI/d" "fmo0/$base.inp"
   # one node, normal queue
   sed -i "/\#PBS -q.*/d" "fmo0/$base.job"
   sed -i "s/\#PBS -l ncpus=.*/\#PBS -l ncpus=48/" "fmo0/$base.job"
@@ -28,7 +30,7 @@ do
   # 1 hr walltime
   sed -i "s/\#PBS -l walltime=.*/\#PBS -l walltime=1:00:00/" "fmo0/$base.job"
   # retain temporary files!
-  sed -i "s/gadi.ln/keep_files/" "fmo0/$base.job"
+  sed -i "s|rungms.gadi.ln|~/gamess19-srs/rungms.one.node.keep_files|" "fmo0/$base.job"
 
   cd "$cwd"
 done

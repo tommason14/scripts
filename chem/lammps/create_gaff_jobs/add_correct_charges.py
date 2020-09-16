@@ -42,6 +42,14 @@ def find_structures():
 
     return {s.replace('.xyz', ''): {"number": int(n)} for s, n in zip(structs, numbers)}
 
+def detect_charges(mols):
+    charge_logs = glob('*.log')
+    for mol in mols.keys():
+        for chargefile in charge_logs:
+            if mol in chargefile:
+                mols[mol]['charge_log'] = chargefile
+                print(f'Charges for {mol} taken from {chargefile}')
+    return mols
 
 def ask_user_for_charges(mols):
     """
@@ -125,7 +133,8 @@ def change_datafile(charges, datafile, output):
 
 def main():
     mols = find_structures()
-    mols = ask_user_for_charges(mols) 
+    mols = detect_charges(mols)
+    # mols = ask_user_for_charges(mols) 
     mols = add_charges(mols)
     charge_sequence = generate_charge_sequence(mols)
     change_datafile(charge_sequence, lammps_datafile, output)

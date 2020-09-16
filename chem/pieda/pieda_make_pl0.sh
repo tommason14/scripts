@@ -10,6 +10,8 @@ cp spec.inp $inp
 
 # PIEDA can only be run with FMO2
 sed -i 's/NBODY=3/NBODY=2/' $inp
+# so remove RITRIM
+sed -i '/RITRIM/d' $inp
 
 # add FMOPRP info from Dmitri's examples in tools/fmo/published5
 # and the efmo0(1) info from the fmo0/spec.dat5
@@ -26,12 +28,13 @@ sed -n -e '/$MP2/,$p' $inp >> "$pol/tmpinp"
 mv "$pol/tmpinp" $inp 
 
 # need F30 file from fmo0 run
-cp fmo0/tempfiles/spec.F30.000 $pol/spec.F40.000
+cp fmo0/tempfiles/spec.F30 $pol/spec.F40.000
 
 # new job script - assumes 4 logical nodes, 2 physical nodes
 cat << ENDJOB > $pol/spec.job
 #!/bin/sh
 #PBS -P k96
+#PBS -l storage=scratch/k96+gdata/k96
 #PBS -l mem=768gb
 #PBS -l ncpus=192
 #PBS -l jobfs=500gb
