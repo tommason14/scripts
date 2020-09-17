@@ -55,3 +55,4 @@ mv tmp.final pack.lmps
 # Clean up
 rm tmp* 
 rm -rf small
+polymatic_types.py pack.lmps > types.txt
