@@ -52,7 +52,7 @@ gbw="${log%.*}.gbw"
 # Orca prints the orbital occupation along with the orbtial energies, so can use them to find the 
 # homo-1, homo, lumo and lumo+1. Then generate cube files for those orbitals
 
-lumo=$(sed -n '/ORBITAL ENERGIES/,/MOLECULAR ORBITALS/p' spec.log | grep "^\s*[0-9]\+\s\+0.0000" | head -1 | awk '{print $1}')
+lumo=$(sed -n '/ORBITAL ENERGIES/,/MOLECULAR ORBITALS/p' "$log" | grep "^\s*[0-9]\+\s\+0.0000" | head -1 | awk '{print $1}')
 orbs="$(($lumo - 2)) $(($lumo - 1)) $lumo $(($lumo + 1))"
 for orb in ${orbs[@]}
 do

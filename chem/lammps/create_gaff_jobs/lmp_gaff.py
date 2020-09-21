@@ -11,7 +11,6 @@ from get_coeffs_gaff import (
 )
 import subprocess as sp
 import glob, re, sys
-
 """ Substitute in different labels to *-l.data files and create
 topology file with VMD topo. After VMD original names are
 substituted back in and coefficients, box size and atom data are
@@ -57,15 +56,9 @@ with open("topo-in.xyz", "w") as new:
 ##### RUN VMD TOPO ----------------------------------------
 
 # COMMANDS FOR VMD
-lines = (
-    "package require topotools\n"
-    + "topo retypebonds\n"
-    + "topo guessangles\n"
-    + "topo guessdihedrals\n"
-    + "topo guessimpropers\n"
-    + "topo writelammpsdata topo.out\n"
-    + "exit"
-)
+lines = ("package require topotools\n" + "topo retypebonds\n" +
+         "topo guessangles\n" + "topo guessdihedrals\n" +
+         "topo guessimpropers\n" + "topo writelammpsdata topo.out\n" + "exit")
 
 open("tempfile", "w+").write(lines)
 
@@ -169,7 +162,8 @@ for line in lines:
         h, num, name = line.split()
         eps, sigma = getAtomData(name, ff)
         # for lj/charmm/coul/long
-        newline = "{:4} {:>10.3f} {:>9.5f}    # {}\n".format(num, eps, sigma, name)
+        newline = "{:4} {:>10.3f} {:>9.5f}    # {}\n".format(
+            num, eps, sigma, name)
         newLines.append(newline)
 
     # ADD BOND COEFFS
@@ -218,8 +212,7 @@ for line in lines:
         # GET NEW PARTIAL CHARGE
         pc = getAtomPartialCharge(name, ff)
         newline = "{:4} {:3} {:3} {:>6.3f} {:>11.6f} {:>11.6f} {:>11.6f}   # {}\n".format(
-            ord, num, ID, pc, float(x), float(y), float(z), name
-        )
+            ord, num, ID, pc, float(x), float(y), float(z), name)
         newLines.append(newline)
         pcharges.append(pc)
 
@@ -241,18 +234,31 @@ zvals.sort()
 for i in range(len(newLines)):
 
     if "xlo" in newLines[i]:
-        newLines[i] = "{:6.3f} {:6.3f}  xlo xhi\n".format(xvals[0] - 1, xvals[-1] + 1)
+        newLines[i] = "{:6.3f} {:6.3f}  xlo xhi\n".format(
+            xvals[0] - 1, xvals[-1] + 1)
 
     elif "ylo" in newLines[i]:
-        newLines[i] = "{:6.3f} {:6.3f}  ylo yhi\n".format(yvals[0] - 1, yvals[-1] + 1)
+        newLines[i] = "{:6.3f} {:6.3f}  ylo yhi\n".format(
+            yvals[0] - 1, yvals[-1] + 1)
 
     elif "zlo" in newLines[i]:
-        newLines[i] = "{:6.3f} {:6.3f}  zlo zhi\n".format(zvals[0] - 1, zvals[-1] + 1)
+        newLines[i] = "{:6.3f} {:6.3f}  zlo zhi\n".format(
+            zvals[0] - 1, zvals[-1] + 1)
 
     elif re.search("^\s*#\s*$", newLines[i]):
         newLines[i] = "\n"
 
-# Masses not added by topotools with polymatic labels (lc1 etc...)
+# Remove incorrect topotools mass section, written before atoms
+_from = 0
+to = 0
+for ind, line in enumerate(newLines):
+    if 'Masses' in line:
+        _from = ind
+    if 'Atoms' in line:
+        to = ind
+newLines = newLines[:_from] + newLines[to:]
+
+# Now add correct mass for each atom type
 # need pair coeffs first to find the atom labels
 found_pairs = False
 masses = []
@@ -276,7 +282,6 @@ for ind, line in enumerate(newLines, 1):
         zlo = ind
         break
 newLines = newLines[:zlo] + masses + newLines[zlo:]
-
 
 # REMOVE EXCESS FILES
 sp.check_output("rm topo-in.xyz topo.out tempfile", shell=True)
