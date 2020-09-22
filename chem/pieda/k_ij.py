@@ -247,7 +247,7 @@ def calc_kij(fmo0=None, fmo3=None, pieda=None):
 def main():
     dirs = (
         sp.check_output(
-            "find . -maxdepth 1 -type d -name 'cluster*' | sort -t'-' -k2 -n",
+            "find . -maxdepth 1 -type d -name '*cluster*' | sort -t'-' -k2 -n",
             shell=True,
         )
         .decode("utf-8")
