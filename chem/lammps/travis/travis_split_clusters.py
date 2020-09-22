@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 """
 Takes in the output from the travis program after a 'cut'
 operation has been performed, which generates one xyz file
@@ -23,6 +22,8 @@ with open(sys.argv[1]) as f:
             clusters.append(tmp)
             tmp = []
         tmp.append(line)
+    # last step
+    clusters.append(tmp)
 
 if not os.path.isdir("clusters"):
     os.mkdir("clusters")
