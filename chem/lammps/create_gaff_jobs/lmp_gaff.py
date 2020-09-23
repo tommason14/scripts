@@ -249,14 +249,19 @@ for i in range(len(newLines)):
         newLines[i] = "\n"
 
 # Remove incorrect topotools mass section, written before atoms
-_from = 0
-to = 0
-for ind, line in enumerate(newLines):
-    if 'Masses' in line:
-        _from = ind
-    if 'Atoms' in line:
-        to = ind
-newLines = newLines[:_from] + newLines[to:]
+# if the masses section appears twice in the file. Only happens
+# if using 'odd' atom labels, like NAM for sodium
+
+remove = sp.getoutput('grep -c "Masses" topo.out') == '2'
+if remove:
+    _from = 0
+    to = 0
+    for ind, line in enumerate(newLines):
+        if 'Masses' in line:
+            _from = ind
+        if 'Atoms' in line:
+            to = ind
+    newLines = newLines[:_from] + newLines[to:]
 
 # Now add correct mass for each atom type
 # need pair coeffs first to find the atom labels
