@@ -1,0 +1,3 @@
+#!/bin/sh
+# remove rows that do not have the same number of columns as the header
+awk -F"," 'NR==1 {len=NF}; NF==len {print $0}' data.csv > tmp && mv tmp data.csv
