@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 """
 Change molecule ID in a lammps data file, generated from packmol.
 By default, all atoms of a file generated using lmp_gaff.py will have 
@@ -22,26 +21,23 @@ else:
     output = sys.argv[2]
 
 # map structures to numbers of each
-structs = (
-    sp.check_output("grep '^\s*structure.*xyz' pack.inp | awk '{print $NF}'", shell=True)
-    .decode("utf-8")
-    .strip()
-    .split("\n")
-)
-numbers = (
-    sp.check_output("grep 'number' pack.inp | awk '{print $NF}'", shell=True)
-    .decode("utf-8")
-    .strip()
-    .split("\n")
-)
+structs = (sp.check_output(
+    "grep '^\s*structure.*xyz' pack.inp | awk '{print $NF}'",
+    shell=True).decode("utf-8").strip().split("\n"))
+numbers = (sp.check_output("grep '^\s*number' pack.inp | awk '{print $NF}'",
+                           shell=True).decode("utf-8").strip().split("\n"))
+
+if len(structs) != len(numbers):
+    sys.exit(
+        'Error in pack.inp: Make sure all xyz files have a "number" line in the structure block.\n'
+        'Cannot assign correct molecule IDs.')
 
 mols = {s: {"number": int(n)} for s, n in zip(structs, numbers)}
-
+print(mols)
 # lengths of each molecule- first line of xyz
 for mol, data in mols.items():
     data["length"] = int(
-        sp.check_output(f"head -1 {mol}", shell=True).decode("utf-8").strip()
-    )
+        sp.check_output(f"head -1 {mol}", shell=True).decode("utf-8").strip())
 
 # packmol retains the order in which molecules are added in pack.inp
 # so loop over the dict and generate new id

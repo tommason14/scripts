@@ -10,7 +10,7 @@ from get_coeffs_gaff import (
     getMass,
 )
 import subprocess as sp
-import glob, re, sys
+import glob, re, sys, os
 """ Substitute in different labels to *-l.data files and create
 topology file with VMD topo. After VMD original names are
 substituted back in and coefficients, box size and atom data are
@@ -300,3 +300,7 @@ open(Name + ".lmps", "w+").writelines(newLines)
 
 # PRINT SUM OF PARTIAL CHARGES
 print(f"{File}   Charge: {sum(pcharges):5.5}")
+
+# add molecule IDs
+# needs a pack.inp file in the directory with the xyz file
+os.system(f'change_molecule_id.py {Name}.lmps')
