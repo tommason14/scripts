@@ -33,7 +33,6 @@ if len(structs) != len(numbers):
         'Cannot assign correct molecule IDs.')
 
 mols = {s: {"number": int(n)} for s, n in zip(structs, numbers)}
-print(mols)
 # lengths of each molecule- first line of xyz
 for mol, data in mols.items():
     data["length"] = int(
