@@ -70,7 +70,7 @@ elif user == "tmas0023":
     vmd = "/Applications/VMD\ 1.9.3.app/Contents/vmd/vmd_MACOSXX86"
 else:
     vmd = "vmd"  # module loaded
-cmd = f"{vmd} -dispdev none -m topo-in.xyz -e tempfile"
+cmd = f"{vmd} -dispdev none -m topo-in.xyz -e tempfile 2>/dev/null" # warnings on gadi
 sp.check_output(cmd, shell=True)
 
 ### SUBSTITUTE IN ORIG NAMES ------------------------------
