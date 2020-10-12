@@ -14,8 +14,6 @@ import re
 if len(sys.argv) < 2 or sys.argv[1] == '-h':
     sys.exit('Syntax: keep_largest_fragment.py <lammps_datafile>')
 datafile = sys.argv[1]
-start, end = datafile.rsplit('.')
-output = '.'.join([start, 'largest', end])
 
 found_masses = False
 found_pairs = False
