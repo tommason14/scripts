@@ -1,10 +1,21 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 [ $# -ne 1 ] || [ "$1" = "-h" ] && echo "Syntax: $(basename $0) xyz_from_ovito" && exit 1
 
 xyz="$1"
+
+max_x=$(tail -n +3 $xyz | awk '{print $2}' | sort -n | tail -1)
+min_x=$(tail -n +3 $xyz | awk '{print $2}' | sort -n | head -1)
+xval=$(( $max_x - $min_x ))
+max_y=$(tail -n +3 $xyz | awk '{print $3}' | sort -n | tail -1)
+min_y=$(tail -n +3 $xyz | awk '{print $3}' | sort -n | head -1)
+yval=$(( $max_y - $min_y ))
+max_z=$(tail -n +3 $xyz | awk '{print $4}' | sort -n | tail -1)
+min_z=$(tail -n +3 $xyz | awk '{print $4}' | sort -n | head -1)
+zval=$(( $max_z - $min_z ))
+
 cat << EOF > input.dat
 $xyz
-$(head -2 $xyz | tail -1 | sed 's/Lattice=//;s/Origin=//;s/"//g' | awk '{print $1-$10,$5-$11,$9-$12}')
+$xval $yval $zval
 90.0 90.0 90.0
 EOF
