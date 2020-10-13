@@ -70,7 +70,7 @@ elif user == "tmas0023":
     vmd = "/Applications/VMD\ 1.9.3.app/Contents/vmd/vmd_MACOSXX86"
 else:
     vmd = "vmd"  # module loaded
-cmd = f"{vmd} -dispdev none -m topo-in.xyz -e tempfile 2>/dev/null" # warnings on gadi
+cmd = f"{vmd} -dispdev none -m topo-in.xyz -e tempfile 2>/dev/null"  # warnings on gadi
 sp.check_output(cmd, shell=True)
 
 ### SUBSTITUTE IN ORIG NAMES ------------------------------
@@ -303,4 +303,6 @@ print(f"{File}   Charge: {sum(pcharges):5.5}")
 
 # add molecule IDs
 # needs a pack.inp file in the directory with the xyz file
-os.system(f'change_molecule_id.py {Name}.lmps')
+if 'pack.inp' in os.listdir('.'):
+    print('Adding molecule IDs using pack.inp')
+    os.system(f'change_molecule_id.py {Name}.lmps')

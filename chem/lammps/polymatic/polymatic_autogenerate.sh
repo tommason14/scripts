@@ -1,5 +1,7 @@
 #!/usr/bin/env bash 
 
+GAFF="../create_gaff_jobs"
+
 packinp=$(ls pack.inp 2> /dev/null | wc -l)
 gaff=$(ls gaff.ff 2> /dev/null | wc -l)
 polym=$(ls polym.in 2> /dev/null | wc -l)
@@ -56,3 +58,4 @@ mv tmp.final pack.lmps
 rm tmp* 
 rm -rf small
 polymatic_types.py pack.lmps > types.txt
+generate_molecule_id_file.py
