@@ -20,11 +20,13 @@ if len(sys.argv) == 2:
 else:
     output = sys.argv[2]
 
+packfile = os.path.splitext(lammps)[0] + '.inp'
 # map structures to numbers of each
-structs = (sp.check_output(
-    "grep '^\s*structure.*xyz' pack.inp | awk '{print $NF}'",
-    shell=True).decode("utf-8").strip().split("\n"))
-numbers = (sp.check_output("grep '^\s*number' pack.inp | awk '{print $NF}'",
+structs = (sp.check_output("grep '^\s*structure.*xyz' " + packfile +
+                           " | awk '{print $NF}'",
+                           shell=True).decode("utf-8").strip().split("\n"))
+numbers = (sp.check_output("grep '^\s*number' " + packfile +
+                           " | awk '{print $NF}'",
                            shell=True).decode("utf-8").strip().split("\n"))
 
 if len(structs) != len(numbers):

@@ -303,6 +303,6 @@ print(f"{File}   Charge: {sum(pcharges):5.5}")
 
 # add molecule IDs
 # needs a pack.inp file in the directory with the xyz file
-if 'pack.inp' in os.listdir('.'):
-    print('Adding molecule IDs using pack.inp')
+if f'{Name}.inp' in os.listdir('.'):
+    print(f'Adding molecule IDs using {Name}.inp')
     os.system(f'change_molecule_id.py {Name}.lmps')
