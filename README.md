@@ -2,5 +2,7 @@
 
 Scripts organised by category.
 
-Also used in the lfrc configuration file, with paths to the files added in the
-~/.bash_aliases script, called in the ~/.bashrc.
+Move this repo to `~/.local/scripts` and the following command to your shell rc file:
+```
+export PATH="$(find "$HOME/.local/scripts" -type d | grep -v "^.$\|.git\|pycache" | tr '\n' ':' | sed 's/:$//'):$PATH"
+```
