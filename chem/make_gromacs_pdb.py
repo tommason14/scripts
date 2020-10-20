@@ -27,7 +27,10 @@ def add_box_dimensions(fname, box):
             index = ind
             break
     box = float(box)
-    inp[index] = f"CRYST1   {box:.3f}   {box:.3f}   {box:.3f}  90.00  90.00  90.00 P 1\n"
+    inp.insert(
+        index,
+        f"CRYST1   {box:.3f}   {box:.3f}   {box:.3f}  90.00  90.00  90.00 P 1\n"
+    )
     with open(fname, 'w') as f:
         for line in inp:
             f.write(line)
