@@ -5,4 +5,4 @@
   echo "Syntax: $(basename $0) file.xvg" &&
   exit 1
 
-tail -n +24 $1 | gnuplot --persist -e "plot '-' with lines notitle"
+tail -n +24 $1 | gnuplot --persist -e "set terminal x11; plot '-' with lines notitle"
