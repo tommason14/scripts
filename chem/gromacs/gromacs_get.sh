@@ -15,4 +15,4 @@ output="${file%.edr}_$ext"
 
 command -v gmx && gmx="gmx" || gmx="gmx_mpi"
 
-echo "$property" | "$gmx" -f "$file" -o "$output"
+echo "$property" | "$gmx" energy -f "$file" -o "$output"
