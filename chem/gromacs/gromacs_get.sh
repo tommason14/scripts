@@ -3,7 +3,8 @@
 [[ $# -ne 2 || "$1" == "-h" ]] &&
   echo "Extract property from edr file using 'gmx energy'." &&
   echo "Syntax: $(basename $0) file.edr property" &&
-  echo "i.e. $(basename $0) npt.edr Total-Energy"
+  echo "i.e. $(basename $0) npt.edr Total-Energy" &&
+  exit 1
 
 file="$1"
 property="$2"
