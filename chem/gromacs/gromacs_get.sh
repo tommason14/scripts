@@ -13,6 +13,6 @@ property="$2"
   ext="$(echo "$property" | tr '[A-Z]' '[a-z]').xvg"
 output="${file%.edr}_$ext"
 
-command -v gmx && gmx="gmx" || gmx="gmx_mpi"
+command -v gmx && gmx="gmx" || module list 2>&1 | grep -Fq gromacs && gmx="gmx_mpi" || module load gromacs/5.1.4 && gmx="gmx_mpi"
 
 echo "$property" | "$gmx" energy -f "$file" -o "$output"
