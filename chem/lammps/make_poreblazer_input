@@ -4,15 +4,15 @@
 
 xyz="$1"
 
-max_x=$(tail -n +3 $xyz | awk '{print $2}' | sort -n | tail -1)
-min_x=$(tail -n +3 $xyz | awk '{print $2}' | sort -n | head -1)
-xval=$(( $max_x - $min_x ))
-max_y=$(tail -n +3 $xyz | awk '{print $3}' | sort -n | tail -1)
-min_y=$(tail -n +3 $xyz | awk '{print $3}' | sort -n | head -1)
-yval=$(( $max_y - $min_y ))
-max_z=$(tail -n +3 $xyz | awk '{print $4}' | sort -n | tail -1)
-min_z=$(tail -n +3 $xyz | awk '{print $4}' | sort -n | head -1)
-zval=$(( $max_z - $min_z ))
+max_x=$(tail -n +3 $xyz | awk '{printf "%f\n", $2}' | sort -n | tail -1)
+min_x=$(tail -n +3 $xyz | awk '{printf "%f\n", $2}' | sort -n | head -1)
+xval=$(echo "$max_x - $min_x" | bc -l)
+max_y=$(tail -n +3 $xyz | awk '{printf "%f\n", $3}' | sort -n | tail -1)
+min_y=$(tail -n +3 $xyz | awk '{printf "%f\n", $3}' | sort -n | head -1)
+yval=$(echo "$max_y - $min_y" | bc -l)
+max_z=$(tail -n +3 $xyz | awk '{printf "%f\n", $4}' | sort -n | tail -1)
+min_z=$(tail -n +3 $xyz | awk '{printf "%f\n", $4}' | sort -n | head -1)
+zval=$(echo "$max_z - $min_z" | bc -l)
 
 cat << EOF > input.dat
 $xyz
