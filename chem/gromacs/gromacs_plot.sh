@@ -7,6 +7,6 @@
 
 [[ $USER =~ (tommason|tmas0023) ]] && 
   cmd="plot '-' using 1:2 with lines notitle" ||
-  cmd="set terminal x1l; plot '-' using 1:2 with lines notitle"
+  cmd="set terminal x11; plot '-' using 1:2 with lines notitle"
 
 tail -n +24 $1 | gnuplot --persist -e "$cmd"
