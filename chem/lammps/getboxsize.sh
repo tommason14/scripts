@@ -7,4 +7,4 @@ Syntax: $(basename $0) lammps.out" && exit 1
 # Find volume column
 col=$(grep Step $1 | tail -1 | tr ' ' '\n' | nl | grep Volume | awk '{print $1}')
 
-grep '^\s\+[0-9]\+\s\+[0-9]\+' $1 | tail -30 | awk -v col=$col '{vol+=$col} END {print (vol/NR)**(1/3)}'
+grep_lammps_data.sh $1 | tail -30 | awk -F"," -v col=$col '{vol+=$col} END {print (vol/NR)**(1/3)}'
