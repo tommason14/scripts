@@ -46,5 +46,8 @@ do
   ) || printf "%s\n" "$lines" > data.tmp # write data from first file to data.tmp
 done
 
-cat header.tmp data.tmp 
+# if SHAKE algorithm used, the output includes SHAKE statistics- so remove these by checking
+# the length of each line wrt to first line
+numcols=$(cat header.tmp | tr ',' '\n' | wc -l)
+cat header.tmp data.tmp | awk -F"," -v cols=$numcols 'NF==cols'
 rm header.tmp data.tmp
