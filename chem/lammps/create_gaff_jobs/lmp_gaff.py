@@ -11,6 +11,7 @@ from get_coeffs_gaff import (
 )
 import subprocess as sp
 import glob, re, sys, os
+
 """ Substitute in different labels to *-l.data files and create
 topology file with VMD topo. After VMD original names are
 substituted back in and coefficients, box size and atom data are
@@ -56,9 +57,15 @@ with open("topo-in.xyz", "w") as new:
 ##### RUN VMD TOPO ----------------------------------------
 
 # COMMANDS FOR VMD
-lines = ("package require topotools\n" + "topo retypebonds\n" +
-         "topo guessangles\n" + "topo guessdihedrals\n" +
-         "topo guessimpropers\n" + "topo writelammpsdata topo.out\n" + "exit")
+lines = (
+    "package require topotools\n"
+    + "topo retypebonds\n"
+    + "topo guessangles\n"
+    + "topo guessdihedrals\n"
+    + "topo guessimpropers\n"
+    + "topo writelammpsdata topo.out\n"
+    + "exit"
+)
 
 open("tempfile", "w+").write(lines)
 
@@ -162,8 +169,7 @@ for line in lines:
         h, num, name = line.split()
         eps, sigma = getAtomData(name, ff)
         # for lj/charmm/coul/long
-        newline = "{:4} {:>10.3f} {:>9.5f}    # {}\n".format(
-            num, eps, sigma, name)
+        newline = "{:4} {:>10.3f} {:>9.5f}    # {}\n".format(num, eps, sigma, name)
         newLines.append(newline)
 
     # ADD BOND COEFFS
@@ -212,7 +218,8 @@ for line in lines:
         # GET NEW PARTIAL CHARGE
         pc = getAtomPartialCharge(name, ff)
         newline = "{:4} {:3} {:3} {:>6.3f} {:>11.6f} {:>11.6f} {:>11.6f}   # {}\n".format(
-            ord, num, ID, pc, float(x), float(y), float(z), name)
+            ord, num, ID, pc, float(x), float(y), float(z), name
+        )
         newLines.append(newline)
         pcharges.append(pc)
 
@@ -234,16 +241,13 @@ zvals.sort()
 for i in range(len(newLines)):
 
     if "xlo" in newLines[i]:
-        newLines[i] = "{:6.3f} {:6.3f}  xlo xhi\n".format(
-            xvals[0] - 1, xvals[-1] + 1)
+        newLines[i] = "{:6.3f} {:6.3f}  xlo xhi\n".format(xvals[0] - 1, xvals[-1] + 1)
 
     elif "ylo" in newLines[i]:
-        newLines[i] = "{:6.3f} {:6.3f}  ylo yhi\n".format(
-            yvals[0] - 1, yvals[-1] + 1)
+        newLines[i] = "{:6.3f} {:6.3f}  ylo yhi\n".format(yvals[0] - 1, yvals[-1] + 1)
 
     elif "zlo" in newLines[i]:
-        newLines[i] = "{:6.3f} {:6.3f}  zlo zhi\n".format(
-            zvals[0] - 1, zvals[-1] + 1)
+        newLines[i] = "{:6.3f} {:6.3f}  zlo zhi\n".format(zvals[0] - 1, zvals[-1] + 1)
 
     elif re.search("^\s*#\s*$", newLines[i]):
         newLines[i] = "\n"
@@ -251,39 +255,45 @@ for i in range(len(newLines)):
 # Remove incorrect topotools mass section, written before atoms
 # if the masses section appears twice in the file. Only happens
 # if using 'odd' atom labels, like NAM for sodium
-
-remove = sp.getoutput('grep -c "Masses" topo.out') == '2'
-if remove:
-    _from = 0
-    to = 0
-    for ind, line in enumerate(newLines):
-        if 'Masses' in line:
-            _from = ind
-        if 'Atoms' in line:
-            to = ind
-    newLines = newLines[:_from] + newLines[to:]
+# count_masses = 0
+# with open("topo.out") as f:
+#     for line in f:
+#         if "Masses" in line:
+#             count_masses += 1
+#         if "Atoms" in line:
+#             break
+# remove = count_masses == 2
+# if remove:
+_from = 0
+to = 0
+for ind, line in enumerate(newLines):
+    if "Masses" in line:
+        _from = ind
+    if "Atoms" in line:
+        to = ind
+newLines = newLines[:_from] + newLines[to:]
 
 # Now add correct mass for each atom type
 # need pair coeffs first to find the atom labels
 found_pairs = False
 masses = []
 for line in newLines:
-    if 'Pair Coeffs' in line:
+    if "Pair Coeffs" in line:
         found_pairs = True
         continue
-    if 'Bond Coeffs' in line:
+    if "Bond Coeffs" in line:
         break
-    if found_pairs and not re.search('^\s*$', line):
+    if found_pairs and not re.search("^\s*$", line):
         line = line.split()
         newline = [line[0], getMass(line[-1], ff), line[-1]]
         newline = "{:4} {:>9.4f}    # {}\n".format(*newline)
         masses.append(newline)
-masses = ['\n', 'Masses\n', '\n'] + masses
+masses = ["\n", "Masses\n", "\n"] + masses
 
 # add after box length
 zlo = 0
 for ind, line in enumerate(newLines, 1):
-    if 'zlo' in line:
+    if "zlo" in line:
         zlo = ind
         break
 newLines = newLines[:zlo] + masses + newLines[zlo:]
@@ -303,6 +313,6 @@ print(f"{File}   Charge: {sum(pcharges):5.5}")
 
 # add molecule IDs
 # needs a pack.inp file in the directory with the xyz file
-if f'{Name}.inp' in os.listdir('.'):
-    print(f'Adding molecule IDs using {Name}.inp')
-    os.system(f'change_molecule_id.py {Name}.lmps')
+if f"{Name}.inp" in os.listdir("."):
+    print(f"Adding molecule IDs using {Name}.inp")
+    os.system(f"change_molecule_id.py {Name}.lmps")
