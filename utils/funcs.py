@@ -202,6 +202,23 @@ def lammps_mdanalysis(data, traj):
     return u
 
 
+def add_elements_to_universe(universe, datafile='pack.lmps'):
+    universe.add_TopologyAttr('names')
+    atoms = datafile_elements(datafile)
+
+    types = sorted([int(i) for i in np.unique(universe.atoms.types).tolist()])
+
+    for a, t in zip(atoms, types):
+        universe.select_atoms(f'type {t}').names = a
+    # convert to ints
+    universe.atoms.types = universe.atoms.types.astype(int)
+    # for hydrogen bonding analysis to work, need to assign residues (meaningless for
+    # these systems)
+    universe.add_TopologyAttr('resnames')
+    universe.atoms.residues.resnames = 'UNK'  # set to unknown
+    return universe
+
+
 def unwrap_traj(universe):
     """
     Unwrap trajectories of all frames in Universe.
