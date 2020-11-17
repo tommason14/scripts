@@ -43,10 +43,15 @@ def find_charges(log):
     Searches log file for charges, returns nested list of dicts
     """
     charges = []
+    found = False
     for line in eof(log, 0.2):
+        if 'NET CHARGES' in line:
+            found = True
+        if 'RMS DEVIATION' in line:
+            found = False
         match = re.match(
             '^\s*([A-z]+)\s+(-?[0-9]+\.[0-9]+)\s+(-?[0-9]+\.[0-9]+)', line)
-        if match is not None:
+        if found and match is not None:
             atom = match.group(1)
             charge = match.group(2)
             charges.append({'atom': atom, 'charge': charge})

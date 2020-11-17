@@ -255,48 +255,80 @@ for i in range(len(newLines)):
 # Remove incorrect topotools mass section, written before atoms
 # if the masses section appears twice in the file. Only happens
 # if using 'odd' atom labels, like NAM for sodium
-# count_masses = 0
-# with open("topo.out") as f:
-#     for line in f:
-#         if "Masses" in line:
-#             count_masses += 1
-#         if "Atoms" in line:
-#             break
-# remove = count_masses == 2
-# if remove:
-_from = 0
-to = 0
-for ind, line in enumerate(newLines):
-    if "Masses" in line:
-        _from = ind
-    if "Atoms" in line:
-        to = ind
-newLines = newLines[:_from] + newLines[to:]
+count_masses = 0
+with open("topo.out") as f:
+    for line in f:
+        if "Masses" in line:
+            count_masses += 1
+        if "Atoms" in line:
+            break
+remove = count_masses == 2
+if remove:
+    _from = 0
+    to = 0
+    for ind, line in enumerate(newLines):
+        if "Masses" in line:
+            _from = ind
+        if "Atoms" in line:
+            to = ind
+    newLines = newLines[:_from] + newLines[to:]
 
-# Now add correct mass for each atom type
-# need pair coeffs first to find the atom labels
-found_pairs = False
-masses = []
+    # Now add correct mass for each atom type
+    # need pair coeffs first to find the atom labels
+    found_pairs = False
+    masses = []
+    for line in newLines:
+        if "Pair Coeffs" in line:
+            found_pairs = True
+            continue
+        if "Bond Coeffs" in line:
+            break
+        if found_pairs and not re.search("^\s*$", line):
+            line = line.split()
+            newline = [line[0], getMass(line[-1], ff), line[-1]]
+            newline = "{:4} {:>9.4f}    # {}\n".format(*newline)
+            masses.append(newline)
+    masses = ["\n", "Masses\n", "\n"] + masses
+
+    # add after box length
+    zlo = 0
+    for ind, line in enumerate(newLines, 1):
+        if "zlo" in line:
+            zlo = ind
+            break
+    newLines = newLines[:zlo] + masses + newLines[zlo:]
+
+# let's check if masses section is present at all
+# if not, needs adding
+masses_present = False
 for line in newLines:
-    if "Pair Coeffs" in line:
-        found_pairs = True
-        continue
-    if "Bond Coeffs" in line:
+    if "Masses" in line:
+        masses_present = True
         break
-    if found_pairs and not re.search("^\s*$", line):
-        line = line.split()
-        newline = [line[0], getMass(line[-1], ff), line[-1]]
-        newline = "{:4} {:>9.4f}    # {}\n".format(*newline)
-        masses.append(newline)
-masses = ["\n", "Masses\n", "\n"] + masses
 
-# add after box length
-zlo = 0
-for ind, line in enumerate(newLines, 1):
-    if "zlo" in line:
-        zlo = ind
-        break
-newLines = newLines[:zlo] + masses + newLines[zlo:]
+if not masses_present:
+    found_pairs = False
+    masses = []
+    for line in newLines:
+        if "Pair Coeffs" in line:
+            found_pairs = True
+            continue
+        if "Bond Coeffs" in line:
+            break
+        if found_pairs and not re.search("^\s*$", line):
+            line = line.split()
+            newline = [line[0], getMass(line[-1], ff), line[-1]]
+            newline = "{:4} {:>9.4f}    # {}\n".format(*newline)
+            masses.append(newline)
+    masses = ["\n", "Masses\n", "\n"] + masses
+
+    # add after box length
+    zlo = 0
+    for ind, line in enumerate(newLines, 1):
+        if "zlo" in line:
+            zlo = ind
+            break
+    newLines = newLines[:zlo] + masses + newLines[zlo:]
 
 # REMOVE EXCESS FILES
 sp.check_output("rm topo-in.xyz topo.out tempfile", shell=True)
