@@ -5,4 +5,6 @@
 if env | grep -Fq SLURM || env | grep -Fq TACC
 then
   scontrol show jobid "$1"  
+else 
+  qstat -fxw "$1" # -x also allows for jobs that have finished, -w for a wide output upto 120 columns
 fi
