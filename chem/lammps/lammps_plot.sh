@@ -27,7 +27,9 @@ fi
 
 label=$(grep Step $1 | tail -1 | awk -v choice=$((option + 1)) '{print $choice}' | sed 's/_/-/') 
 # gnuplot treats _ as subscript so replace them with hyphens
+
+[[ $USER == "tm3124" ]] && extra="set terminal x11;" || extra=""
 grep_lammps_data.sh $1 |
   sed '1d' |
   awk -F"," -v step=1 -v choice=$((option + 1)) '{print $step,$choice}' |
-  gnuplot --persist -e "set xlabel 'Timestep'; set ylabel '$label'; plot '-' using 1:2 with lines notitle"
+  gnuplot --persist -e "$extra set xlabel 'Timestep'; set ylabel '$label'; plot '-' using 1:2 with lines notitle"
