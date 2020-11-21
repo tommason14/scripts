@@ -28,6 +28,10 @@ do
   lines="$(sed -n '/Setting up Verlet run .../,/Loop/p' "$f" |
     grep '^\s\+[0-9]\+\s\+-*[0-9]\+' |
     $sed 's/^\s\+//;s/\s\+$//;s/\s\+/,/g')"
+  # There might not be a line contatining 'Loop' line if the run hasn't finished,
+  # in that case just read until the end of the file
+  [[ $lines == "" ]] &&
+    lines=$(sed -n '/Setting up Verlet run .../, $ p' "$f" | grep '^[0-9]' | $sed 's/^\s\+//;s/\s\+$//;s/\s\+/,/g')
   # if more than one file
   [ -f data.tmp ] && [ $(cat data.tmp | wc -l) -gt 0 ] && (
   # take last two lines and find step increment
