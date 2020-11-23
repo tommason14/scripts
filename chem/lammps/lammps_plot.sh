@@ -38,7 +38,12 @@ fi
 label=$(grep Step $1 | tail -1 | awk -v choice=$((option + 1)) '{print $choice}' | sed 's/_/-/') 
 # gnuplot treats _ as subscript so replace them with hyphens
 
+# gadi gnuplot qt terminal always shows "slow font initialisation warning", so change to x11 terminal.
+# This might show stretched text as though the font is still too slow to render, but at least the location
+# of the text is correct
+[[ $HOSTNAME =~ gadi ]] && extra='set terminal x11;' || extra=''
+
 grep_lammps_data.sh "$@" |
   sed '1d' |
   awk -F"," -v step=1 -v choice=$((option + 1)) '{print $step,$choice}' |
-  gnuplot --persist -e "set xlabel 'Timestep'; set ylabel '$label'; plot '-' using 1:2 with lines notitle"
+  gnuplot --persist -e "$extra set xlabel 'Timestep'; set ylabel '$label'; plot '-' using 1:2 with lines notitle"
