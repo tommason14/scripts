@@ -7,4 +7,5 @@ def remove_legend_title(plot):
         remove_legend_title(plot)
     """
     handles, labels = plot.get_legend_handles_labels()
-    plot.legend(handles=handles[1:], labels=labels[1:])
+    # plot.legend(handles=handles[1:], labels=labels[1:]) # old version of seaborn
+    plot.legend(handles=handles, labels=labels)
