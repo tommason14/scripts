@@ -30,7 +30,7 @@ with open(sys.argv[1]) as f:
             masses.append(float(line.split()[1]))
 ptable = {}
 # atomic weights from: http://www.ciaaw.org/atomic-weights.htm
-ptable["Xx"] = 0.00000
+ptable["D"] = 0.00000 # drude particle created by agilio's polarizer have a mass of 0.4
 ptable["H"] = 1.00798
 ptable["He"] = 4.00260
 ptable["Li"] = 6.96750
