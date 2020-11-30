@@ -10,6 +10,10 @@ with open('connected.in') as f:
                 bonds[one] = [two]
             else:
                 bonds[one].append(two)
+            if two not in bonds:
+                bonds[two] = [one]
+            else:
+                bonds[two].append(one)
 
 atoms = {}
 found = False
