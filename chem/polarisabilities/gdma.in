@@ -1,0 +1,14 @@
+Title "DHI M062X Sadlej-pVTZ"
+File ../spec.fchk
+
+Angstrom
+Multipoles
+  switch 4
+  Limit 4
+  Limit 1 H
+  Radius H 0.325
+  Punch spec.punch
+Start
+
+Finish
+
