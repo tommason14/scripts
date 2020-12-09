@@ -8,9 +8,7 @@
 
 file="$1"
 property="$2"
-[[ "$property" == *"-"* ]] &&
-  ext="$(echo "$property" | sed 's/-/_/g' | tr '[A-Z]' '[a-z]').xvg" ||
-  ext="$(echo "$property" | tr '[A-Z]' '[a-z]').xvg"
+ext="$(echo "$property" | sed 's/-/_/g' | tr '[A-Z]' '[a-z]').xvg"
 output="${file%.edr}_$ext"
 
 if command -v gmx; then
