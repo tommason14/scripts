@@ -10,9 +10,6 @@ then
   read num_jobs
 fi
 
-# if enter pressed
-[ "$num_jobs" = "" ] || [ "$num_jobs" = "all" ] && num_jobs="$(echo "$jobs" | wc -l)"
-
 if env | grep -Fq SLURM || env | grep -Fq TACC
 then
   cmd='scontrol show jobid'
@@ -21,5 +18,8 @@ else
   cmd='qstat -f'
   jobs=$(qstat -u $USER | grep $USER | awk '{print $1}')
 fi
+
+# if enter pressed
+[ "$num_jobs" = "" ] || [ "$num_jobs" = "all" ] && num_jobs="$(echo "$jobs" | wc -l)"
 
 echo "$jobs" | head -n $num_jobs | xargs -I{} $cmd {}  
