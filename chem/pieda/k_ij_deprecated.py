@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 """
 File: k_ij.py
 Author: Tom Mason
@@ -136,8 +137,10 @@ def two_body_table(filename):
     vals = []
     found = False
     for line in eof(filename, 0.2):
-        if ('I    J DL  Z    R   Q(I->J)        E"corr          E"uncorr    E"IJ-E"I-E"J,corr/uncorr dDIJ*VIJ,unc   Gsol  tot,corr'
-                in line):
+        if (
+            'I    J DL  Z    R   Q(I->J)        E"corr          E"uncorr    E"IJ-E"I-E"J,corr/uncorr dDIJ*VIJ,unc   Gsol  tot,corr'
+            in line
+        ):
             found = True
             for v in line.split():
                 # E"IJ-E"I-E"J,corr/uncorr need to be split up
@@ -165,8 +168,10 @@ def three_body_table(filename):
     vals = []
     found = False
     for line in eof(filename, 0.2):
-        if ('I   J   K DL   RMIN   RMAX       E"corr      deltaE"IJK,corr/uncorr  dDIJK*VIJK     Gsol     tot'
-                in line):
+        if (
+            'I   J   K DL   RMIN   RMAX       E"corr      deltaE"IJK,corr/uncorr  dDIJK*VIJK     Gsol     tot'
+            in line
+        ):
             found = True
             for v in line.split():
                 # deltaE"IJK,corr/uncorr need to be split up
@@ -194,8 +199,10 @@ def full_pieda_table(piedalog):
     cols = None
     vals = []
     for line in eof(piedalog, 0.1):
-        if ("I    J DL  Z    R   Q(I->J)  EIJ-EI-EJ dDIJ*VIJ    total     Ees      Eex    Ect+mix   Erc+di    Gsol"
-                in line):
+        if (
+            "I    J DL  Z    R   Q(I->J)  EIJ-EI-EJ dDIJ*VIJ    total     Ees      Eex    Ect+mix   Erc+di    Gsol"
+            in line
+        ):
             found = True
             cols = line.split()
             continue
@@ -209,48 +216,52 @@ def full_pieda_table(piedalog):
     return df
 
 
-def pol_from_pieda(pieda_log):
-    with open(pieda_log) as f:
-        for line in f:
-            if 'Polarisation (total)' in line:
-                return float(line.split()[-1])
-
-
 def calc_kij(fmo0=None, fmo3=None, pieda=None):
     CAL_TO_J = 4.184
     HART_TO_KJ = 2625.5
+    zero_body = fmo0_energies(fmo0)
+    one_body = polarised_monomer_energies(fmo3)
+    two_body = two_body_table(fmo3)
     three_body = three_body_table(fmo3)
-    pieda_df = full_pieda_table(pieda)
+    pieda = full_pieda_table(pieda)
 
-    pieda_pol = pol_from_pieda(pieda)
+    one_body_pol = (one_body["Ecorr"].sum() - zero_body["Ecorr"].sum()) * HART_TO_KJ
+    two_body_pol = two_body["dDIJ*VIJ,unc"].sum() * HART_TO_KJ
     three_body_pol = three_body["dDIJK*VIJK"].sum() * HART_TO_KJ
-    three_body_hf = three_body["corr/uncorr"].sum() * HART_TO_KJ
-    three_body_srs_corr = (three_body['deltaE"IJK'].sum() -
-                           three_body["corr/uncorr"].sum()) * HART_TO_KJ
-    two_body_ctmix = pieda_df["Ect+mix"].sum() * CAL_TO_J
-    two_body_rc_di = pieda_df["Erc+di"].sum() * CAL_TO_J
+    three_body_hf = (
+        three_body["corr/uncorr"].sum() - two_body["corr/uncorr"].sum()
+    ) * HART_TO_KJ
+    three_body_srs_corr = (
+        three_body['deltaE"IJK'].sum()
+        - three_body["corr/uncorr"].sum()
+        - two_body['E"IJ-E"I-E"J'].sum()
+    ) * HART_TO_KJ
+    two_body_ctmix = pieda["Ect+mix"].sum() * CAL_TO_J
+    two_body_rc_di = pieda["Erc+di"].sum() * CAL_TO_J
 
-    indPI = pieda_pol + two_body_ctmix
-    indFMO = three_body_hf + three_body_pol
-    disp = two_body_rc_di + three_body_srs_corr
-    ind = indPI + indFMO
-    return (disp / (disp + ind))
+    disp = one_body_pol + two_body_pol + two_body_ctmix + three_body_pol + three_body_hf
+    ind = two_body_rc_di + three_body_srs_corr
+    return disp / (disp + ind)
 
 
 def main():
-    dirs = (sp.check_output(
-        "find . -type d -name '*cluster*' | sort",
-        shell=True,
-    ).decode("utf-8").split("\n")[:-1])
+    dirs = (
+        sp.check_output(
+            "find . -maxdepth 1 -type d -name '*cluster*' | sort -t'-' -k2 -n",
+            shell=True,
+        )
+        .decode("utf-8")
+        .split("\n")[:-1]
+    )
     cwd = os.getcwd()
     # collect results for better printing
     res = []
     for d in tqdm(dirs):
         os.chdir(d)
-        kij = calc_kij(fmo3="spec.log",
-                       fmo0="fmo0/spec.log",
-                       pieda="full-pieda/spec.log")
-        res.append(f"{d.replace('./', '')}: k_ij = {kij:.3f}")
+        kij = calc_kij(
+            fmo3="spec.log", fmo0="fmo0/spec.log", pieda="full-pieda/spec.log"
+        )
+        res.append(f"{d.rsplit('/')[1]}: k_ij = {kij:.3f}")
         os.chdir(cwd)
     ave = sum([float(r.split()[-1]) for r in res]) / len(res)
     print('Writing to results.txt')

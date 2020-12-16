@@ -6,18 +6,19 @@ num_jobs=""
 [ $# -gt 0 ] && num_jobs=$1
 if [ "$num_jobs" = "" ]
 then
-  printf "How many jobs to check? [1] "
+  printf "How many jobs to check? [all] "
   read num_jobs
 fi
 
+jobs=$(squeue -u $USER | grep $USER | awk '{print $1}')
+
 # if enter pressed
-[ "$num_jobs" = "" ] && num_jobs="1"
+[ "$num_jobs" = "" ] || [ "$num_jobs" = "all" ] && num_jobs="$(echo $jobs | wc -l)"
 
 if ! (env | grep -Fq SLURM || env | grep -Fq TACC)
 then
   echo "Error: Only set up for SLURM" && exit 1
 fi
 
-jobs=$(squeue -u $USER | grep $USER | awk '{print $1}')
 
 echo "$jobs" | head -n $num_jobs | xargs -I{} scontrol show jobid {}  
