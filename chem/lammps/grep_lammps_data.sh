@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # Grep data from all lammps*.out.
 # Sort by timestep, the first value of the thermo_style command
@@ -50,8 +50,25 @@ do
   ) || printf "%s\n" "$lines" > data.tmp # write data from first file to data.tmp
 done
 
-# if SHAKE algorithm used, the output includes SHAKE statistics- so remove these by checking
-# the length of each line wrt to first line
+# if SHAKE algorithm used, the output could include SHAKE statistics- so remove these by comparing
+# the length of each line to the first line
 numcols=$(cat header.tmp | tr ',' '\n' | wc -l)
+
+# if running through a pipe, select a column. i.e.
+# echo density | grep_lammps.data.sh lammps.out 
+# to print out just the density
+if [[ ! -t 0 ]]                                                                              
+then
+  # remove Step from choice for user, then add one to their choice to find correct column     
+  opts=$(grep Step $1 | tail -1 | tr ' ' '\n' | tail -n +2 | nl)                              
+  option="$(cat /dev/stdin)"                                                                 
+  option=$(printf "%s\n" "${opts[@]}" | grep -i $option | awk '{print $1}')                  
+  [[ $option == "" ]] &&                                                                     
+    echo -e "Option not found. Possible choices are:\n${opts[@]}" &&                         
+    exit 1                                                                                   
+  cat header.tmp data.tmp | awk -F"," -v cols=$numcols -v choice=$((option + 1)) 'NF==cols {print $choice}' | tail -n +2 
+  rm header.tmp data.tmp
+else
 cat header.tmp data.tmp | awk -F"," -v cols=$numcols 'NF==cols'
 rm header.tmp data.tmp
+fi
