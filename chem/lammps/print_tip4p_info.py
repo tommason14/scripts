@@ -3,7 +3,6 @@
 import os
 import sys
 import re
-
 """
 print tip4p information to the screen
 - oxygen/hydrogen atoms
@@ -11,6 +10,7 @@ print tip4p information to the screen
 - sodium (NAM)
 - chloride (CL)
 """
+
 
 def check_args():
     if not len(sys.argv) == 2 or sys.argv[1] == '-h':
@@ -30,10 +30,13 @@ def attributes(datafile):
     angle = ''
     na = ''
     cl = ''
+    in_coeffs_section = False
     with open(datafile) as f:
         for line in f:
-            line = line.strip()
-            if 'Atoms' in line:
+            line = line.upper().strip()
+            if 'ZLO' in line:
+                in_coeffs_section = True
+            if 'ATOMS' in line and in_coeffs_section:
                 break
             if line.endswith('# NAM'):
                 na = line.split()[0]
@@ -49,6 +52,7 @@ def attributes(datafile):
                 angle = line.split()[0]
     return otype, htype, bond, angle, na, cl
 
+
 def main():
     check_args()
     otype, htype, ohbond, ohangle, na, cl = attributes(sys.argv[1])
@@ -58,6 +62,7 @@ def main():
     print(f'ohangle = {ohangle}')
     print(f'na = {na}')
     print(f'cl = {cl}')
+
 
 if __name__ == "__main__":
     main()
