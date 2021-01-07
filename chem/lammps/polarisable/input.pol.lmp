@@ -1,4 +1,4 @@
-# basic input
+# IL (CL&P) + water (SWM4-NDP) equilibration using fix/rigid for water
 
 units           real
 boundary        p p p
