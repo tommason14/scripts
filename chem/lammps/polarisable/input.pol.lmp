@@ -11,7 +11,7 @@ angle_style     harmonic
 dihedral_style  opls
 improper_style  cvff
 
-pair_style hybrid/overlay lj/cut/coul/long 12 12 coul/long/cs 12.0 thole 2.6 12.0 coul/tt 4 12.0
+pair_style      hybrid/overlay lj/cut/coul/long 12 12 coul/long/cs 12.0 thole 2.6 12.0 coul/tt 4 12.0
 pair_modify     mix geometric
 kspace_style    pppm 1e-5
 special_bonds   lj/coul 0.0 0.0 0.5
@@ -19,11 +19,11 @@ special_bonds   lj/coul 0.0 0.0 0.5
 read_data ${data} extra/special/per/atom 3 
 include ${pairs}
 
-group ATOMS type ${atoms}
-group CORES type ${cores}
+group ATOMS  type ${atoms}
+group CORES  type ${cores}
 group DRUDES type ${drudes}
-group WATER type ${waters}
-group IL subtract ATOMS WATER
+group WATER  type ${waters}
+group IL     subtract ATOMS WATER
 
 fix DRUDE all drude ${drudefix}
 
@@ -37,7 +37,8 @@ variable DUMP equal 10000
 comm_modify vel yes
 compute TATOMS ATOMS temp
 fix DIRECT all drude/transform/direct
-fix RIG WATER rigid/npt/small molecule temp ${TK} ${TK} 100 iso ${PBAR} ${PBAR} 500 dilate all
+fix RIG WATER rigid/npt/small molecule temp ${TK} ${TK} 100 iso ${PBAR} ${PBAR} 500 dilate all 
+# dilate necessary otherwise box deforms in a non-uniform manner, with a rapid reduction in density
 fix fIL IL nvt temp ${TK} ${TK} 100 
 fix_modify fIL temp TATOMS 
 fix NVT DRUDES nvt temp ${TDK} ${TDK} 20
@@ -53,7 +54,9 @@ thermo 1000
 
 timestep        1
 restart         ${DUMP} IL.restart1 IL.restart2
-dump d1 all     custom ${DUMP} traj.lmp element xu yu zu
-dump_modify d1 element ${elements}
+dump d1 ATOMS   custom ${DUMP} traj.lmp element xu yu zu
+dump_modify d1  element ${elements}
 dump_modify d1  sort id
-run             20000
+run             5000000
+
+write_data output.data
