@@ -29,7 +29,7 @@ with open(sys.argv[1]) as f:
         if "Masses" in line:
             found = True
             continue
-        if len(masses) > 0 and re.search("^\s*[A-Z]", line):
+        if len(types) > 0 and re.search("^\s*[A-Z]", line):
             break
         if found and len(line.split()) > 1:
             if line.strip().endswith('DC'):
