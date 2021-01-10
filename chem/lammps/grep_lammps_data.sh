@@ -54,23 +54,5 @@ done
 # the length of each line to the first line
 # remove space from `wc` on mac os
 numcols=$(cat header.tmp | tr ',' '\n' | wc -l | tr -s " " | sed 's/ //')
-
-# if running through a pipe, select a column. i.e.
-# echo density | grep_lammps.data.sh lammps.out 
-# to print out just the density
-if [[ ! -t 0 ]]                                                                              
-then
-  # remove Step from choice for user, then add one to their choice to find correct column     
-  opts=$(grep Step $1 | tail -1 | tr ' ' '\n' | tail -n +2 | nl)                              
-  option="$(cat /dev/stdin)"                                                                 
-  option=$(printf "%s\n" "${opts[@]}" | grep -i $option | awk '{print $1}')                  
-  [[ $option == "" ]] &&                                                                     
-    echo -e "Option not found. Possible choices are:\n${opts[@]}" &&                         
-    exit 1    
-  # selecting one column, so no need for the header
-  cat data.tmp | awk -F"," -v cols=$numcols -v choice=$((option + 1)) 'NF==cols {print $choice}' | tail -n +2 
-  rm header.tmp data.tmp
-else
 cat header.tmp data.tmp | awk -F"," -v cols=$numcols 'NF==cols'
 rm header.tmp data.tmp
-fi

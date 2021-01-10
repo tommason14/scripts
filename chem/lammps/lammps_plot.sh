@@ -20,7 +20,7 @@ done
 opts=$(grep Step $1 | tail -1 | tr ' ' '\n' | tail -n +2 | nl)
 
 # read stdin so that "echo density | lammps_plot.sh lammps.out" works
-if [[ ! -t 0 ]]
+if [[ -p /dev/stdin ]]
 then
   option="$(cat /dev/stdin)"
   option=$(printf "%s\n" "${opts[@]}" | grep -i $option | awk '{print $1}')
