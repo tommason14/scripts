@@ -1,3 +1,8 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-echo "scale=2; $@" | bc -l
+[[ $# -eq 0 ]] &&
+  echo "Executes command in python." && 
+  echo "The math module is imported so you can use functions such as math.exp." &&
+  exit 1
+
+python3 -c "import math; print($@)"
