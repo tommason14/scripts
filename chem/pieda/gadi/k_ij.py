@@ -239,7 +239,7 @@ def calc_kij(fmo0=None, fmo3=None, pieda=None):
 
 def main():
     dirs = (sp.check_output(
-        "find . -type d -name '*cluster*' | sort",
+        "find . -maxdepth 1 -type d | tail -n +2 | sort",
         shell=True,
     ).decode("utf-8").split("\n")[:-1])
     cwd = os.getcwd()
