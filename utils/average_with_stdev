@@ -2,4 +2,4 @@
 
 # If running interactively, exit
 [ -t 0 ] && echo "Pass in a column of numbers to average over" && exit 1
-awk '{x+=$0;y+=$0^2}END{average=x/NR; pop_stdev=sqrt(y/NR-(x/NR)^2); print average,"±",pop_stdev}'
+awk '{x+=$0;y+=$0^2}END{average=x/NR; pop_stdev=sqrt(y/NR-(x/NR)^2); printf "%f ± %f (%.2f %% deviation)\n", average,pop_stdev,100*(pop_stdev/average)}'
