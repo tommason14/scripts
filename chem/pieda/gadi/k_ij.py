@@ -47,18 +47,25 @@ Expects a file structure of:
 │   ├── spec.job
 │   └── spec.log
 
-which you'll get by running chem_assist -d on a set of xyz files to make FMO3 calcs, then
+which you'll get by running autochem -d on a set of xyz files to make FMO3 calcs, then
 - pieda_make_fmo0.sh
 - pieda_make_pl0.sh
 - pieda_make_full_pieda.sh
 from the base dir
+
+Then run pieda_fmo3_energies.sh (https://github.com/tommason14/scripts/blob/master/chem/pieda/pieda_fmo3_energies.sh)
+to write all fmo3_energies to fmo3.csv, and then you can run this script.
 """
 
 import os
 import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from numpy import exp
 import re
 import subprocess as sp
 from tqdm import tqdm
+import sys
 
 
 def eof(filename, percentage):
@@ -236,29 +243,72 @@ def calc_kij(fmo0=None, fmo3=None, pieda=None):
     ind = indPI + indFMO
     return (disp / (disp + ind))
 
+def boltz(diffs):
+    """
+    Pass in energy differences in kJ/mol
+    """
+    R = 8.3145
+    T = 298.15
+    kJ_to_J = 1000
+    numerator = exp((-1 * kJ_to_J * diffs) / (R * T))
+    return numerator / numerator.sum()
 
-def main():
+def plot_graph(df, show_fig = False):
+    sns.set(style='white')
+    plt.rcParams['mathtext.default'] = 'regular'
+    sns.scatterplot(x='diffs', y='k_ij', data=df)
+    plt.xlabel(r'$\Delta$E$_{Tot}$ (kJ mol$^{-1}$)')
+    plt.ylabel(r'k$_{ij}$')
+    fig = plt.gcf()
+    fig.set_size_inches(5, 4)
+    plt.tight_layout()
+    plt.savefig('kij_vs_fmo3.png', dpi=300, bbox_inches='tight')
+    print('Plot of kij against energy saved as kij_vs_fmo3.png')
+    if show_fig:
+        plt.show()
+
+def check_files():
+    if 'fmo3.csv' not in os.listdir('.'):
+        print('Run pieda_fmo3_energies.sh '
+        '(https://github.com/tommason14/scripts/blob/master/chem/pieda/pieda_fmo3_energies.sh)\n'
+        'from the top-level directory to generate fmo3.csv, then try again')
+        sys.exit(1)
+
+def main(show_fig=False):
+    check_files()
     dirs = (sp.check_output(
         "find . -maxdepth 1 -type d | tail -n +2 | sort",
         shell=True,
     ).decode("utf-8").split("\n")[:-1])
     cwd = os.getcwd()
-    # collect results for better printing
+    folders = []
     res = []
     for d in tqdm(dirs):
+        folders.append(d)
         os.chdir(d)
         kij = calc_kij(fmo3="spec.log",
                        fmo0="fmo0/spec.log",
                        pieda="full-pieda/spec.log")
-        res.append(f"{d.replace('./', '')}: k_ij = {kij:.3f}")
+        res.append(kij)
         os.chdir(cwd)
-    ave = sum([float(r.split()[-1]) for r in res]) / len(res)
-    print('Writing to results.txt')
+    kij = pd.DataFrame({'Path': folders, 'k_ij': res})
+
+    H_to_kJ = 2625.5
+    energies = pd.read_csv('fmo3.csv')
+    df = energies.merge(kij, on='Path')
+    df['diffs'] = (df['MP2/SRS'] - df['MP2/SRS'].min()) * H_to_kJ
+    plot_graph(df, show_fig)
+    df['weights'] = boltz(df['diffs'])
+
     with open('results.txt', 'w') as f:
-        for r in res:
-            f.write(r + '\n')
-        f.write(f'Average: {ave:.3f}')
-
-
+        for d, r in zip(folders, res):
+            f.write(f'{d.replace("./", "")}: {r:.3f}\n')
+        f.write(f'Mean value = {df.k_ij.mean():.3f}\n')
+        f.write(f'Boltzmann averaged value = {(df.weights * df.k_ij).sum():.3f}')
+    
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1:
+        show_fig = sys.argv[1] == '--show'
+    else:
+        show_fig = False
+    main(show_fig)
