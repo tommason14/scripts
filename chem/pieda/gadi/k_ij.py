@@ -296,6 +296,7 @@ def main(show_fig=False):
     H_to_kJ = 2625.5
     energies = pd.read_csv('fmo3.csv')
     df = energies.merge(kij, on='Path')
+    df.to_csv('raw_data.csv', index=False)
     df['diffs'] = (df['MP2/SRS'] - df['MP2/SRS'].min()) * H_to_kJ
     plot_graph(df, show_fig)
     df['weights'] = boltz(df['diffs'])
