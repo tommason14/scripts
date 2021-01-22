@@ -232,9 +232,11 @@ def unwrap_traj(universe):
     transform = mda.transformations.unwrap(a)
     universe.trajectory.add_transformations(transform)
 
+
 ###################
 #  Seaborn plots  #
 ###################
+
 
 def remove_legend_title(plot):
     """
@@ -247,3 +249,14 @@ def remove_legend_title(plot):
     handles, labels = plot.get_legend_handles_labels()
     # plot.legend(handles=handles[1:], labels=labels[1:]) # old version of seaborn
     plot.legend(handles=handles, labels=labels)
+
+
+def boltz(diffs):
+    """
+    Pass in energy differences in kJ/mol
+    """
+    R = 8.3145
+    T = 298.15
+    kJ_to_J = 1000
+    numerator = np.exp((-1 * kJ_to_J * diffs) / (R * T))
+    return numerator / numerator.sum()
