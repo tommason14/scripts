@@ -1,13 +1,5 @@
-from MDAnalysis import transformations  # used as mda.transformations
-import MDAnalysis as mda
-import matplotlib.pyplot as plt
-import nglview as nv
 import numpy as np
-import pandas as pd
 import re
-import seaborn as sns
-# defaults
-sns.set(style='whitegrid')
 
 
 def datafile_elements(datafile):
@@ -167,6 +159,7 @@ def lammps_mdanalysis(data, traj):
     Import LAMMPS datafile and trajectory, 
     adding atom names by looking up the mass from the datafile
     """
+    import MDAnalysis as mda
     # deal with incorrect filenames
     format_needed = any(traj.endswith(x) for x in ('lmp', 'lammpstrj'))
     top_needed = not data.endswith('data')
@@ -228,6 +221,8 @@ def unwrap_traj(universe):
     not
     u = unwrap_traj(u)
     """
+    import MDAnalysis as mda
+    from MDAnalysis import transformations  # used as mda.transformations
     a = universe.atoms
     transform = mda.transformations.unwrap(a)
     universe.trajectory.add_transformations(transform)
