@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if env | grep -Fq SLURM || env | grep -Fq TACC
+then
+  squeue -o "%10i %40j %t" -u $USER
+else
+  echo "Needs configuring for PBS" 
+fi
