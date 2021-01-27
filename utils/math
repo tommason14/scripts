@@ -5,4 +5,4 @@
   echo "The math module is imported so you can use functions such as math.exp." &&
   exit 1
 
-python3 -c "import math; print($@)"
+python3 -c "import math; print($*)"
