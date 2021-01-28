@@ -304,12 +304,10 @@ def main(show_fig=False):
     df['weights'] = boltz(df['MP2/SRS'])
     plot_graph(df, show_fig)
 
-    with open('results.txt', 'w') as f:
-        for d, r in zip(folders, res):
-            f.write(f'{d.replace("./", "")}: {r:.3f}\n')
-        f.write(f'Mean value = {df.k_ij.mean():.3f}\n')
-        f.write(f'Boltzmann averaged value = {(df.weights * df.k_ij).sum():.3f}')
-    
+    bw = df.groupby('groups').apply(lambda g: (g['weights'] * g['k_ij']).sum()).reset_index(name='boltz_weighted')
+    means = df.groupby('groups')['k_ij'].mean().reset_index(name='mean')
+    bw.merge(means, on='groups').to_csv('average_values.csv', index=False)
+
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         show_fig = sys.argv[1] == '--show'
