@@ -2,7 +2,7 @@
 
 if env | grep -Fq SLURM || env | grep -Fq TACC
 then
-  squeue -o "%10i %Z %R" -u $USER | tail -n+2 | awk -F"/" '{OFS="/"; print $1,$(NF-2),$(NF-1),$NF}'
+  squeue -o "%10i %Z %t" -u $USER | awk -F"/" '{if(NR > 1){OFS="/"; print $1,$(NF-2),$(NF-1),$NF} else {print $0}}' | column -t
 else
   qstat -f | sed -n '/Job Id/p;/WORKDIR/,/PATH/p' | grep -v 'PATH'
 fi
