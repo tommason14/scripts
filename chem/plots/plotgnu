@@ -1,2 +1,2 @@
 #!/bin/sh
-[ $# -eq 1 ] && [ "$1" = "dumb" ] && gnuplot -e "set terminal dumb; plot '-' with lines notitle" || gnuplot -e "plot '-' with lines notitle"
+[ $# -eq 1 ] && [ "$1" = "dumb" ] && gnuplot -e "set terminal dumb; plot '-' with lines notitle" || gnuplot --persist -e "plot '-' with lines notitle"
