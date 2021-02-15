@@ -235,11 +235,6 @@ for line in lines:
     else:
         newLines.append(line)
 
-with open('tmp2.lmps', 'w') as f:
-    for line in newLines:
-        f.write(line)
-        
-
 # SORT X, Y, Z, VALS FOR MIN MAX VALUES
 xvals.sort()
 yvals.sort()
@@ -275,9 +270,6 @@ for ind, line in enumerate(newLines):
             break
 
 newLines = newLines[:rm_start] + newLines[rm_end:]
-with open('tmp3.lmps', 'w') as f:
-    for line in newLines:
-        f.write(line)
 
 found_pairs = False
 masses = []
@@ -302,9 +294,6 @@ for ind, line in enumerate(newLines, 1):
         break
 newLines = newLines[:zlo] + masses + newLines[zlo:]
 
-with open('tmp4.lmps', 'w') as f:
-    for line in newLines:
-        f.write(line)
 # REMOVE EXCESS FILES
 sp.check_output("rm topo-in.xyz topo.out tempfile", shell=True)
 

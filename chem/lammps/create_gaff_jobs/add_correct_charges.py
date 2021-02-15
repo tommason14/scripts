@@ -14,7 +14,6 @@ from glob import glob
 import subprocess as sp
 import sys
 import re
-from pprint import pprint
 
 if not 2 <= len(sys.argv) <= 3 or sys.argv[1] == '-h':
     sys.exit(f'Syntax: {os.path.basename(__file__)} lammps_file [output_file]')
