@@ -28,7 +28,6 @@ structs = (sp.check_output("grep '^\s*structure.*xyz' " + packfile +
 numbers = (sp.check_output("grep '^\s*number' " + packfile +
                            " | awk '{print $NF}'",
                            shell=True).decode("utf-8").strip().split("\n"))
-
 if len(structs) != len(numbers):
     sys.exit(
         'Error in pack.inp: Make sure all xyz files have a "number" line in the structure block.\n'
@@ -44,12 +43,11 @@ for mol, data in mols.items():
 # so loop over the dict and generate new id
 mol_id = []
 mol_count = 1
-for data in mols.values():
-    for _ in range(data["number"]):
-        for _ in range(data["length"]):
+for s in structs:
+    for _ in range(mols[s]['number']):
+        for _ in range(mols[s]["length"]):
             mol_id.append(mol_count)
         mol_count += 1
-
 # now change data file
 
 b4_atoms = []

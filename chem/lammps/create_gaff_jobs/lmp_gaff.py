@@ -45,7 +45,8 @@ with open(File, "r") as f:
         if sym not in elemDict.keys():
             # unique atoms as C001, H002 etc...
             count += 1
-            elemDict[sym] = sym[0] + f"{count:03d}"
+            # elemDict[sym] = sym[0] + f"{count:03d}"
+            elemDict[sym] = sym + f"{count:03d}"
 
         newID = elemDict[sym]
         newLines.append(newID + "   " + coords + "\n")
@@ -99,13 +100,15 @@ for line in lines:
 
             # REPLACE NEW WITH OLD STRING
             line = line.replace(newID, sym)
-
     newLines.append(line)
 
 ### EDIT DATA FILE ----------------------------------------
 
 # READ LINES
 lines = newLines[:]
+# with open('tmp.lmps', 'w') as f:
+#     for line in lines:
+#         f.write(line)
 
 # SWITCHES - TURN ON WHEN FIND IN FILE
 pcoef = False  # Pair Coeffs
@@ -232,6 +235,11 @@ for line in lines:
     else:
         newLines.append(line)
 
+with open('tmp2.lmps', 'w') as f:
+    for line in newLines:
+        f.write(line)
+        
+
 # SORT X, Y, Z, VALS FOR MIN MAX VALUES
 xvals.sort()
 yvals.sort()
@@ -252,84 +260,51 @@ for i in range(len(newLines)):
     elif re.search("^\s*#\s*$", newLines[i]):
         newLines[i] = "\n"
 
-# Remove incorrect topotools mass section, written before atoms
-# if the masses section appears twice in the file. Only happens
-# if using 'odd' atom labels, like NAM for sodium
-count_masses = 0
-with open("topo.out") as f:
-    for line in f:
-        if "Masses" in line:
-            count_masses += 1
-        if "Atoms" in line:
+# Manually add masses so that odd atom names don't result in the wrong mass
+found_masses = False
+rm_start = 0
+rm_end = 0
+for ind, line in enumerate(newLines):
+    if 'Masses' in line:
+        found_masses = True
+        rm_start = ind
+        continue
+    if found_masses:
+        if re.search('^\s*[A-Z]', line):
+            rm_end = ind
             break
-remove = count_masses == 2
-if remove:
-    _from = 0
-    to = 0
-    for ind, line in enumerate(newLines):
-        if "Masses" in line:
-            _from = ind
-        if "Atoms" in line:
-            to = ind
-    newLines = newLines[:_from] + newLines[to:]
 
-    # Now add correct mass for each atom type
-    # need pair coeffs first to find the atom labels
-    found_pairs = False
-    masses = []
+newLines = newLines[:rm_start] + newLines[rm_end:]
+with open('tmp3.lmps', 'w') as f:
     for line in newLines:
-        if "Pair Coeffs" in line:
-            found_pairs = True
-            continue
-        if "Bond Coeffs" in line:
-            break
-        if found_pairs and not re.search("^\s*$", line):
-            line = line.split()
-            newline = [line[0], getMass(line[-1], ff), line[-1]]
-            newline = "{:4} {:>9.4f}    # {}\n".format(*newline)
-            masses.append(newline)
-    masses = ["\n", "Masses\n", "\n"] + masses
+        f.write(line)
 
-    # add after box length
-    zlo = 0
-    for ind, line in enumerate(newLines, 1):
-        if "zlo" in line:
-            zlo = ind
-            break
-    newLines = newLines[:zlo] + masses + newLines[zlo:]
-
-# let's check if masses section is present at all
-# if not, needs adding
-masses_present = False
+found_pairs = False
+masses = []
 for line in newLines:
-    if "Masses" in line:
-        masses_present = True
+    if "Pair Coeffs" in line:
+        found_pairs = True
+        continue
+    if "Bond Coeffs" in line:
         break
+    if found_pairs and not re.search("^\s*$", line):
+        line = line.split()
+        newline = [line[0], getMass(line[-1], ff), line[-1]]
+        newline = "{:4} {:>9.4f}    # {}\n".format(*newline)
+        masses.append(newline)
+masses = ["\n", "Masses\n", "\n"] + masses
 
-if not masses_present:
-    found_pairs = False
-    masses = []
+# add after box length
+zlo = 0
+for ind, line in enumerate(newLines, 1):
+    if "zlo" in line:
+        zlo = ind
+        break
+newLines = newLines[:zlo] + masses + newLines[zlo:]
+
+with open('tmp4.lmps', 'w') as f:
     for line in newLines:
-        if "Pair Coeffs" in line:
-            found_pairs = True
-            continue
-        if "Bond Coeffs" in line:
-            break
-        if found_pairs and not re.search("^\s*$", line):
-            line = line.split()
-            newline = [line[0], getMass(line[-1], ff), line[-1]]
-            newline = "{:4} {:>9.4f}    # {}\n".format(*newline)
-            masses.append(newline)
-    masses = ["\n", "Masses\n", "\n"] + masses
-
-    # add after box length
-    zlo = 0
-    for ind, line in enumerate(newLines, 1):
-        if "zlo" in line:
-            zlo = ind
-            break
-    newLines = newLines[:zlo] + masses + newLines[zlo:]
-
+        f.write(line)
 # REMOVE EXCESS FILES
 sp.check_output("rm topo-in.xyz topo.out tempfile", shell=True)
 
@@ -338,7 +313,9 @@ sp.check_output("rm topo-in.xyz topo.out tempfile", shell=True)
 newLines.insert(1, "\n")
 
 # WRITE .lmps FILE
-open(Name + ".lmps", "w+").writelines(newLines)
+with open(f'{Name}.lmps', 'w') as f:
+    for line in newLines:
+        f.write(line)
 
 # PRINT SUM OF PARTIAL CHARGES
 print(f"{File}   Charge: {sum(pcharges):5.5}")
