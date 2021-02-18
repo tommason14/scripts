@@ -1,5 +1,4 @@
 #!/usr/bin/env zsh
-# BSD/GNU sed differences
 
 error_out(){
   echo "Install gsed on mac, or edit the script and replace sed with sed ''"
@@ -14,7 +13,6 @@ else
   sed="sed"
 fi
 
-if [[ $(uname -s) == "Darwin" ]] &&  || echo "linux"
 tleap=~/miniconda3/envs/ambertools20/bin/tleap
 tleap_input=~/.local/scripts/chem/lammps/lammps_to_gromacs_gaff/tleap.in
 
