@@ -13,7 +13,10 @@ else
   sed="sed"
 fi
 
-tleap=~/miniconda3/envs/ambertools20/bin/tleap
+[[ $USER == "tommason" ]] && 
+  tleap=~/miniconda3/envs/ambertools20/bin/tleap ||
+  tleap=~/miniconda3/envs/ambertools/bin/tleap 
+
 tleap_input=~/.local/scripts/chem/lammps/lammps_to_gromacs_gaff/tleap.in
 
 obabel -ixyz unlabelled.xyz -omol2 > polymer.mol2
