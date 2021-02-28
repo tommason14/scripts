@@ -26,7 +26,7 @@ do
   # extract from "Setting up Verlet run..." onwards because 
   # minimisation is finished by that point
   lines="$(sed -n '/Setting up Verlet run .../,/Loop/p' "$f" |
-    grep '^\s\+[0-9]\+\s\+-*[0-9]\+' |
+    grep '^\s*[0-9]\+\s\+-*[0-9]\+' |
     $sed 's/^\s\+//;s/\s\+$//;s/\s\+/,/g')"
   # There might not be a line contatining 'Loop' line if the run hasn't finished,
   # in that case just read until the end of the file
