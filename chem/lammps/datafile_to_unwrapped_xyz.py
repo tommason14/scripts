@@ -15,7 +15,7 @@ if len(sys.argv) == 2:
 else:
     output = sys.argv[2]
 
-pipeline = import_file(traj)
+pipeline = import_file(traj, atom_style='full')
 pipeline.modifiers.append(UnwrapTrajectoriesModifier())
 export_file(
     pipeline,
