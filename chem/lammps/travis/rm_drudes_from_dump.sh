@@ -15,4 +15,4 @@ num_atoms_no_drudes=$(
 
 orig_atoms=$(sed '/BOX BOUNDS/q' $1 | tail -n 2 | head -1)
 
-sed "s|$orig_atoms.*|$num_atoms_no_drudes|" $1 | grep -v "^\s*D" > no_drude_"$1"
+sed "s|^\s*$orig_atoms.*|$num_atoms_no_drudes|" $1 | grep -v "^\s*D" > no_drude_"$1"
