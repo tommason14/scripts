@@ -64,6 +64,8 @@ lines = (
     + "topo guessangles\n"
     + "topo guessdihedrals\n"
     + "topo guessimpropers\n"
+    + "set sel [atomselect top all]\n"
+    + "$sel set resid [$sel get fragment]\n"
     + "topo writelammpsdata topo.out\n"
     + "exit"
 )
@@ -311,6 +313,6 @@ print(f"{File}   Charge: {sum(pcharges):5.5}")
 
 # add molecule IDs
 # needs a pack.inp file in the directory with the xyz file
-if f"{Name}.inp" in os.listdir("."):
-    print(f"Adding molecule IDs using {Name}.inp")
-    os.system(f"change_molecule_id.py {Name}.lmps")
+# if f"{Name}.inp" in os.listdir("."):
+#     print(f"Adding molecule IDs using {Name}.inp")
+#     os.system(f"change_molecule_id.py {Name}.lmps")

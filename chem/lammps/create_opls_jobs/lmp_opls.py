@@ -56,6 +56,8 @@ lines = (
     + "topo guessangles\n"
     + "topo guessdihedrals\n"
     + "topo guessimpropers\n"
+    + "set sel [atomselect top all]\n"
+    + "$sel set resid [$sel get fragment]\n"
     + "topo writelammpsdata topo.out\n"
     + "exit"
 )
