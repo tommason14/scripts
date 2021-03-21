@@ -39,7 +39,7 @@ with open(sys.argv[1]) as f:
 if not os.path.isdir(newdir):
     os.mkdir(newdir)
 
-for idx, cluster in enumerate({newdir}):
+for idx, cluster in enumerate(clusters):
     with open(f"{newdir}/cluster-{idx}.xyz", "w") as new:
         for line in cluster:
             new.write(line)
