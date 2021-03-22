@@ -167,7 +167,7 @@ C   N   H    harm   119.8   292.9
 H   N   H    harm   120.0   292.9
 # From oplsaa.prm, tinker file
 CT  CT  CA   harm   114.0   527.184
-OY  SZ  OY   harm   
+OY  SZ  OY   harm    
 CA  SY  OY   harm 
 CA  CA  SZ   harm
 # check /mnt/lustre/scratch/tmason1/polymers/OPLS/copolymer/run-after-creating-with-vmd/pack.lmps for params
