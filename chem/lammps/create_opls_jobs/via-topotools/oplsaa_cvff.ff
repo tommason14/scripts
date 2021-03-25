@@ -79,7 +79,7 @@ CT1   CT  12.011   0.010  lj    3.50   0.27614
 CU    C   12.011  +0.142  lj    3.50   0.43932
 OU    O   15.999  -0.390  lj    2.96   0.87864
 NU    N   14.007  -0.542  lj    3.25   0.71128
-HU    H    1.008   0.333  lj    0.00   0.00000
+HU    H    1.008   0.333  lj    0.00   0.00000  
 
 BONDS
 # i j    pot    re/A    kr/kJmol-1
@@ -115,6 +115,8 @@ C   N    harm   1.335   4100.3
 CT  N    harm   1.449   2820.0
 CT  C    harm   1.522   2652.7
 N   H    cons   1.010   3631.7
+# oplsaa.prm
+CA  SZ   harm   1.770   2845.12
 
 ANGLES
 # i  j  k    pot    th/deg  ka/kjmol-1
@@ -167,9 +169,9 @@ C   N   H    harm   119.8   292.9
 H   N   H    harm   120.0   292.9
 # From oplsaa.prm, tinker file
 CT  CT  CA   harm   114.0   527.184
-OY  SZ  OY   harm    
-CA  SY  OY   harm 
-CA  CA  SZ   harm
+OY  SZ  OY   harm   119.0   870.272 
+CA  SZ  OY   harm   107.20  619.232
+CA  CA  SZ   harm   119.4   711.28
 # check /mnt/lustre/scratch/tmason1/polymers/OPLS/copolymer/run-after-creating-with-vmd/pack.lmps for params
 # and dihedrals + impropers
 
@@ -239,6 +241,10 @@ CT  CT  CA  CA   opls    0 0 0 0
 CT  CT  CT  CA   opls    7.158824  -2.092  2.773992 0
 # torsion  HC  CT  CT  CA  0.000  0.0  1  0.000  180.0  2  0.462  0.0  3
 HC  CT  CT  CA   opls    0 0 1.933008 0
+CA  CA  CA  SZ   opls    0 0 30.3340 0
+CA  CA  CT  HC   opls    0 0 0 0
+CA  CA  SZ  OY   opls    0 0 0 0
+HA  CA  CA  SZ   opls    0 0 30.3340 0
 
 IMPROPER
 
