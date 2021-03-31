@@ -1,22 +1,28 @@
 #!/usr/bin/env python3
 
+"""
+Following procedure laid out in DOI:10.1021/jp0477147, describing the correction that should be
+applied to diffusion coefficients found when periodic boundary conditions are applied
+"""
+
+
 import argparse
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument(
     "-b", "--box", help="Box length in angstroms", type=float, required=True
 )
 parser.add_argument(
     "-d",
     "--diffusion",
-    help="Diffusion coefficient from the simulation in cm2/s",
+    help="Diffusion coefficient from the simulation in cm²/s",
     type=float,
     required=True,
 )
 parser.add_argument(
     "-v",
     "--viscosity",
-    help="Shear viscosity of the solvent, in mPas. Default = 0.896 (assuming water, DOI:10.1063/1.3330544)",
+    help="Shear viscosity of the solvent, in mPa.s. Default = 0.896 (assuming water, DOI:10.1063/1.3330544)",
     default=0.896,
     type=float,
 )
@@ -29,11 +35,6 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
-"""
-Following procedure laid out in DOI:10.1021/jp0477147, describing the correction that should be
-applied to diffusion coefficients found when periodic boundary conditions are applied
-"""
-
 from scipy.constants import pi, k
 
 CONS = 2.837297
