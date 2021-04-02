@@ -3,6 +3,7 @@
 import sys
 import re
 import numpy as np
+import os
 
 if len(sys.argv) != 2:
     sys.exit("Syntax: gamess_to_molden.py logfile")
@@ -15,12 +16,9 @@ def read_file(file):
     Returns an iterator over a file object.
     """
 
-    with open(file, "r") as f:
-        try:
-            for line in f:
-                yield line
-        except UnicodeDecodeError:
-            pass
+    with open(file, "r", encoding="utf-8", errors="ignore") as f:
+        for line in f:
+            yield line
 
 
 def calc_type(file):
@@ -30,6 +28,14 @@ def calc_type(file):
     runtypes["RUNTYP=ENERGY"] = "spec"
     runtypes["RUNTYP=HESSIAN"] = "hessian"
     runtypes["RUNTYP=FMOHESS"] = "fmohess"
+
+    # if the job is a restart, no coordinates are printed, so
+    # must take initial coords from the input file - just like
+    # when the runtype is fmohess
+    for line in read_file(file):
+        if "$VIB" in line:
+            return "fmohess"
+
     for line in read_file(file):
         for key, value in runtypes.items():
             if key in line.upper():
@@ -185,15 +191,6 @@ def find_init_coords(file):
     get_atnum["Ts"] = 117
     get_atnum["Og"] = 118
 
-    # if calc_type == 'hessian':
-    #     pass
-    #
-    # elif calc_type == 'fmohess':
-    #     pass
-    #
-    # elif calc_type == 'opt':
-    #     pass
-
     if fmo:
         calc = calc_type(file)
 
@@ -227,6 +224,9 @@ def find_init_coords(file):
         elif calc == "fmohess":
 
             inpfile = file[:-3] + "inp"
+            if inpfile not in os.listdir("."):
+                inpfile = [i for i in os.listdir(".") if i.endswith("inp")][0]
+            print(f"Reading {inpfile} to get initial coordinates")
             reg = "^\s[A-z]{1,2}(\s*-?[0-9]*.[0-9]*){4}$"
             found = False
             atoms = []
@@ -285,7 +285,7 @@ def find_init_coords(file):
         for line in read_file(file):
             if "CHARGE         X                   Y                   Z" in line:
                 found = True
-            if found and line is "\n":
+            if found and line == "\n":
                 break
             if found:
                 if re.search(reg, line):
@@ -456,7 +456,7 @@ def refine_selection(lst):
             intensities += line.split()[2:]
         if re.search(xvib_regex, line):
             found_vibs = True
-        if "\n" is line:
+        if "\n" == line:
             found_vibs = False
         if found_vibs:
             refined.append(line.strip())  # rm \n
@@ -612,7 +612,7 @@ def write_file(data, filename):
         lst.append(f"[{header}]\n")
         for line in lines:
             lst.append(f"{line}\n")
-
+    print(f"Writing info to {filename}")
     with open(filename, "w") as f:
         for line in lst:
             f.write(line)
