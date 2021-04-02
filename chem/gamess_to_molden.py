@@ -6,7 +6,8 @@ import numpy as np
 import os
 
 if len(sys.argv) != 2:
-    sys.exit("Syntax: gamess_to_molden.py logfile")
+    print("Syntax: gamess_to_molden.py logfile")
+    sys.exit(1)
 logfile = sys.argv[1]
 newfile = logfile.rsplit(".")[0] + ".molden"
 
@@ -29,7 +30,7 @@ def calc_type(file):
     runtypes["RUNTYP=HESSIAN"] = "hessian"
     runtypes["RUNTYP=FMOHESS"] = "fmohess"
 
-    # if the job is a restart, no coordinates are printed, so
+    # if the job is a hessian restart, no coordinates are printed, so
     # must take initial coords from the input file - just like
     # when the runtype is fmohess
     for line in read_file(file):
@@ -51,8 +52,6 @@ def find_init_coords(file):
 
     bohrs = []
     angs = []
-
-    regex = "[A-Za-z]{1,2}(\s*\D?[0-9]{1,3}\.[0-9]{1,10}){4}"
 
     fmo = False
     for line in read_file(file):
