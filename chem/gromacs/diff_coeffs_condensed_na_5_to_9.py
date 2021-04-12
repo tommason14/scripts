@@ -9,6 +9,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy.stats import linregress
+import sys
 
 
 class EinsteinMSD(AnalysisBase):
@@ -223,4 +224,5 @@ D = grad / 6  # 1/6 gradient = diff coeff
 diff = f"Diffusion coeffs of sodiums within {args.distance} Å of sulfurs = {D /1e7 :<.4e} cm²/s"
 print(diff)
 with open("diff_coeff_5_to_9.txt", "w") as f:
-    f.write(diff)
+    f.write(f'# {" ".join([sys.argv[0].split("/")[-1]] + sys.argv[1:])}\n')
+    f.write(diff + "\n")
