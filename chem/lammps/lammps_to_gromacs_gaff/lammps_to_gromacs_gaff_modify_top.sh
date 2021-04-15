@@ -42,5 +42,10 @@ cat header addn <(echo) footer > polymer.top
 rm header addn footer
 
 $sed -i 's/Generic title/Polymer in salinated water/' polymer.top
+
+# additional files
+scriptdir="$(dirname $(realpath $0))"
+cp $scriptdir/gromacs_files/* .
+
 echo "Add the required number of each residue at the bottom of polymer.top after packing,"
 echo "then run the job."
