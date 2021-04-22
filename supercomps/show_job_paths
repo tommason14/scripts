@@ -20,5 +20,5 @@ if env | grep -Fq SLURM || env | grep -Fq TACC
 then
   slurmpaths
 else
-  psbpaths
+  pbspaths
 fi
