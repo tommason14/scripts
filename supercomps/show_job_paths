@@ -5,6 +5,7 @@ slurmpaths(){
 }
 
 pbspaths(){
+  # Assuming that the job path doesn't span more than two lines of the original qstat -f output
   JobIDs="$(qstat -f | grep  "Job Id" | awk '{print $NF}')"
   paths="$(qstat -f | sed -n '/PBS_O_WORKDIR/,/PBS_O/p' | sed 's/,PBS.*//;s/PBS_O_WORKDIR=//')"
 
