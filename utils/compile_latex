@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-extras="*.bbl *.log *.blg *.out *.lof *.lot *.toc *.aux"
+[[ $# -ne 1 || $1 =~ "-h" ]] && echo "Syntax: $(basename $0) file.tex" && exit 1
 
 xelatex $1
 bibtex ${1%.tex}
