@@ -1,4 +1,4 @@
- #!/usr/bin/env python3
+#!/usr/bin/env python3
 
 import MDAnalysis as mda
 import numpy as np
@@ -6,6 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import sys
+from tqdm import tqdm
 
 if len(sys.argv) != 3 or any("-h" in x for x in sys.argv[1:]):
     print("Syntax: radius_of_gyration.py file.tpr file.xtc")
@@ -18,7 +19,7 @@ cr61 = u.select_atoms("resname pol")
 # Rg for multiple polymers
 resids = np.unique(cr61.resids)
 rg = []
-for ts in u.trajectory:
+for ts in tqdm(u.trajectory):
     for res in resids:
         polymer = cr61.select_atoms(f"resid {res}")
         rg.append((res, ts.time, polymer.radius_of_gyration()))
