@@ -207,6 +207,7 @@ def find_init_coords(file):
                 if found:
                     if re.search(reg, line):
                         _, sym, x, y, z = line.split()
+                        sym = sym.title()
                         x, y, z = map(float, (x, y, z))
                         x, y, z = map(lambda num: num * bohr_to_angs, (x, y, z))
                         atnum = get_atnum[sym]
@@ -263,6 +264,7 @@ def find_init_coords(file):
                 if found:
                     if re.search(reg, line):
                         sym, atnum, x, y, z = line.split()
+                        sym = sym.title()
                         x, y, z = map(float, (x, y, z))
                         atnum = get_atnum[sym]
                         atoms.append([sym, atnum, x, y, z])
@@ -289,6 +291,7 @@ def find_init_coords(file):
             if found:
                 if re.search(reg, line):
                     sym, atnum, x, y, z = line.split()
+                    sym = sym.title()
                     x, y, z = map(float, (x, y, z))
                     x, y, z = map(lambda num: num * bohr_to_angs, (x, y, z))
                     atnum = float(atnum)
