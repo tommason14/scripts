@@ -28,7 +28,6 @@ df["Time (ns)"] = df["Time (ps)"] / 1000
 df.drop("Time (ps)", axis=1, inplace=True)
 df.to_csv("rg.csv", index=False)
 
-df = pd.read_csv("rg.csv")
 sns.set(style="white", font="Helvetica")
 p = sns.relplot(x="Time (ns)", y="Rg", hue="Residue", kind="line", data=df)
 p.set_axis_labels("Time (ns)", r"R$_{gyr}$ (${\AA}$)")
