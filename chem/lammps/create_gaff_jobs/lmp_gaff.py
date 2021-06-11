@@ -58,14 +58,20 @@ with open("topo-in.xyz", "w") as new:
 ##### RUN VMD TOPO ----------------------------------------
 
 # COMMANDS FOR VMD
+
+# In the newer vmd versions, the box size is no longer set...
+# have to do it "manually"
 lines = (
     "package require topotools\n"
+    + "package require pbctools\n"
     + "topo retypebonds\n"
     + "topo guessangles\n"
     + "topo guessdihedrals\n"
     + "topo guessimpropers\n"
     + "set sel [atomselect top all]\n"
     + "$sel set resid [$sel get fragment]\n"
+    + "set minmax [measure minmax $sel]\n"
+    + "pbc set [vecsub [lindex $minmax 1] [lindex $minmax 0]]\n"
     + "topo writelammpsdata topo.out\n"
     + "exit"
 )
@@ -73,14 +79,7 @@ lines = (
 open("tempfile", "w+").write(lines)
 
 # OPEN VMD WITH EDITTED XYZ AND COMMAND FILE
-user = sp.check_output("echo $USER", shell=True).decode("utf8").strip()
-if user == "tommason":
-    vmd = "/Applications/VMD\ 1.9.4a38.app/Contents/vmd/vmd_MACOSXX86_64"
-elif user == "tmas0023":
-    vmd = "/Applications/VMD\ 1.9.3.app/Contents/vmd/vmd_MACOSXX86"
-else:
-    vmd = "vmd"  # module loaded
-cmd = f"{vmd} -dispdev none -m topo-in.xyz -e tempfile 2>/dev/null"  # warnings on gadi
+cmd = f"vmd -dispdev none -m topo-in.xyz -e tempfile 2>/dev/null"  # warnings on gadi
 sp.check_output(cmd, shell=True)
 
 ### SUBSTITUTE IN ORIG NAMES ------------------------------
@@ -262,12 +261,12 @@ found_masses = False
 rm_start = 0
 rm_end = 0
 for ind, line in enumerate(newLines):
-    if 'Masses' in line:
+    if "Masses" in line:
         found_masses = True
         rm_start = ind
         continue
     if found_masses:
-        if re.search('^\s*[A-Z]', line):
+        if re.search("^\s*[A-Z]", line):
             rm_end = ind
             break
 
@@ -304,15 +303,9 @@ sp.check_output("rm topo-in.xyz topo.out tempfile", shell=True)
 newLines.insert(1, "\n")
 
 # WRITE .lmps FILE
-with open(f'{Name}.lmps', 'w') as f:
+with open(f"{Name}.lmps", "w") as f:
     for line in newLines:
         f.write(line)
 
 # PRINT SUM OF PARTIAL CHARGES
-print(f"{File}   Charge: {sum(pcharges):5.5}")
-
-# add molecule IDs
-# needs a pack.inp file in the directory with the xyz file
-# if f"{Name}.inp" in os.listdir("."):
-#     print(f"Adding molecule IDs using {Name}.inp")
-#     os.system(f"change_molecule_id.py {Name}.lmps")
+print(f"{File}   Charge: {sum(pcharges):5.5f}")
