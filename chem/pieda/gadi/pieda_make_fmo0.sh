@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-files="$(find . -name "spec.log")"
+files="$(find . -maxdepth 2 -name "spec.log")"
 
 cwd="$(pwd)"
 for f in $files
