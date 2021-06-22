@@ -5,7 +5,7 @@
 # ├── struct1
 # ├── struct2
 
-printf "Reminder to run chem_assist -e. Continue? [Y]"
+printf "Reminder to run autochem -e. Continue? [Y]"
 read option
 if [[ $option =~ (y|Y) ]] || [[ $option = "" ]]   
 then

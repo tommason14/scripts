@@ -17,8 +17,8 @@
 # │   └── spec
 # │       └── opt_equil.xyz
 
-# so run chem_assist -e first
-printf "Reminder to run chem_assist -e. Continue [Y]"
+# so run autochem -e first
+printf "Reminder to run autochem -e. Continue [Y]"
 read option
 [ ! "$option" = "y" ] && [ ! "$option" = "Y" ] && [ ! "$option" = "" ] && exit 1
 
