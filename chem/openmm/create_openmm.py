@@ -5,33 +5,12 @@ from mstools.simsys import System
 import argparse
 
 
-def make_system(molecules, numbers, ff, box=None, virtual_sites=False, drudes=False):
-    from shutil import which
-    from mstools.wrapper import Packmol
-
-    packmol_path = which("packmol")
-    packmol = Packmol(packmol_path)
-
-    # convert to nm - nargs gives a list
-    if len(box) == 1:
-        box = [b / 10 for b in box] * 3
-    else:
-        box = [b / 10 for b in box]
-    top = Topology(molecules)
-    top.generate_angle_dihedral_improper()
-    if virtual_sites:
-        top.generate_virtual_sites(ff)
-    if drudes:
-        top.generate_drude_particles(ff)
-    top.assign_charge_from_ff(ff)
-    top.cell.set_box(box)
-    top.scale_with_packmol(numbers, packmol)
-    return System(top, ff)
-
-
 def read_args():
     parser = argparse.ArgumentParser(
-        description="Create coordinate and topology files for OpenMM using OPLS-based forcefields"
+        description=(
+            "Create coordinate and topology files for OpenMM using OPLS-based "
+            "forcefields using the mstools software"
+        )
     )
     parser.add_argument(
         "-f",
@@ -59,8 +38,8 @@ def read_args():
             "if one is given, this will be used as the length of each dimension"
         ),
         nargs="+",
-        type=float,
         required=True,
+        type=float,
     )
 
     parser.add_argument(
@@ -73,19 +52,44 @@ def read_args():
     return parser.parse_args()
 
 
-def read_mols(files):
+def make_system(molecules, numbers, ff, box=None, virtual_sites=False, drudes=False):
+    from shutil import which
+    from mstools.wrapper import Packmol
+
+    packmol_path = which("packmol")
+    packmol = Packmol(packmol_path)
+
+    # convert to nm - nargs gives a list
+    if len(box) == 1:
+        box = [b / 10 for b in box] * 3
+    else:
+        box = [b / 10 for b in box]
+    top = Topology(molecules)
+    top.generate_angle_dihedral_improper()
+    if virtual_sites:
+        top.generate_virtual_sites(ff)
+    if drudes:
+        top.generate_drude_particles(ff)
+    top.assign_charge_from_ff(ff)
+    top.cell.set_box(box)
+    top.scale_with_packmol(numbers, packmol)
+    return System(top, ff)
+
+
+def read_mols(files, ff):
     mols = []
     for f in files:
         mol = Topology.open(f).molecules[0]
         if f.endswith("xyz"):
             mol.guess_connectivity_from_ff(ff)
         mols.append(mol)
+    return mols
 
 
 def main():
     args = read_args()
-    mols = read_mols(args.files)
     ff = ForceField.open(*args.forcefield)
+    mols = read_mols(args.files, ff)
     system = make_system(
         mols,
         args.numbers,
