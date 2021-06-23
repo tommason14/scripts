@@ -48,6 +48,9 @@ def read_args():
     parser.add_argument(
         "-d", "--drudes", help="Include drude particles", action="store_true"
     )
+    parser.add_argument(
+        "-s", "--scale", help="File including scaling factors for the CL&Pol forcefield"
+    )
 
     return parser.parse_args()
 
@@ -89,6 +92,9 @@ def read_mols(files, ff):
 def main():
     args = read_args()
     ff = ForceField.open(*args.forcefield)
+    if args.scale:
+        scaler = PaduaLJScaler(args.scale)
+        scaler.scale(ff)
     mols = read_mols(args.files, ff)
     system = make_system(
         mols,
