@@ -1,0 +1,126 @@
+#!/usr/bin/env python3
+
+import MDAnalysis as mda
+import argparse
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import sys
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Compute dipole moments via MDAnalysis"
+    )
+    parser.add_argument(
+        "-p", "--topology", help="Topology file (.top/.psf)", required=True
+    )
+    parser.add_argument(
+        "-t", "--traj", help="Trajectory file (.dcd/.xtc)", required=True
+    )
+    parser.add_argument(
+        "-o",
+        "--csv",
+        help="csv to save to, default=dipole_moments.csv",
+        default="dipole_moments.csv",
+    )
+
+    parser.add_argument(
+        "-nodrudes", help="Remove drude particles from trajectory", action="store_true"
+    )
+    parser.add_argument(
+        "-s",
+        "--start",
+        help="Frame to start at, default is to include all frames",
+        type=int,
+    )
+    parser.add_argument(
+        "-e",
+        "--end",
+        help="Frame to end at, default is to include all frames",
+        type=int,
+    )
+    return parser.parse_args()
+
+
+def calc_dipoles(selection):
+    """
+    Returns a dictionary with list items containing the dipole moments (in the x, y, z dimensions) of each molecule 
+    in the trajectory. The dipole moment is calculated relative to the centre of mass of each
+    molecule.
+    """
+    dipoles = {res: [] for res in np.unique(selection.atoms.resnames)}
+    for res in selection.residues:
+        dipole_moment = np.array([0, 0, 0])
+        residue_com = res.atoms.center_of_mass()
+        for atom in res.atoms:
+            dipole_moment = dipole_moment + atom.charge * (atom.position - residue_com)
+        dipoles[res.resname].append(dipole_moment)
+    return dipoles
+
+
+def calc_dipoles_all_frames(selection, frames):
+    dipole_moments = {res: [] for res in np.unique(selection.atoms.resnames)}
+    numframes = len(frames)
+    for num, ts in enumerate(frames):
+        dipoles = calc_dipoles(selection)
+        for res, dipole_moment_list in dipoles.items():
+            dipole_moments[res] += dipole_moment_list
+        sys.stdout.write(f"\r{num/numframes * 100:.2f}% complete")
+    sys.stdout.write("\n")
+    return dipole_moments
+
+
+def compute_moments(args):
+    """
+    Computes dipole moments for each molecule (residue) in every frame of the trajectory, 
+    and then returns the values in a pandas DataFrame with headers:
+    resname, Dx, Dy, Dz, Dtot.
+    For example, for a system of 500 molecules, analysing 10 frames will produce a DataFrame
+    of 5000 rows.
+    """
+    u = mda.Universe(args.topology, args.traj)
+
+    if args.nodrudes:
+        selection = u.select_atoms("not name D*")
+    else:
+        selection = u.atoms
+
+    if args.start and args.end:
+        frames = u.trajectory[args.start : args.end]
+    elif args.start:
+        frames = u.trajectory[args.start :]
+    elif args.end:
+        frames = u.trajectory[: args.end]
+    else:
+        frames = u.trajectory
+
+    dipole_moments = calc_dipoles_all_frames(selection, frames)
+    # one 3x1 array for each molecule in each trajectory - turn this into a pandas dataframe for faster
+    # processing
+    df = {"resname": [], "Dx": [], "Dy": [], "Dz": []}
+    for res, moments in dipole_moments.items():
+        for moment in moments:
+            df["resname"].append(res)
+            df["Dx"].append(moment[0])
+            df["Dy"].append(moment[1])
+            df["Dz"].append(moment[2])
+
+    df = pd.DataFrame(df)
+    conversion = 0.20819434  # 0.208 e.angstrom -> 1 Debye
+    df["Dx"] = df["Dx"] / conversion
+    df["Dy"] = df["Dy"] / conversion
+    df["Dz"] = df["Dz"] / conversion
+    df["Dtot"] = (df["Dx"] ** 2 + df["Dy"] ** 2 + df["Dz"] ** 2) ** 0.5
+    return df
+
+
+def main():
+    args = parse_args()
+    moments = compute_moments(args)
+    moments.to_csv(args.csv, index=False)
+
+
+if __name__ == "__main__":
+    main()
