@@ -22,8 +22,8 @@ def parse_args():
     parser.add_argument(
         "-o",
         "--csv",
-        help="csv to save to, default=dipole_moments.csv",
-        default="dipole_moments.csv",
+        help="csv to save all vectors to, default=dipole_vectors.csv",
+        default="dipole_vectors.csv",
     )
 
     parser.add_argument(
@@ -41,14 +41,41 @@ def parse_args():
         help="Frame to end at, default is to include all frames",
         type=int,
     )
+    parser.add_argument(
+        "-m",
+        "--maxval",
+        help=(
+            "Maximum dipole moment used when creating a histogram "
+            "of moments for each molecule"
+        ),
+        default=10,
+        type=float,
+    )
+    parser.add_argument(
+        "-n",
+        "--nbins",
+        help="Number of intervals to create for the dipole moment histogram",
+        default=50,
+        type=int,
+    )
+    parser.add_argument(
+        "-b",
+        "--histname",
+        help=(
+            "Filename of the csv containing the histogram of total dipole moments, "
+            "default = dipole_moments.csv"
+        ),
+        default="dipole_moments.csv",
+    )
     return parser.parse_args()
 
 
-def calc_dipoles(selection):
+def _calc_dipoles(selection):
     """
     Returns a dictionary with list items containing the dipole moments (in the x, y, z dimensions) of each molecule 
     in the trajectory. The dipole moment is calculated relative to the centre of mass of each
-    molecule.
+    molecule, given in e.Å.
+    TODO: Compute dipole moments via numpy instead of iterating over each atom
     """
     dipoles = {res: [] for res in np.unique(selection.atoms.resnames)}
     for res in selection.residues:
@@ -60,11 +87,15 @@ def calc_dipoles(selection):
     return dipoles
 
 
-def calc_dipoles_all_frames(selection, frames):
+def _calc_dipoles_all_frames(selection, frames):
+    """
+    Loops over frames and computes dipoles for every molecule, returning them as 
+    lists of 1x3 arrays for each molecule, stored inside a dictionary of {res: [[x1 y1 z1], [x2, y2 z2]]}
+    """
     dipole_moments = {res: [] for res in np.unique(selection.atoms.resnames)}
     numframes = len(frames)
     for num, ts in enumerate(frames):
-        dipoles = calc_dipoles(selection)
+        dipoles = _calc_dipoles(selection)
         for res, dipole_moment_list in dipoles.items():
             dipole_moments[res] += dipole_moment_list
         sys.stdout.write(f"\r{num/numframes * 100:.2f}% complete")
@@ -79,6 +110,7 @@ def compute_moments(args):
     resname, Dx, Dy, Dz, Dtot.
     For example, for a system of 500 molecules, analysing 10 frames will produce a DataFrame
     of 5000 rows.
+    All values are given in Debyes.
     """
     u = mda.Universe(args.topology, args.traj)
 
@@ -96,9 +128,7 @@ def compute_moments(args):
     else:
         frames = u.trajectory
 
-    dipole_moments = calc_dipoles_all_frames(selection, frames)
-    # one 3x1 array for each molecule in each trajectory - turn this into a pandas dataframe for faster
-    # processing
+    dipole_moments = _calc_dipoles_all_frames(selection, frames)
     df = {"resname": [], "Dx": [], "Dy": [], "Dz": []}
     for res, moments in dipole_moments.items():
         for moment in moments:
@@ -116,10 +146,32 @@ def compute_moments(args):
     return df
 
 
+def group_moments_into_intervals(df, maxval=10, n=50):
+    """
+    Group dipole moments of each molecule into n intervals for easier plotting, with a much smaller file
+    produced.
+    """
+    minval = 0
+    bins = np.linspace(minval, maxval, n)
+    counts = (
+        df.groupby(["resname", pd.cut(df["Dtot"], bins)])
+        .size()
+        .unstack()
+        .T.reset_index()
+    )
+    counts["Dtot"] = counts["Dtot"].apply(lambda x: round(x.mid, 2))
+    # move to first column
+    col = counts.pop("Dtot")
+    counts.insert(0, "Dtot", col)
+    return counts
+
+
 def main():
     args = parse_args()
-    moments = compute_moments(args)
-    moments.to_csv(args.csv, index=False)
+    dipoles = compute_moments(args)
+    dipoles.to_csv(args.csv, index=False)
+    binned = group_moments_into_intervals(dipoles, maxval=args.maxval, n=args.nbins)
+    binned.to_csv(args.histname, index=False)
 
 
 if __name__ == "__main__":

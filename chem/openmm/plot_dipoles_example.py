@@ -33,7 +33,7 @@ def faceted(df):
 
 
 def main():
-    df = pd.read_csv("dipole_moments.csv")
+    df = pd.read_csv("dipole_vectors.csv")
     df["resname"] = df["resname"].replace({"ch+": "Ch", "dhp": "DHP", "WAT": "Water"})
 
     # note that rc params are not used in facetgrid functions (i.e. displot)
