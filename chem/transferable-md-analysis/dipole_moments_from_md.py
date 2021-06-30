@@ -4,8 +4,6 @@ import MDAnalysis as mda
 import argparse
 import numpy as np
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
 import sys
 
 
@@ -138,10 +136,10 @@ def compute_moments(args):
             df["Dz"].append(moment[2])
 
     df = pd.DataFrame(df)
-    conversion = 0.20819434  # 0.208 e.angstrom -> 1 Debye
-    df["Dx"] = df["Dx"] / conversion
-    df["Dy"] = df["Dy"] / conversion
-    df["Dz"] = df["Dz"] / conversion
+    eA_to_debye = 0.20819434  # 0.208 e.angstrom -> 1 Debye
+    df["Dx"] = df["Dx"] / eA_to_debye
+    df["Dy"] = df["Dy"] / eA_to_debye
+    df["Dz"] = df["Dz"] / eA_to_debye
     df["Dtot"] = (df["Dx"] ** 2 + df["Dy"] ** 2 + df["Dz"] ** 2) ** 0.5
     return df
 

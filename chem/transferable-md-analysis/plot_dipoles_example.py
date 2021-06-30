@@ -4,6 +4,11 @@ import matplotlib.pyplot as plt
 
 
 def one_plot(df):
+    """
+    Plot all dipole moments onto one set of axes - has the consequence of
+    making distributions that are spread over a large range appear small, when
+    paired with narrow distributions
+    """
     p = sns.kdeplot(data=df, x="Dtot", hue="resname", fill=True,)
     p.get_legend().set_title(None)
     p.set_xlabel(r"$\mu$ (D)")
@@ -12,6 +17,9 @@ def one_plot(df):
 
 
 def faceted(df):
+    """
+    Plot distributions of each total dipole moment as an individual facet
+    """
     p = sns.displot(
         data=df,
         x="Dtot",
@@ -19,6 +27,7 @@ def faceted(df):
         kind="kde",
         fill=True,
         col="resname",
+        col_wrap=3,
         facet_kws={"sharey": False},
         common_norm=True,
         height=3,

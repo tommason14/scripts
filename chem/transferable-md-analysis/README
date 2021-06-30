@@ -1,0 +1,8 @@
+Analysis tools written using the python MDAnalysis library.
+As such, the tools accept a multitude of file formats and should work
+with Gromacs/Amber/OpenMM simulation output with no issues.
+
+For LAMMPS simulations, ensure the trajectory is written in the 'atom' style (dump ... atom).
+This is the only LAMMPS trajectory format accepted by MDAnalysis. Alternatively, write trajectories
+to a DCD format (dump ... dcd), which are handled completely.
+and then edit the Universe constructor in each of the scripts if necessary.
