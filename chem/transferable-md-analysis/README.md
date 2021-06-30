@@ -11,7 +11,8 @@ and then edit the `MDAnalysis.Universe` constructor in each of the scripts if ne
 
 ## Diffusion coefficients
 
-- Computed via the Einstein relation (1/2N * gradient of MSD against time)
+- Computed via the Einstein relation (1/2N * gradient of MSD against time, N = dimensionality)
+- The middle 80 % of trajectory is used by default to compute diffusion coefficients, but easily changed
 - Diffusion coefficients printed to the screen, MSD vs time plot saved as pdf
 
 ## Dipole moments
