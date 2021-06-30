@@ -1,21 +1,20 @@
 #!/usr/bin/env python3
 
 import MDAnalysis as mda
-import sys
 import argparse
 
-try:
-    from tqdm import tqdm
 
-    HAS_TQDM = True
-except ImportError:
-    HAS_TQDM = False
+def completion(iterable):
+    """
+    Write percentage completion of a loop to the screen
+    """
+    import sys
 
-
-def loop(iterable):
-    if HAS_TQDM:
-        return tqdm(iterable)
-    return iterable
+    total = len(iterable)
+    for num, val in enumerate(iterable):
+        yield val
+        sys.stdout.write(f"\r{num/total*100:.2f} % complete")
+    sys.stdout.write("\n")
 
 
 def parse_args():
@@ -37,6 +36,9 @@ def parse_args():
         "-nodrudes", help="Remove drude particles from trajectory", action="store_true"
     )
     parser.add_argument(
+        "-novirtuals", help="Remove virtual sites from trajectory", action="store_true"
+    )
+    parser.add_argument(
         "-s",
         "--start",
         help="Frame to start at, default is to include all frames",
@@ -56,10 +58,11 @@ def convert_traj(args):
     if args.output is None:
         args.output = args.traj.rsplit(".")[0] + ".pdb"
 
+    sel = mda.AtomGroup(u.atoms)  # so we can use sel.n_atoms later
     if args.nodrudes:
-        sel = u.select_atoms("not name D*")
-    else:
-        sel = u.atoms
+        sel = sel.select_atoms("not name D*")
+    if args.novirtuals:
+        sel = sel.select_atoms("not name V*")
 
     if args.start and args.end:
         frames = u.trajectory[args.start : args.end]
@@ -71,7 +74,7 @@ def convert_traj(args):
         frames = u.trajectory
 
     with mda.Writer(args.output, sel.n_atoms) as f:
-        for _ in loop(frames):
+        for _ in completion(frames):
             f.write(sel)
 
 
