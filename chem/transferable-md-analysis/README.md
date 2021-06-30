@@ -10,10 +10,12 @@ to a DCD format (`dump ... dcd`), which are handled completely.
 and then edit the `MDAnalysis.Universe` constructor in each of the scripts if necessary.
 
 ## Diffusion coefficients
+
 - Computed via the Einstein relation (1/2N * gradient of MSD against time)
 - Diffusion coefficients printed to the screen, MSD vs time plot saved as pdf
 
 ## Dipole moments
+
 - Calculated relative to the centre of mass of each molecule in the simulation, so one moment per molecule
 per frame
 - Moments in each direction along with the absolute value saved for every molecule in each frame
