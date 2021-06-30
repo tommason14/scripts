@@ -277,14 +277,14 @@ def compute_diff_coeffs(df, start=0.1, end=0.9):
     and gives close agreement to TRAVIS in testing.
     """
     N = 3  # dimensionality - assumed to be a 3D simulation
-    ANGS_PER_NM2_TO_M2_PER_S = 1e-11
+    ANGSTROM2_PER_NS_TO_M2_PER_S = 1e-11
 
     maxtime = df["Time (ns)"].max()
     df = df[(start * maxtime <= df["Time (ns)"]) & (df["Time (ns)"] <= end * maxtime)]
 
     def diffcoeffs(group):
         regression = linregress(group["Time (ns)"], group["MSD"])
-        return regression.slope / 2 * N * ANGS_PER_NM2_TO_M2_PER_S
+        return regression.slope / 2 * N * ANGSTROM2_PER_NS_TO_M2_PER_S
 
     return (
         df.groupby("resname")
