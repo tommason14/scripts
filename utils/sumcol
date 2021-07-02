@@ -4,7 +4,7 @@
   echo "Syntax: sumcol [-delim] [col]" &&
   echo "i.e. 'sumcol -, 1' to split on commas and sum the first column" &&
   echo "or 'sumcol 3' to split on whitespace and sum the third column" &&
-  return 1 
+  exit 1 
 if [[ $1 =~ ^- ]]; then 
   delim="${1#-}"
   col="$2"
