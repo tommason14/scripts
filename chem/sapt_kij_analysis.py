@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import numpy as np
-import os
+import math
 import re
 import sys
 import argparse
@@ -123,17 +123,14 @@ def responsive_table(data, strings, min_width=13, decimal_places=5):
     can be passed in to define the number of decimal places of floats.
     """
     num_cols = len(data.keys())
-    content = zip(*[data[key]
-                    for key in data.keys()])  # dict values into list of lists
+    content = zip(*[data[key] for key in data.keys()])  # dict values into list of lists
     # unknown number of arguments
     max_sizes = {}
     try:
         for k, v in data.items():
             max_sizes[k] = len(max([str(val) for val in v], key=len))
     except ValueError:
-        sys.exit(
-            "Error: No data is passed into autochem.core.utils.responsive_table"
-        )
+        sys.exit("Error: No data is passed into autochem.core.utils.responsive_table")
 
     # create the thing to pass into .format()- can't have brackets like zip gives
     formatting = []
@@ -312,25 +309,21 @@ class PT:
     @classmethod
     def get_radius(cls, atom):
         """Returns atomic radius for a given element"""
-        atnum = cls.get_atnum(atom)
         return float(cls.ptable[atom.atnum][2])
 
     @classmethod
     def get_mass(cls, atom):
         """Returns atomic mass for a given element"""
-        atnum = cls.get_atnum(atom)
         return float(cls.ptable[atom.atnum][1])
 
     @classmethod
     def get_connectors(cls, atom):
         """Returns number of possible attachments to a given element"""
-        atnum = cls.get_atnum(atom)
         return int(cls.ptable[atom.atnum][-2])
 
     @classmethod
     def get_vdw(cls, atom):
         """Returns van der waals radius of a given element"""
-        atnum = cls.get_atnum(atom)
         return float(cls.ptable[atom.atnum][-1])
 
 
@@ -350,12 +343,8 @@ class Atom:
     >>> a = Atom('H', coords = (1,2,3))
 
     """
-    def __init__(self,
-                 symbol=None,
-                 atnum=0,
-                 coords=None,
-                 mol=None,
-                 bonds=None):
+
+    def __init__(self, symbol=None, atnum=0, coords=None, mol=None, bonds=None):
         if symbol is not None:
             self.symbol = symbol
             self.atnum = PT.get_atnum(self)
@@ -408,10 +397,10 @@ class Atom:
  Mol: {self.mol} Atom: {self.number}"
 
         elif hasattr(self, "index") and len(self.h_bonded_to) > 0:
-            h_bonded = [(atom.symbol, {
-                "mol": atom.mol,
-                "atom": atom.index
-            }) for atom in self.h_bonded_to]
+            h_bonded = [
+                (atom.symbol, {"mol": atom.mol, "atom": atom.index})
+                for atom in self.h_bonded_to
+            ]
             return f"Atom: {self.symbol:3s} {self.x:>10.5f} {self.y:>10.5f} {self.z:>10.5f}\
  Mol: {self.mol} Index: {self.index} Number: {self.number} H-Bonds: {h_bonded}"
 
@@ -432,10 +421,7 @@ class Atom:
     def distance_to(self, vector):
         """Measure the distance between the atom and a point in space, given as a vector in angstroms"""
         # pythagoras in 3D
-        dist = 0.0
-        for i, j in zip(self, vector):
-            dist += (i - j)**2
-        return dist**0.5
+        return sum((i - j) ** 2 for i, j in zip(self, vector)) ** 0.5
 
     def vector_to(self, point):
         """Returns a vector from the atom to a given point, in angstroms"""
@@ -453,7 +439,7 @@ class Atom:
         Return atom in xyz format: symbol x y z. Can also give an optional 
         end of line character such as a newline
         """
-        return f" {self.symbol:5s} {self.x:>10.5f} {self.y:>10.5f} {self.z:>10.5f}{end_of_line}"
+        return f"{self.symbol:5s} {self.x:>10.5f} {self.y:>10.5f} {self.z:>10.5f}{end_of_line}"
 
     __str__ = __repr__
 
@@ -481,6 +467,7 @@ def get_dispersion_and_induction(log):
 
 def kij(disp, ind):
     return 1 / (1 + (ind / disp))
+
 
 class Molecule:
     def __init__(self, atomlist):
@@ -543,13 +530,16 @@ class Molecule:
                 mol_count += 1
 
         nums = set([atom.mol for atom in self.coords])
-        self.molecules = [[atom for atom in self.coords if atom.mol == val]
-                          for val in nums]
+        self.molecules = [
+            [atom for atom in self.coords if atom.mol == val] for val in nums
+        ]
+
 
 class com_distance:
     """
     Assumes that the xyz only contains two fragments
     """
+
     def __init__(self, molecule):
         self.mol = molecule.molecules
 
@@ -558,20 +548,19 @@ class com_distance:
         1/M * sum(m_i * r_i)
         """
         total_mass = sum(PT.get_mass(atom) for atom in atom_list)
-        com_x = 1 / total_mass * sum(
-            PT.get_mass(atom) * atom.x for atom in atom_list)
-        com_y = 1 / total_mass * sum(
-            PT.get_mass(atom) * atom.y for atom in atom_list)
-        com_z = 1 / total_mass * sum(
-            PT.get_mass(atom) * atom.z for atom in atom_list)
+        com_x = 1 / total_mass * sum(PT.get_mass(atom) * atom.x for atom in atom_list)
+        com_y = 1 / total_mass * sum(PT.get_mass(atom) * atom.y for atom in atom_list)
+        com_z = 1 / total_mass * sum(PT.get_mass(atom) * atom.z for atom in atom_list)
         return com_x, com_y, com_z
 
     @property
     def distance_between_centre_of_masses(self):
         coms = [self.centre_of_mass(frag) for frag in self.mol]
-        return ((coms[1][0] - coms[0][0])**2 + (coms[1][1] - coms[0][1])**2 +
-                (coms[1][2] - coms[0][2])**2)**0.5
-
+        return (
+            (coms[1][0] - coms[0][0]) ** 2
+            + (coms[1][1] - coms[0][1]) ** 2
+            + (coms[1][2] - coms[0][2]) ** 2
+        ) ** 0.5
 
 
 class calc:
@@ -591,8 +580,10 @@ class calc:
         with open(self.log) as f:
             found = False
             for line in f:
-                if ("Center              X                  Y                   Z"
-                        in line):
+                if (
+                    "Center              X                  Y                   Z"
+                    in line
+                ):
                     found = True
                     continue
                 if found and re.search("^\s+$", line):
