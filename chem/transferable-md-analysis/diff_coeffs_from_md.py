@@ -86,7 +86,7 @@ class EinsteinMSD(AnalysisBase):
 
     def _prepare(self):
         if self.verbose:
-            print(f"Starting {self.ag.atoms[0].resname.title()} MSD")
+            print(f"Initialising {self.ag.atoms[0].resname.title()} arrays")
         # self.n_frames only available here
         # these need to be zeroed prior to each run() call
         self.msds_by_particle = np.zeros((self.n_frames, self.n_particles))
@@ -127,7 +127,7 @@ class EinsteinMSD(AnalysisBase):
 
     def _conclude(self):
         if self.verbose:
-            print(f"Finalising {self.ag.atoms[0].resname.title()} MSD")
+            print(f"Computing {self.ag.atoms[0].resname.title()} MSD")
         if self.fft:
             self._conclude_fft()
         else:
