@@ -1,0 +1,10 @@
+#!/bin/bash                        
+#SBATCH --tasks-per-node=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=4GB
+#SBATCH --time=1:00:00
+#SBATCH --partition=comp,short
+#SBATCH --qos=partner
+
+$WORK/gdma/bin/gdma < gdma.in > gdma.out

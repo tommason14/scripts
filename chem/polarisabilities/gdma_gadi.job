@@ -1,0 +1,10 @@
+#!/bin/bash                        
+#PBS -P k96                    
+#PBS -l walltime=1:00:00          
+#PBS -l mem=4GB                  
+#PBS -l ncpus=1                   
+#PBS -l jobfs=10GB                
+#PBS -q normal                     
+#PBS -l wd                         
+
+~/gdma/bin/gdma < gdma.in > gdma.out

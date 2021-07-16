@@ -38,6 +38,7 @@ def parse_args():
     parser.add_argument(
         "-novirtuals", help="Remove virtual sites from trajectory", action="store_true"
     )
+    parser.add_argument("--sel", help="Selection of atoms, for example 'resname bf4'")
     parser.add_argument(
         "-s",
         "--start",
@@ -63,6 +64,8 @@ def convert_traj(args):
         sel = sel.select_atoms("not name D*")
     if args.novirtuals:
         sel = sel.select_atoms("not name V*")
+    if args.sel:
+        sel = sel.select_atoms(args.sel)
 
     if args.start and args.end:
         frames = u.trajectory[args.start : args.end]
