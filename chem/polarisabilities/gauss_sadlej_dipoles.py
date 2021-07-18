@@ -9,12 +9,21 @@ sett = Settings()
 sett.input.method = "M062X"
 sett.input.basis = "Gen"
 sett.input.polar = "Dipole"  # print dipoles, might not be needed...
-sett.meta.ncpus = 48
-sett.meta.mem = "160gb"
-sett.meta.nodemem = "192gb"
-sett.meta.time = "1:00:00"
-sett.meta.partition = "normal"
-sett.meta.jobfs = "200gb"
+if os.environ["USER"] == "tm3124":
+    # gadi
+    sett.meta.ncpus = 48
+    sett.meta.mem = "160gb"
+    sett.meta.nodemem = "192gb"
+    sett.meta.time = "1:00:00"
+    sett.meta.partition = "normal"
+    sett.meta.jobfs = "200gb"
+else:
+    # monarch
+    sett.meta.ncpus = 16
+    sett.meta.mem = "64gb"
+    sett.meta.nodemem = "64gb"
+    sett.meta.time = "2:00:00"
+    sett.meta.partition = "comp,short"
 
 # basis sets from https://www.basissetexchange.org/
 
