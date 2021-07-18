@@ -45,9 +45,7 @@ class EinsteinMSD(AnalysisBase):
         Number of particles MSD was calculated over.
     """
 
-    def __init__(
-        self, u, select="all", msd_type="xyz", fft=True, verbose=False, **kwargs
-    ):
+    def __init__(self, u, select="all", msd_type="xyz", fft=True, **kwargs):
         r"""
         Parameters
         ----------
@@ -73,7 +71,6 @@ class EinsteinMSD(AnalysisBase):
         self.msd_type = msd_type
         self._parse_msd_type()
         self.fft = fft
-        self.verbose = verbose
 
         # local
         self.ag = u.select_atoms(self.select)
@@ -85,8 +82,6 @@ class EinsteinMSD(AnalysisBase):
         self.timeseries = None
 
     def _prepare(self):
-        if self.verbose:
-            print(f"Initialising {self.ag.atoms[0].resname.title()} arrays")
         # self.n_frames only available here
         # these need to be zeroed prior to each run() call
         self.msds_by_particle = np.zeros((self.n_frames, self.n_particles))
@@ -126,8 +121,7 @@ class EinsteinMSD(AnalysisBase):
         self._position_array[self._frame_index] = self.ag.positions[:, self._dim]
 
     def _conclude(self):
-        if self.verbose:
-            print(f"Computing {self.ag.atoms[0].resname.title()} MSD")
+        print(f"Computing {self.ag.atoms[0].resname} MSD")
         if self.fft:
             self._conclude_fft()
         else:
@@ -233,16 +227,10 @@ def read_args():
         ),
         nargs="+",
     )
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        help="Print updates to the screen as computation progresses",
-        action="store_true",
-    )
     return parser.parse_args()
 
 
-def compute_msd(resname, universe, timestep=10000, dimensionality="xyz", verbose=False):
+def compute_msd(resname, universe, timestep=10000, dimensionality="xyz"):
     """
     Compute mean squared displacements for a particular residue, according to the Einstein
     relation.
@@ -252,11 +240,7 @@ def compute_msd(resname, universe, timestep=10000, dimensionality="xyz", verbose
     """
     FS_TO_NS = 1e-6
     MSD = EinsteinMSD(
-        universe,
-        select=f"resname {resname}",
-        msd_type=dimensionality,
-        fft=True,
-        verbose=verbose,
+        universe, select=f"resname {resname}", msd_type=dimensionality, fft=True,
     )
     MSD.run()
 
@@ -337,20 +321,18 @@ def check_args(args):
 
 def main():
     args = read_args()
-    if not args.verbose:
-        args.verbose = False
     check_args(args)
     u = mda.Universe(args.coords, args.trajectory)
     msd = pd.concat(
-        compute_msd(resname, u, timestep=args.timestep, verbose=args.verbose)
+        compute_msd(resname, u, timestep=args.timestep)
         for resname in np.unique(u.atoms.resnames)
     )
     if args.replace:
         msd = change_resnames(msd, args.replace)
     msd.to_csv("msd.csv", index=False)
-    print(
-        compute_diff_coeffs(msd, start=args.start, end=args.end).to_string(index=False)
-    )
+    coeffs = compute_diff_coeffs(msd, start=args.start, end=args.end)
+    coeffs.to_csv("diff_coeffs.csv", index=False)
+    print(coeffs.to_string(index=False))
     if args.plot:
         plot_msd(msd, start=args.start, end=args.end)
 

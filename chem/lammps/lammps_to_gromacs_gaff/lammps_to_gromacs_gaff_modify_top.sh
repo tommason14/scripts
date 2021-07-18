@@ -24,9 +24,11 @@ $sed -n '/\[ system \]/, $p' polymer.top > footer
 # add additional info to topology file
 
 cat << EOF > addn
-; taken from amber03.ff/ffnonbonded.itp for tip4p                
-Cl          17      35.45    0.0000  A   4.40104e-01  4.18400e-01
-Na          11      22.99    0.0000  A   3.32840e-01  1.15897e-02
+; amber
+; Cl          17      35.45    0.0000  A   4.40104e-01  4.18400e-01  
+; GAFF
+Cl          17      35.45    0.0000  A   3.47094e-01  1.10876
+Na          11      22.99    0.0000  A   3.32840e-01  1.15897e-02 
 ; tip4p                                                          
 HW_tip4p     1       1.008   0.0000  A   0.00000e+00  0.00000e+00
 OW_tip4p     8      16.00    0.0000  A   3.15365e-01  6.48520e-01
