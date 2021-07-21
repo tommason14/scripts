@@ -294,6 +294,7 @@ def plot_msd(df, start=0.1, end=0.9):
     )
     p.set_ylabel(r"MSD (${\AA}^2$)")
     p.legend().set_title(None)
+    plt.tight_layout()  # y axis label sometimes cut off
     plt.savefig("msd.pdf", dpi=300)
 
 
