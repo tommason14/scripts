@@ -23,7 +23,7 @@ def parse_args():
         help="csv to save all vectors to, default=dipole_vectors.csv",
         default="dipole_vectors.csv",
     )
-
+    parser.add_argument("--sel", help="MDAnalysis atomgroup.select_atoms() expression")
     parser.add_argument(
         "-nodrudes", help="Remove drude particles from trajectory", action="store_true"
     )
@@ -112,10 +112,11 @@ def compute_moments(args):
     """
     u = mda.Universe(args.topology, args.traj)
 
+    selection = u.select_atoms("all")
     if args.nodrudes:
-        selection = u.select_atoms("not name D*")
-    else:
-        selection = u.atoms
+        selection = selection.select_atoms("not name D*")
+    if args.sel:
+        selection = selection.select_atoms(args.sel)
 
     if args.start and args.end:
         frames = u.trajectory[args.start : args.end]
