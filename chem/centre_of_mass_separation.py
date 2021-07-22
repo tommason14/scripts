@@ -7,6 +7,64 @@ import argparse
 import csv
 
 
+def responsive_table(data, strings, min_width=13, decimal_places=5):
+    """
+    Returns a table that is responsive in size to every column.
+    Requires a dictionary to be passed in, with the keys referring to
+    the headers of the table.
+    Also pass in the number of each column that should be a string, starting
+    from 1.
+
+    Usage:
+        >>> d = {'col1': [1,2,3,4],
+                 'col2': ['One', 'Two', 'Three', 'Four']}
+        >>> responsive_table(d, strings = [2])
+
+    Can also give a minimum width, defaults to 13 spaces. A `decimal_places` parameter
+    can be passed in to define the number of decimal places of floats.
+    """
+    num_cols = len(data.keys())
+    content = zip(*[data[key] for key in data.keys()])  # dict values into list of lists
+    # unknown number of arguments
+    max_sizes = {}
+    try:
+        for k, v in data.items():
+            max_sizes[k] = len(max([str(val) for val in v], key=len))
+    except ValueError:
+        sys.exit("Error: No data is passed into autochem.core.utils.responsive_table")
+
+    # create the thing to pass into .format()- can't have brackets like zip gives
+    formatting = []
+    index = 0
+    all_sizes = []
+    for val in zip(data.keys(), max_sizes.values()):
+        entry, size = val
+        if size < min_width or index + 1 not in strings:
+            size = min_width
+        # also check dict key length
+        if len(entry) > size:
+            size = len(entry)
+        formatting += [entry, size]
+        all_sizes.append(size)
+        index += 1
+    line_length = sum(all_sizes) + num_cols * 3 - 1  # spaces in header
+    print("+" + "-" * line_length + "+")
+    output_string = "|" + " {:^{}} |" * len(data.keys())
+    print(output_string.format(*formatting))
+    print("+" + "-" * line_length + "+")
+    for line in content:
+        formatting = []
+        for val in zip(line, all_sizes):
+            entry, size = val
+            # if not isinstance(entry, str):
+            if isinstance(entry, float):
+                size = f"{size}.{decimal_places}f"
+            formatting.append(entry)
+            formatting.append(size)
+        print(output_string.format(*formatting))
+    print("+" + "-" * line_length + "+")
+
+
 class PT:
     """Helper class to allow for lookup of atomic properties. Can convert between symbol and atomic number"""
 
@@ -455,6 +513,7 @@ def main():
     ):
         print("Syntax: centre_of_mass_separation.py xyz xyz2 xyz3...")
         sys.exit(1)
+    data = {"xyz": [], "COM separation (Å)": []}
     for xyz in sys.argv[1:]:
         atoms = []
         with open(xyz) as f:
@@ -464,7 +523,9 @@ def main():
                 atoms.append(Atom(sym, coords=coords))
         mol = Molecule(atoms)
         com = com_distance(mol)
-        print(f"{xyz} -> {com.distance_between_centre_of_masses:.3f}")
+        data["xyz"].append(xyz)
+        data["COM separation (Å)"].append(com.distance_between_centre_of_masses)
+    responsive_table(data, strings=[1], decimal_places=3)
 
 
 if __name__ == "__main__":
