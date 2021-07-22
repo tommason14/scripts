@@ -12,7 +12,7 @@ def parse_args():
         description="Compute dipole moments via MDAnalysis"
     )
     parser.add_argument(
-        "-p", "--topology", help="Topology file (.top/.psf)", required=True
+        "-p", "--topology", help="Topology file that must contain charges (.top/.psf)", required=True
     )
     parser.add_argument(
         "-t", "--traj", help="Trajectory file (.dcd/.xtc)", required=True
