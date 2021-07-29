@@ -27,3 +27,7 @@ per frame
 - Moments in each direction along with the absolute value saved for every molecule in each frame
 - For simpler plotting, total dipole moments for each molecule are also grouped into intervals and data is saved
 in order for a histogram to be plotted
+
+## Radial distribution functions (rdf_from_md.py)
+
+- Given reference and selection atom groups, an rdf is calculated within 15 angstroms of the reference
