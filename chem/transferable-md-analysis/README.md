@@ -9,6 +9,8 @@ This is the only LAMMPS trajectory format accepted by MDAnalysis. Alternatively,
 to a DCD format (`dump ... dcd`), which are handled completely.
 and then edit the `MDAnalysis.Universe` constructor in each of the scripts if necessary.
 
+All scripts have help messages available - pass in the `-h` flag to see the available options.
+
 ## Converting trajectories (traj_convert.py)
 
 - Pass in coordinates and topology files, with the output format detected from
