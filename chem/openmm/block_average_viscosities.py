@@ -2,6 +2,7 @@
 
 import argparse
 import pandas as pd
+import sys
 
 FEMTOSECONDS_TO_NANOSECONDS = 1e-15 / 1e-9
 
@@ -62,7 +63,8 @@ def responsive_table(data, strings, min_width=13, decimal_places=5):
         for k, v in data.items():
             max_sizes[k] = len(max([str(val) for val in v], key=len))
     except ValueError:
-        sys.exit("Error: No data is passed into autochem.core.utils.responsive_table")
+        print("Error: No data is passed into responsive_table")
+        sys.exit(1)
 
     # create the thing to pass into .format()- can't have brackets like zip gives
     formatting = []
