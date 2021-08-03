@@ -720,6 +720,9 @@ for xyz in glob("*xyz"):
         print(
             "Download the required basis set from basissetexchange.org and add to gauss_sadlej_dipoles.py"
         )
+    if os.path.isdir(xyzdir):
+        print(f"Skipping {xyzdir}")
+        continue
     os.mkdir(xyzdir)
     for name, field in fields.items():
         os.mkdir(f"{xyzdir}/{name}")
