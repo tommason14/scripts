@@ -19,15 +19,13 @@ sett.meta.partition = "comp,short"
 
 
 def get_basis(
-    atoms,
-    fname=os.path.expanduser("~/.local/scripts/chem/polarisabilities/sadlej.gbs"),
+    atoms, fname=os.path.expanduser("~/.local/scripts/chem/polarisabilities/sadlej.gbs")
 ):
     """
     Returns the required basis functions as a list
     """
     basis_set = []
     tmp = []
-    found = False
     with open(fname) as f:
         for line in f:
             if "****" in line:
@@ -39,6 +37,11 @@ def get_basis(
     # basis_set is a list of basis functions for each basis set,
     # turn it into a dict of {atom: basis}
     basis_set = {bset[0].split()[0]: bset for bset in basis_set}
+    missing_atoms = [a for a in atoms if a not in basis_set]
+    if len(missing_atoms) > 0:
+        raise AttributeError(
+            f"The following atom(s) are not included in the SadleJ pVTZ basis set: {missing_atoms}"
+        )
     basis = []
     for atom, bset in basis_set.items():
         if atom in atoms:
@@ -46,7 +49,6 @@ def get_basis(
     return basis
 
 
-get_basis(["H", "C", "O"])
 fields = {
     "plusX": "X+8",
     "minusX": "X-8",
@@ -60,10 +62,7 @@ for xyz in glob("*xyz"):
     xyzdir = xyz.replace(".xyz", "")
     mol = Molecule(xyz)
     atoms = list(set([a.symbol for a in mol.coords]))
-    try:
-        basis = get_basis(sorted(atoms)) + ["\n"]
-    except ValueError:
-        print("Some or all atoms are not included in the SadleJ basis set")
+    basis = get_basis(sorted(atoms)) + ["\n"]
     if os.path.isdir(xyzdir):
         print(f"Skipping {xyzdir}")
         continue
