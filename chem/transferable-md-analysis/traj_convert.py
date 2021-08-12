@@ -25,7 +25,7 @@ def parse_args():
         "-c", "--coords", help="Coordinate file (.gro/.psf/.pdb)", required=True
     )
     parser.add_argument(
-        "-t", "--traj", help="Trajectory file (.dcd/.xtc)", required=True
+        "-t", "--traj", help="Trajectory file(s) (.dcd/.xtc)", nargs="+", required=True
     )
     parser.add_argument(
         "-o",
@@ -55,7 +55,7 @@ def parse_args():
 
 
 def convert_traj(args):
-    u = mda.Universe(args.coords, args.traj)
+    u = mda.Universe(args.coords, *args.traj)
     if args.output is None:
         args.output = args.traj.rsplit(".")[0] + ".pdb"
 

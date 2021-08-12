@@ -11,10 +11,16 @@ and then edit the `MDAnalysis.Universe` constructor in each of the scripts if ne
 
 All scripts have help messages available - pass in the `-h` flag to see the available options.
 
+
 ## Converting trajectories (traj_convert.py)
 
 - Pass in coordinates and topology files, with the output format detected from
   the filetype of the output file
+
+## Extracting a selection of atoms (extract_selection.py)
+
+- Alternative to `traj_convert.py` that writes a `gro` coordinate file and
+  `xtc` binary trajectory of a selection provided by the user
 
 ## Diffusion coefficients (diff_coeffs_from_md.py)
 
