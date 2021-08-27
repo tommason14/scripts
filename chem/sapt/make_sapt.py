@@ -72,7 +72,7 @@ def main():
         sys.exit(1)
     for xyz in glob("*xyz"):
         name = xyz.replace(".xyz", "")
-        newdir = os.path.join(os.getcwd(), name)
+        newdir = os.path.join(os.getcwd(), name + "-sapt")
         if not os.path.isdir(newdir):
             os.mkdir(newdir)
         mol = Molecule(xyz)
