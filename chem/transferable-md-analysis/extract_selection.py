@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import MDAnalysis as mda
+from MDAnalysis import transformations
 import argparse
 import sys
 
@@ -37,6 +38,11 @@ def arguments():
         ),
         default="selection",
     )
+    parser.add_argument(
+        "-wrap",
+        help="Use this parameter to output a wrapped trajectory.",
+        action="store_true",
+    )
     return parser.parse_args()
 
 
@@ -46,6 +52,10 @@ def main():
     xtc = args.output + ".xtc"
     u = mda.Universe(*args.files)
     selection = u.select_atoms(args.sel)
+    if args.wrap:
+        ag = selection.atoms
+        transform = mda.transformations.wrap(ag, compound="residues")
+        u.trajectory.add_transformations(transform)
     if len(args.files) == 1:
         selection.write(gro)
     else:
