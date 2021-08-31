@@ -7,6 +7,68 @@ import argparse
 import csv
 
 
+def check_user_input(user_input, condition, if_error):
+    """
+    Uses a try/except statement to create a scenario where the 
+    end user cannot give unexpected input. 
+    Give the condition referring to an item in a lambda expression 
+    i.e. lambda item: item.endswith('.csv'), or lambda item: item in range(...)
+
+    Usage:
+        >>> check_user_input('Filename of output', lambda item: item.endswith('.csv'), "Please print a name ending in '.csv'")
+        # Produces:
+        while not correct:
+            try:
+                item = input('Filename of output: ')
+            except ValueError:
+                print("Please enter a filename ending in '.csv'")
+            if not filename.endswith('.csv'):
+                print("Please enter a filename ending in '.csv'")
+            else:
+                correct = True
+        return item
+    """
+    f = condition
+    correct = False
+    while not correct:
+        try:
+            item = input(user_input + ": ")
+        except ValueError:
+            print(if_error)
+        if not f(item):
+            print(if_error)
+        else:
+            correct = True
+    return item
+
+
+def write_csv_from_dict(data, filename=None, autosave=False):
+    """Write to file from dictionary"""
+    write = True if autosave else False
+    if not autosave:
+        done = False
+        while not done:
+            to_file = input("Print to csv? [Y/N] ")
+            if to_file.lower() in ("y", "n"):
+                done = True
+                if to_file.lower() == "y":
+                    write = True
+                    if filename is None:
+                        filename = check_user_input(
+                            "Filename",
+                            lambda item: item.endswith(".csv"),
+                            "Please give a filename ending in '.csv'",
+                        )
+            else:
+                print("Please select 'Y' or 'N'")
+    if write:
+        with open(filename, "w", encoding="utf-8-sig") as f:
+            writer = csv.writer(f)
+            writer.writerow(data.keys())
+            content = zip(*[data[key] for key in data.keys()])
+            writer.writerows(content)
+
+
 def responsive_table(data, strings, min_width=13, decimal_places=5):
     """
     Returns a table that is responsive in size to every column.
@@ -522,10 +584,15 @@ def main():
                 coords = [float(i) for i in (x, y, z)]
                 atoms.append(Atom(sym, coords=coords))
         mol = Molecule(atoms)
-        com = com_distance(mol)
-        data["xyz"].append(xyz)
-        data["COM separation (Å)"].append(com.distance_between_centre_of_masses)
+        try:
+            com = com_distance(mol)
+            data["xyz"].append(xyz)
+            data["COM separation (Å)"].append(com.distance_between_centre_of_masses)
+        except IndexError:
+            print(f"Two molecules not found in {xyz} - skipping")
+            continue
     responsive_table(data, strings=[1], decimal_places=3)
+    write_csv_from_dict(data, filename="com_separation.csv")
 
 
 if __name__ == "__main__":
