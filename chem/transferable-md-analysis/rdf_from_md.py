@@ -37,6 +37,9 @@ u = mda.Universe(args.coords, *args.trajectory)
 ref = u.select_atoms(args.ref)
 sel = u.select_atoms(args.sel)
 
+print(f"Reference selection contains {ref.n_atoms} atoms")
+print(f"Mobile selection contains {sel.n_atoms} atoms")
+
 rdf = InterRDF(ref, sel, nbins=200)
 rdf.run(verbose=True)
 df = pd.DataFrame({"bins": rdf.bins, "rdf": rdf.rdf})
