@@ -260,13 +260,13 @@ def compute_msd(resname, universe, timestep=10000, dimensionality="xyz"):
     return df
 
 
-def compute_diff_coeffs(df, start=0.1, end=0.9):
+def compute_diff_coeffs(df, start=0.1, end=0.9, dimensionality="xyz"):
     """
     Compute diffusion coefficients using MSD values returned by EinsteinMSD.
     Default is to use the middle 80 %, which is the default configuration of gmx msd
     and gives close agreement to TRAVIS in testing.
     """
-    N = 3  # dimensionality - assumed to be a 3D simulation
+    N = len(dimensionality)
     ANGSTROM2_PER_NS_TO_M2_PER_S = 1e-11
 
     maxtime = df["Time (ns)"].max()
@@ -339,7 +339,9 @@ def main():
     if args.replace:
         msd = change_resnames(msd, args.replace)
     msd.to_csv("msd.csv", index=False)
-    coeffs = compute_diff_coeffs(msd, start=args.start, end=args.end)
+    coeffs = compute_diff_coeffs(
+        msd, start=args.start, end=args.end, dimensionality=args.dimensionality
+    )
     coeffs.to_csv("diff_coeffs.csv", index=False)
     print(coeffs.to_string(index=False))
     if args.plot:
