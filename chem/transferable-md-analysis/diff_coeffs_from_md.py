@@ -236,7 +236,7 @@ def read_args():
     return parser.parse_args()
 
 
-def compute_msd(resname, universe, timestep=10000, dimensionality="xyz"):
+def compute_msd(resname, universe, timestep=10000, dimensionality="xyz", fft=True):
     """
     Compute mean squared displacements for a particular residue, according to the Einstein
     relation.
@@ -246,7 +246,7 @@ def compute_msd(resname, universe, timestep=10000, dimensionality="xyz"):
     """
     FS_TO_NS = 1e-6
     MSD = EinsteinMSD(
-        universe, select=f"resname {resname}", msd_type=dimensionality, fft=True,
+        universe, select=f"resname {resname}", msd_type=dimensionality, fft=fft,
     )
     MSD.run()
 
@@ -332,7 +332,11 @@ def main():
     u = mda.Universe(args.coords, args.trajectory)
     msd = pd.concat(
         compute_msd(
-            resname, u, timestep=args.timestep, dimensionality=args.dimensionality
+            resname,
+            u,
+            timestep=args.timestep,
+            dimensionality=args.dimensionality,
+            fft=True,
         )
         for resname in np.unique(u.atoms.resnames)
     )
