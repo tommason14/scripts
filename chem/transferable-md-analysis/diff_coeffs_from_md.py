@@ -214,6 +214,8 @@ def read_args():
         ),
         action="store_true",
     )
+    parser.add_argument('-dim', '--dimensionality', help='Dimensions to consider for MSD,
+            default="xyz"', default='xyz')
     parser.add_argument(
         "-r",
         "--replace",
@@ -325,7 +327,7 @@ def main():
     check_args(args)
     u = mda.Universe(args.coords, args.trajectory)
     msd = pd.concat(
-        compute_msd(resname, u, timestep=args.timestep)
+        compute_msd(resname, u, timestep=args.timestep, dimensionality=args.dimensionality)
         for resname in np.unique(u.atoms.resnames)
     )
     if args.replace:
