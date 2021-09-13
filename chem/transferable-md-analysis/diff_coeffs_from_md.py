@@ -45,7 +45,7 @@ class EinsteinMSD(AnalysisBase):
         Number of particles MSD was calculated over.
     """
 
-    def __init__(self, u, select="all", msd_type="xyz", fft=True, **kwargs):
+    def __init__(self, u, select="all", msd_type="xyz", fft=True, com=False, **kwargs):
         r"""
         Parameters
         ----------
@@ -60,6 +60,9 @@ class EinsteinMSD(AnalysisBase):
             If ``True``, uses a fast FFT based algorithm for computation of
             the MSD. Otherwise, use the simple "windowed" algorithm.
             The tidynamics package is required for `fft=True`.
+        com : bool
+            If ``True``, compute MSDs for the centre of mass of each residue, 
+            instead of all atoms
         """
         if isinstance(u, groups.UpdatingAtomGroup):
             raise TypeError("UpdatingAtomGroups are not valid for MSD " "computation")
@@ -71,10 +74,14 @@ class EinsteinMSD(AnalysisBase):
         self.msd_type = msd_type
         self._parse_msd_type()
         self.fft = fft
+        self.com = com
 
         # local
         self.ag = u.select_atoms(self.select)
-        self.n_particles = len(self.ag)
+        if self.com:
+            self.n_particles = len(self.ag.residues.resids)  # 1 per molecule
+        else:
+            self.n_particles = len(self.ag)
         self._position_array = None
 
         # result
@@ -118,7 +125,12 @@ class EinsteinMSD(AnalysisBase):
         """
         # shape of position array set here, use span in last dimension
         # from this point on
-        self._position_array[self._frame_index] = self.ag.positions[:, self._dim]
+        if self.com:
+            self._position_array[self._frame_index] = self.ag.center_of_mass(
+                compound="residues"
+            )[:, self._dim]
+        else:
+            self._position_array[self._frame_index] = self.ag.positions[:, self._dim]
 
     def _conclude(self):
         print(f"Computing {self.ag.atoms[0].resname} MSD")
@@ -221,6 +233,15 @@ def read_args():
         default="xyz",
     )
     parser.add_argument(
+        "-com",
+        "--centre-of-mass",
+        help=(
+            "Compute MSDs and subsequent diffusion coefficients using the centre of mass of "
+            "each residue instead of averaging over every atom."
+        ),
+        action="store_true",
+    )
+    parser.add_argument(
         "-r",
         "--replace",
         help=(
@@ -236,7 +257,9 @@ def read_args():
     return parser.parse_args()
 
 
-def compute_msd(resname, universe, timestep=10000, dimensionality="xyz", fft=True):
+def compute_msd(
+    resname, universe, timestep=10000, dimensionality="xyz", fft=True, com=False
+):
     """
     Compute mean squared displacements for a particular residue, according to the Einstein
     relation.
@@ -246,7 +269,7 @@ def compute_msd(resname, universe, timestep=10000, dimensionality="xyz", fft=Tru
     """
     FS_TO_NS = 1e-6
     MSD = EinsteinMSD(
-        universe, select=f"resname {resname}", msd_type=dimensionality, fft=fft,
+        universe, select=f"resname {resname}", msd_type=dimensionality, fft=fft, com=com
     )
     MSD.run()
 
@@ -337,6 +360,7 @@ def main():
             timestep=args.timestep,
             dimensionality=args.dimensionality,
             fft=True,
+            com=args.centre_of_mass,
         )
         for resname in np.unique(u.atoms.resnames)
     )
