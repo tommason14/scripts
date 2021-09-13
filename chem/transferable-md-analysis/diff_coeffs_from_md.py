@@ -215,6 +215,12 @@ def read_args():
         action="store_true",
     )
     parser.add_argument(
+        "-dim",
+        "--dimensionality",
+        help='Dimensions to consider for MSD, default="xyz"',
+        default="xyz",
+    )
+    parser.add_argument(
         "-r",
         "--replace",
         help=(
@@ -230,7 +236,7 @@ def read_args():
     return parser.parse_args()
 
 
-def compute_msd(resname, universe, timestep=10000, dimensionality="xyz"):
+def compute_msd(resname, universe, timestep=10000, dimensionality="xyz", fft=True):
     """
     Compute mean squared displacements for a particular residue, according to the Einstein
     relation.
@@ -240,7 +246,7 @@ def compute_msd(resname, universe, timestep=10000, dimensionality="xyz"):
     """
     FS_TO_NS = 1e-6
     MSD = EinsteinMSD(
-        universe, select=f"resname {resname}", msd_type=dimensionality, fft=True,
+        universe, select=f"resname {resname}", msd_type=dimensionality, fft=fft,
     )
     MSD.run()
 
@@ -254,13 +260,13 @@ def compute_msd(resname, universe, timestep=10000, dimensionality="xyz"):
     return df
 
 
-def compute_diff_coeffs(df, start=0.1, end=0.9):
+def compute_diff_coeffs(df, start=0.1, end=0.9, dimensionality="xyz"):
     """
     Compute diffusion coefficients using MSD values returned by EinsteinMSD.
     Default is to use the middle 80 %, which is the default configuration of gmx msd
     and gives close agreement to TRAVIS in testing.
     """
-    N = 3  # dimensionality - assumed to be a 3D simulation
+    N = len(dimensionality)
     ANGSTROM2_PER_NS_TO_M2_PER_S = 1e-11
 
     maxtime = df["Time (ns)"].max()
@@ -325,13 +331,21 @@ def main():
     check_args(args)
     u = mda.Universe(args.coords, args.trajectory)
     msd = pd.concat(
-        compute_msd(resname, u, timestep=args.timestep)
+        compute_msd(
+            resname,
+            u,
+            timestep=args.timestep,
+            dimensionality=args.dimensionality,
+            fft=True,
+        )
         for resname in np.unique(u.atoms.resnames)
     )
     if args.replace:
         msd = change_resnames(msd, args.replace)
     msd.to_csv("msd.csv", index=False)
-    coeffs = compute_diff_coeffs(msd, start=args.start, end=args.end)
+    coeffs = compute_diff_coeffs(
+        msd, start=args.start, end=args.end, dimensionality=args.dimensionality
+    )
     coeffs.to_csv("diff_coeffs.csv", index=False)
     print(coeffs.to_string(index=False))
     if args.plot:
