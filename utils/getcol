@@ -4,14 +4,31 @@
   echo "Syntax: getcol [-delim] [col]" &&
   echo "i.e. 'getcol -, 1' to split on commas and take the first column" &&
   echo "or 'getcol 3' to split on whitespace and take the third column" &&
+  echo "or 'getcol -2' to split on whitespace and take the second to last column" &&
   return 1 
-if [[ $1 =~ ^- ]]; then 
-  delim="${1#-}"
-  col="$2"
-  file="${3:-/dev/stdin}"
-else 
-  delim=" " 
-  col="$1"
-  file="${2:-/dev/stdin}"
+
+# if stdin
+if [[ ! -t 0 ]]; then
+  if [[ $# -eq 2 ]]; then
+    delim="${1#-}"
+    col="$2"
+  else
+    delim=" "
+    col="$1"
+  fi
+else
+  if [[ $# -eq 3 ]]; then 
+    delim="${1#-}"
+    col="$2"
+    file="${3:-/dev/stdin}"
+  else
+    delim=" " 
+    col="$1"
+    file="${2:-/dev/stdin}"
+  fi
 fi
-awk -v col="$col" -F "$delim" '{print $col}' "$file"
+
+
+# if col < 0, print NF+col, which is really NF-1, NF-2 etc... as col is less than 0
+# add one, so that getcol -1 = last column, like python negative indexing
+awk -v col="$col" -F "$delim" '{if(col < 0){print $(NF+col+1);} else {print $col}}' "$file"
