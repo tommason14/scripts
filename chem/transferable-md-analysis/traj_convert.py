@@ -57,7 +57,7 @@ def parse_args():
 def convert_traj(args):
     u = mda.Universe(args.coords, *args.traj)
     if args.output is None:
-        args.output = args.traj.rsplit(".")[0] + ".pdb"
+        args.output = args.traj[-1].rsplit(".")[0] + ".pdb"
 
     sel = mda.AtomGroup(u.atoms)  # so we can use sel.n_atoms later
     if args.nodrudes:
