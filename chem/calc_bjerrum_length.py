@@ -11,7 +11,11 @@ parser.add_argument(
     type=float,
 )
 parser.add_argument(
-    "-d", "--dipole", help="Dipole moment of polymer", required=True, type=float
+    "-d",
+    "--dielectric",
+    help="Dielectric constant of polymer",
+    required=True,
+    type=float,
 )
 parser.add_argument(
     "-t",
@@ -29,5 +33,5 @@ def bjerrum_length(eps, b, T=300):
     return e ** 2 / (4 * pi * epsilon_0 * eps * k * T * b)
 
 
-bjerrum = bjerrum_length(args.dipole, args.sep, args.temp)
+bjerrum = bjerrum_length(args.dielectric, args.sep, args.temp)
 print(f"Bjerrum length = {bjerrum:.2f} Å")
