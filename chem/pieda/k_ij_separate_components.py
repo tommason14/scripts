@@ -81,7 +81,7 @@ def eof(filename, percentage):
             lines[i] = lines[i].decode("utf-8")
         except:
             lines[i] = "CORRUPTLINE"
-            print("eof function passed a corrupt line in file ", File)
+            print("eof function passed a corrupt line in file ", filename)
         # FOR LETTER IN SYMBOL
     return lines
 
@@ -137,10 +137,8 @@ def two_body_table(filename):
     vals = []
     found = False
     for line in eof(filename, 0.2):
-        if (
-            'I    J DL  Z    R   Q(I->J)        E"corr          E"uncorr    E"IJ-E"I-E"J,corr/uncorr dDIJ*VIJ,unc   Gsol  tot,corr'
-            in line
-        ):
+        if ('I    J DL  Z    R   Q(I->J)        E"corr          E"uncorr    E"IJ-E"I-E"J,corr/uncorr dDIJ*VIJ,unc   Gsol  tot,corr'
+                in line):
             found = True
             for v in line.split():
                 # E"IJ-E"I-E"J,corr/uncorr need to be split up
@@ -168,10 +166,8 @@ def three_body_table(filename):
     vals = []
     found = False
     for line in eof(filename, 0.2):
-        if (
-            'I   J   K DL   RMIN   RMAX       E"corr      deltaE"IJK,corr/uncorr  dDIJK*VIJK     Gsol     tot'
-            in line
-        ):
+        if ('I   J   K DL   RMIN   RMAX       E"corr      deltaE"IJK,corr/uncorr  dDIJK*VIJK     Gsol     tot'
+                in line):
             found = True
             for v in line.split():
                 # deltaE"IJK,corr/uncorr need to be split up
@@ -199,10 +195,8 @@ def full_pieda_table(piedalog):
     cols = None
     vals = []
     for line in eof(piedalog, 0.1):
-        if (
-            "I    J DL  Z    R   Q(I->J)  EIJ-EI-EJ dDIJ*VIJ    total     Ees      Eex    Ect+mix   Erc+di    Gsol"
-            in line
-        ):
+        if ("I    J DL  Z    R   Q(I->J)  EIJ-EI-EJ dDIJ*VIJ    total     Ees      Eex    Ect+mix   Erc+di    Gsol"
+                in line):
             found = True
             cols = line.split()
             continue
@@ -250,20 +244,16 @@ def k_ij_value(pieda_df, three_body, subset=None, total_pieda_pol=None):
         three_rows = three_body.copy()  # all rows
         pieda_rows = pieda_df.copy()
     else:
-        three_rows = three_body[
-            (three_body["I"].isin(subset))
-            & (three_body["J"].isin(subset))
-            & (three_body["K"].isin(subset))
-        ]
-        pieda_rows = pieda_df[
-            (pieda_df["I"].isin(subset)) & (pieda_df["J"].isin(subset))
-        ]
+        three_rows = three_body[(three_body["I"].isin(subset))
+                                & (three_body["J"].isin(subset))
+                                & (three_body["K"].isin(subset))]
+        pieda_rows = pieda_df[(pieda_df["I"].isin(subset))
+                              & (pieda_df["J"].isin(subset))]
 
     three_body_pol = three_rows["dDIJK*VIJK"].sum() * HART_TO_KJ
     three_body_hf = three_rows["corr/uncorr"].sum() * HART_TO_KJ
-    three_body_srs_corr = (
-        three_rows['deltaE"IJK'].sum() - three_rows["corr/uncorr"].sum()
-    ) * HART_TO_KJ
+    three_body_srs_corr = (three_rows['deltaE"IJK'].sum() -
+                           three_rows["corr/uncorr"].sum()) * HART_TO_KJ
     two_body_ctmix = pieda_rows["Ect+mix"].sum() * CAL_TO_J
     two_body_rc_di = pieda_rows["Erc+di"].sum() * CAL_TO_J
     if total_pieda_pol is not None:
@@ -279,10 +269,7 @@ def k_ij_value(pieda_df, three_body, subset=None, total_pieda_pol=None):
 
 def get_ions(inp):
     """
-    Returns a list of indices of cations and anions in the calculation.
-    Note that no check for neutral fragments is performed - the function
-    assumes that each fragment is either a singly-charged cation
-    or singly-charged anion.
+    Returns a list of indices of molecules in the calculation.
     """
     charges = []
     with open(inp) as f:
@@ -296,7 +283,7 @@ def get_ions(inp):
     anions = []
     cations = []
     neutrals = []
-    for ind, charge in enumerate(charges, 1):  # gamess says first frag is 1, not 0
+    for ind, charge in enumerate(charges, 1):
         if charge == -1:
             anions.append(ind)
         elif charge == 1:
@@ -307,8 +294,7 @@ def get_ions(inp):
             raise AttributeError(
                 "Multivalent ions deliberately not accounted for - sometimes multiple cations/anions "
                 "of the same charge may be included in the same calculation and the current code will "
-                "not account for this."
-            )
+                "not account for this.")
     return cations, anions, neutrals
 
 
@@ -328,32 +314,37 @@ def calc_kij(fmo0=None, fmo3=None, pieda=None, inp=None):
         "Neutral-Neutral k_ij": None,
     }
 
-    res["Cation-Cation k_ij"] = k_ij_value(pieda_df, three_body, subset=cations)
+    res["Cation-Cation k_ij"] = k_ij_value(pieda_df,
+                                           three_body,
+                                           subset=cations)
     res["Anion-Anion k_ij"] = k_ij_value(pieda_df, three_body, subset=anions)
     if len(neutrals) == 0:
-        res["Cation-Anion k_ij"] = k_ij_value(
-            pieda_df, three_body, subset="all", total_pieda_pol=total_pieda_pol
-        )
+        res["Cation-Anion k_ij"] = k_ij_value(pieda_df,
+                                              three_body,
+                                              subset="all",
+                                              total_pieda_pol=total_pieda_pol)
     else:
         # Can't include total polarisation as the Coulomb bath will also include neutral terms
-        res["Cation-Anion k_ij"] = k_ij_value(
-            pieda_df, three_body, subset=cations + anions
-        )
-        res["Cation-Neutral k_ij"] = k_ij_value(
-            pieda_df, three_body, subset=cations + neutrals
-        )
-        res["Anion-Neutral k_ij"] = k_ij_value(
-            pieda_df, three_body, subset=anions + neutrals
-        )
-        res["Neutral-Neutral k_ij"] = k_ij_value(pieda_df, three_body, subset=neutrals)
+        res["Cation-Anion k_ij"] = k_ij_value(pieda_df,
+                                              three_body,
+                                              subset=cations + anions)
+        res["Cation-Neutral k_ij"] = k_ij_value(pieda_df,
+                                                three_body,
+                                                subset=cations + neutrals)
+        res["Anion-Neutral k_ij"] = k_ij_value(pieda_df,
+                                               three_body,
+                                               subset=anions + neutrals)
+        res["Neutral-Neutral k_ij"] = k_ij_value(pieda_df,
+                                                 three_body,
+                                                 subset=neutrals)
     return res
 
 
 def obtain_results(dirs):
     """
     Run calc_kij on each subdirectory passed in, returning a Pandas
-    DataFrame with the results. 
-    Also includes the total energy in kJ/mol (from the FMO3 calculation), 
+    DataFrame with the results.
+    Also includes the total energy in kJ/mol (from the FMO3 calculation),
     in order to Boltzmann-weight the k_ij values.
     """
     results = {
@@ -406,14 +397,12 @@ def compute_boltzmann_weighted_values(df):
     df["Weights"] = _boltz(df["Total Energy"])
     df_with_weights = df.copy()
     df = df.drop("Total Energy", axis="columns")
-    df = df.melt(
-        id_vars=["Configuration", "Weights"], var_name="Type", value_name="kij"
-    )
-    df = (
-        df.groupby("Type")[["Weights", "kij"]]
-        .apply(lambda x: x.prod(axis=1).sum())
-        .reset_index()
-    )
+    df = df.melt(id_vars=["Configuration", "Weights"],
+                 var_name="Type",
+                 value_name="kij")
+    df = (df.groupby("Type")[[
+        "Weights", "kij"
+    ]].apply(lambda x: x.prod(axis=1).sum()).reset_index())
     return df_with_weights, df
 
 
@@ -453,11 +442,10 @@ def save_bw_kij(df):
 
 
 def main():
-    dirs = (
-        sp.check_output("find . -type d -name '*cluster*' | sort", shell=True,)
-        .decode("utf-8")
-        .split("\n")[:-1]
-    )
+    dirs = (sp.check_output(
+        "find . -type d -name '*cluster*' | sort",
+        shell=True,
+    ).decode("utf-8").split("\n")[:-1])
     results = obtain_results(dirs)
     results_with_weights, bw = compute_boltzmann_weighted_values(results)
     save_all_kij(results_with_weights)

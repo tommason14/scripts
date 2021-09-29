@@ -1573,3 +1573,143 @@ U+1D6E1, MATHEMATICAL BOLD PI SYMBOL            , b.piv
 U+1D7CA, MATHEMATICAL BOLD CAPITAL DIGAMMA      , b.Gammad
 U+1D7CB, MATHEMATICAL BOLD SMALL DIGAMMA        , b.gammad
 U+207B, SUPERSCRIPT MINUS, supminus
+
+U+1F600, EMOJI, grinning face
+U+1F603, EMOJI, grinning face with big eyes
+U+1F604, EMOJI, grinning face with smiling eyes
+U+1F601, EMOJI, beaming face with smiling eyes
+U+1F606, EMOJI, grinning squinting face
+U+1F605, EMOJI, grinning face with sweat
+U+1F923, EMOJI, rolling on the floor laughing
+U+1F602, EMOJI, face with tears of joy
+U+1F642, EMOJI, slightly smiling face
+U+1F643, EMOJI, upside-down face
+U+1F609, EMOJI, winking face
+U+1F60A, EMOJI, smiling face with smiling eyes
+U+1F607, EMOJI, smiling face with halo
+
+U+1F970, EMOJI, smiling face with hearts
+U+1F60D, EMOJI, smiling face with heart-eyes
+U+1F929, EMOJI, star-struck
+U+1F618, EMOJI, face blowing a kiss
+U+1F617, EMOJI, kissing face
+U+263A, EMOJI, smiling face
+U+1F61A, EMOJI, kissing face with closed eyes
+U+1F619, EMOJI, kissing face with smiling eyes
+U+1F60B, EMOJI, face savoring food
+U+1F61B, EMOJI, face with tongue
+U+1F61C, EMOJI, winking face with tongue
+U+1F92A, EMOJI, zany face
+U+1F61D, EMOJI, squinting face with tongue
+U+1F911, EMOJI, money-mouth face
+U+1F917, EMOJI, hugging face
+U+1F92D, EMOJI, face with hand over mouth
+U+1F92B, EMOJI, shushing face
+U+1F914, EMOJI, thinking face
+U+1F910, EMOJI, zipper-mouth face
+U+1F928, EMOJI, face with raised eyebrow
+U+1F610, EMOJI, neutral face
+U+1F611, EMOJI, expressionless face
+U+1F636, EMOJI, face without mouth
+U+1F60F, EMOJI, smirking face
+U+1F612, EMOJI, unamused face
+U+1F644, EMOJI, face with rolling eyes
+U+1F62C, EMOJI, grimacing face
+U+1F925, EMOJI, lying face
+U+1F60C, EMOJI, relieved face
+U+1F614, EMOJI, pensive face
+U+1F62A, EMOJI, sleepy face
+U+1F924, EMOJI, drooling face
+U+1F634, EMOJI, sleeping face
+U+1F637, EMOJI, face with medical mask
+U+1F912, EMOJI, face with thermometer
+U+1F915, EMOJI, face with head-bandage
+U+1F922, EMOJI, nauseated face
+U+1F92E, EMOJI, face vomiting
+U+1F927, EMOJI, sneezing face
+U+1F975, EMOJI, hot face
+U+1F976, EMOJI, cold face
+U+1F974, EMOJI, woozy face
+U+1F635, EMOJI, dizzy face
+U+1F92F, EMOJI, exploding head
+U+1F920, EMOJI, cowboy hat face
+U+1F973, EMOJI, partying face
+U+1F60E, EMOJI, smiling face with sunglasses
+U+1F913, EMOJI, nerd face
+U+1F9D0, EMOJI, face with monocle
+U+1F615, EMOJI, confused face
+U+1F61F, EMOJI, worried face
+U+1F641, EMOJI, slightly frowning face
+U+2639, EMOJI, frowning face
+U+1F62E, EMOJI, face with open mouth
+U+1F62F, EMOJI, hushed face
+U+1F632, EMOJI, astonished face
+U+1F633, EMOJI, flushed face
+U+1F97A, EMOJI, pleading face
+U+1F626, EMOJI, frowning face with open mouth
+U+1F627, EMOJI, anguished face
+U+1F628, EMOJI, fearful face
+U+1F630, EMOJI, anxious face with sweat
+U+1F625, EMOJI, sad but relieved face
+U+1F622, EMOJI, crying face
+U+1F62D, EMOJI, loudly crying face
+U+1F631, EMOJI, face screaming in fear
+U+1F616, EMOJI, confounded face
+U+1F623, EMOJI, persevering face
+U+1F61E, EMOJI, disappointed face
+U+1F613, EMOJI, downcast face with sweat
+U+1F629, EMOJI, weary face
+U+1F62B, EMOJI, tired face
+U+1F624, EMOJI, face with steam from nose
+U+1F621, EMOJI, pouting face
+U+1F620, EMOJI, angry face
+U+1F92C, EMOJI, face with symbols on mouth
+U+1F44B, EMOJI, waving hand
+U+1F91A, EMOJI, raised back of hand
+U+1F590, EMOJI, hand with fingers splayed
+U+270B, EMOJI, raised hand
+U+1F596, EMOJI, vulcan salute
+U+1F44C, EMOJI, OK hand
+U+1F91E, EMOJI, crossed fingers
+U+1F91F, EMOJI, love-you gesture
+U+1F918, EMOJI, sign of the horns
+U+1F919, EMOJI, call me hand
+U+1F448, EMOJI, backhand index pointing left
+U+1F449, EMOJI, backhand index pointing right
+U+1F446, EMOJI, backhand index pointing up
+U+1F595, EMOJI, middle finger
+U+1F447, EMOJI, backhand index pointing down
+U+261D, EMOJI, index pointing up
+U+1F44D, EMOJI, thumbs up
+U+1F44E, EMOJI, thumbs down
+U+270A, EMOJI, raised fist
+U+1F44A, EMOJI, oncoming fist
+U+1F91B, EMOJI, left-facing fist
+U+1F91C, EMOJI, right-facing fist
+U+1F44F, EMOJI, clapping hands
+U+1F64C, EMOJI, raising hands
+U+1F450, EMOJI, open hands
+U+1F932, EMOJI, palms up together
+U+1F91D, EMOJI, handshake
+U+1F64F, EMOJI, folded hands
+U+2B06, EMOJI, up arrow
+U+2197, EMOJI, up-right arrow
+U+27A1, EMOJI, right arrow
+U+2198, EMOJI, down-right arrow
+U+2B07, EMOJI, down arrow
+U+2199, EMOJI, down-left arrow
+U+2B05, EMOJI, left arrow
+U+2196, EMOJI, up-left arrow
+U+2195, EMOJI, up-down arrow
+U+2194, EMOJI, left-right arrow
+U+21A9, EMOJI, right arrow curving left
+U+21AA, EMOJI, left arrow curving right
+U+2934, EMOJI, right arrow curving up
+U+2935, EMOJI, right arrow curving down
+U+1F503, EMOJI, clockwise vertical arrows
+U+1F504, EMOJI, counterclockwise arrows button
+U+1F519, EMOJI, BACK arrow
+U+1F51A, EMOJI, END arrow
+U+1F51B, EMOJI, ON! arrow
+U+1F51C, EMOJI, SOON arrow
+U+1F51D, EMOJI, TOP arrow
