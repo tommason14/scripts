@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+[[ $# -eq 0 || $1 =~ '-h' ]] && echo "Syntax: show [size] filename" && exit 1
+if [[ $# -eq 2 ]]
+then
+  size=$1
+  fname=$2
+else
+  size=1000
+  fname=$1
+fi
+display -geometry ${size}x${size} $fname
