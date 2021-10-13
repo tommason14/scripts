@@ -7,26 +7,19 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-c",
-                    "--coords",
-                    help="Coordinate/topology file (.gro/.pdb/.psf/.top etc)")
-parser.add_argument("-t",
-                    "--trajectory",
-                    help="Trajectory file(s) (.dcd/.pdb/.xtc etc)",
-                    nargs="+")
+parser.add_argument(
+    "-c", "--coords", help="Coordinate/topology file (.gro/.pdb/.psf/.top etc)"
+)
+parser.add_argument(
+    "-t", "--trajectory", help="Trajectory file(s) (.dcd/.pdb/.xtc etc)", nargs="+"
+)
 parser.add_argument("-ref", help="Reference MDAnalysis selection")
 parser.add_argument("-sel", help="MDAnalysis selection to search for")
 parser.add_argument(
-    "-o",
-    "--output",
-    help="Output prefix. Default = rdf",
-    default="rdf",
+    "-o", "--output", help="Output prefix. Default = rdf", default="rdf",
 )
 parser.add_argument(
-    "-p",
-    "--plot",
-    help="Plot data, saved with the output prefix",
-    action="store_true",
+    "-p", "--plot", help="Plot data, saved with the output prefix", action="store_true",
 )
 parser.add_argument(
     "-s",
@@ -42,6 +35,12 @@ parser.add_argument(
     default=15,
     type=float,
 )
+parser.add_argument(
+    "-i",
+    "--intermolecular",
+    help="Disregard interactions of atoms in the same residue",
+    action="store_true",
+)
 
 args = parser.parse_args()
 
@@ -52,15 +51,24 @@ sel = u.select_atoms(args.sel)
 print(f"Reference selection contains {ref.n_atoms} atoms")
 print(f"Mobile selection contains {sel.n_atoms} atoms")
 
-rdf = InterRDF(ref, sel, nbins=200, range=(args.start, args.end))
+if args.intermolecular:
+    ref_atoms = len(ref.residues[0].atoms)
+    sel_atoms = len(sel.residues[0].atoms)
+    rdf = InterRDF(
+        ref,
+        sel,
+        nbins=200,
+        range=(args.start, args.end),
+        exclusion_block=(ref_atoms, sel_atoms),
+    )
+else:
+    rdf = InterRDF(ref, sel, nbins=200, range=(args.start, args.end))
 rdf.run(verbose=True)
 df = pd.DataFrame({"bins": rdf.bins, "rdf": rdf.rdf})
-df.to_csv(args.output + '.csv', index=False)
+df.to_csv(args.output + ".csv", index=False)
 
 if args.plot:
-    sns.set(style="white",
-            font="Nimbus Sans",
-            rc={"mathtext.default": "regular"})
+    sns.set(style="white", font="Nimbus Sans", rc={"mathtext.default": "regular"})
     p = sns.lineplot(x="bins", y="rdf", ci=None, data=df)
     p.set_xlabel(r"Distance (${\AA}$)")
     p.set_ylabel("g(r)")
