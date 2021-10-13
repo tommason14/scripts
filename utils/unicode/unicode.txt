@@ -52,14 +52,11 @@ U+00AE, REGISTERED SIGN                        , reg, circledR, REG
 U+00AF, MACRON                                 , macr, strns
 U+00B0, DEGREE SIGN                            , deg
 U+00B1, PLUS-MINUS SIGN                        , plusmn, pm, PlusMinus
-U+00B2, SUPERSCRIPT TWO                        , sup2
-U+00B3, SUPERSCRIPT THREE                      , sup3
 U+00B4, ACUTE ACCENT                           , acute, DiacriticalAcute
 U+00B5, MICRO SIGN                             , micro
 U+00B6, PILCROW SIGN                           , para
 U+00B7, MIDDLE DOT                             , middot, centerdot, CenterDot
 U+00B8, CEDILLA                                , cedil, Cedilla
-U+00B9, SUPERSCRIPT ONE                        , sup1
 U+00BA, MASCULINE ORDINAL INDICATOR            , ordm
 U+00BB, RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK, raquo
 U+00BC, VULGAR FRACTION ONE QUARTER            , frac14
@@ -1573,6 +1570,25 @@ U+1D6E1, MATHEMATICAL BOLD PI SYMBOL            , b.piv
 U+1D7CA, MATHEMATICAL BOLD CAPITAL DIGAMMA      , b.Gammad
 U+1D7CB, MATHEMATICAL BOLD SMALL DIGAMMA        , b.gammad
 U+207B, SUPERSCRIPT MINUS, supminus
+U+2081, SUBSCRIPT ONE, sub1
+U+2082, SUBSCRIPT TWO, sub2
+U+2083, SUBSCRIPT THREE, sub3
+U+2084, SUBSCRIPT FOUR, sub4
+U+2085, SUBSCRIPT FIVE, sub5
+U+2086, SUBSCRIPT SIX, sub6
+U+2087, SUBSCRIPT SEVEN, sub7
+U+2088, SUBSCRIPT EIGHT, sub8
+U+2089, SUBSCRIPT NINE, sub9
+U+00B9, SUPERSCRIPT ONE                        , sup1
+U+00B2, SUPERSCRIPT TWO                        , sup2
+U+00B3, SUPERSCRIPT THREE                      , sup3
+U+2074, SUPERSCRIPT FOUR                      , sup4
+U+2075, SUPERSCRIPT FIVE                      , sup5
+U+2076, SUPERSCRIPT SIX                      , sup6
+U+2077, SUPERSCRIPT SEVEN                      , sup7
+U+2078, SUPERSCRIPT EIGHT                      , sup8
+U+2079, SUPERSCRIPT NINE                      , sup9
+
 
 U+1F600, EMOJI, grinning face
 U+1F603, EMOJI, grinning face with big eyes
