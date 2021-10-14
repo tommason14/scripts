@@ -16,7 +16,7 @@ if len(structs) != len(numbers):
 
 mols = {i: int(n) for i, n in enumerate(numbers, 1)}
 
-with open('moleculeID.tmp', 'w') as f:
+with open('moleculeID.txt', 'w') as f:
     f.write('Molecule    Type\n')
     total = 0
     for mol, num in mols.items():

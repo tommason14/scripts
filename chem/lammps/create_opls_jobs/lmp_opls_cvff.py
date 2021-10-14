@@ -3,102 +3,41 @@ from get_coeffs import getAtomData, getBond, getImproperCVFF
 from get_coeffs import getAngle, getDihedral
 from get_coeffs import getAtomPartialCharge, getMass
 import subprocess as sp
-import glob, re, sys
-""" Substitute in different labels to *-l.data files and create
-topology file with VMD topo. After VMD original names are
-substituted back in and coefficients, box size and atom data are
-added. This includes Pair Coeffs, Bond Coeffs, Angle Coeffs,
-Dihedral Coeffs, Improper Coeffs and Atoms (partial charges)
-sections and box dimensions - xlo, xhi, ylo, yhi, zlo, zhi. """
+import re
+import sys
 
 # PATTERN MATCHING
-pattern_labelled_xyz = "^\s*[A-Z]*[a-z]?[0-9]*\s+-?[0-9]\."
-pattern_coeffs = "^# [0-9]+\s+[A-Z]{1,2}[a-z]?[0-9]*"
+pattern_labelled_xyz = r"^\s*[A-Z]*[a-z]?[0-9]*\s+-?[0-9]\."
+pattern_coeffs = r"^# [0-9]+\s+[A-Z]{1,2}[a-z]?[0-9]*"
 
 if len(sys.argv) < 3:
     sys.exit("Syntax: lmp_opls.py xyzfile ff_file [output]")
 
-File = sys.argv[1]
+xyz = sys.argv[1]
 ff = sys.argv[2]
 try:
     output = sys.argv[3]
 except IndexError:
-    output = File.replace(".xyz", ".data")
-
-# NUMBER OF NEW ELEMENTS
-count = 0
-
-# NEW ELEMENT NAMES
-elemDict = {}
-
-# NEW LINES
-newLines = []
-with open(File, "r") as f:
-    for line in f.readlines()[2:]:
-        sym, coords = line.strip().split(" ", 1)
-        if sym not in elemDict.keys():
-            # unique atoms as C001, H002 etc...
-            count += 1
-            elemDict[sym] = sym[0] + f"{count:03d}"
-
-        newID = elemDict[sym]
-        newLines.append(newID + "   " + coords + "\n")
-with open("topo-in.xyz", "w") as new:
-    new.write(f"{len(newLines)}\n\n")
-    for line in newLines:
-        new.write(line)
-
-##### RUN VMD TOPO ----------------------------------------
+    output = xyz.replace(".xyz", ".data")
 
 # COMMANDS FOR VMD
-lines = ("package require topotools\n" + "topo retypebonds\n" +
-         "topo guessangles\n" + "topo guessdihedrals\n" +
-         "topo guessimpropers\n" + "set sel [atomselect top all]\n" +
+lines = ("package require topotools\n" + "package require pbctools\n" +
+         "topo retypebonds\n" + "topo guessangles\n" +
+         "topo guessdihedrals\n" + "topo guessimpropers\n" +
+         "set sel [atomselect top all]\n" +
          "$sel set resid [$sel get fragment]\n" +
+         "set minmax [measure minmax $sel]\n" +
+         "pbc set [vecsub [lindex $minmax 1] [lindex $minmax 0]]\n" +
          "topo writelammpsdata topo.out\n" + "exit")
 
-open("tempfile", "w+").write(lines)
+with open("create_lmp.tcl", "w+") as f:
+    f.write(lines)
 
-# OPEN VMD WITH EDITTED XYZ AND COMMAND FILE
-user = sp.check_output("echo $USER", shell=True).decode("utf8").strip()
-if user == "tommason":
-    vmd = "/Applications/VMD\ 1.9.4a38.app/Contents/vmd/vmd_MACOSXX86_64"
-elif user == "tmas0023":
-    vmd = "/Applications/VMD\ 1.9.3.app/Contents/vmd/vmd_MACOSXX86"
-else:
-    vmd = "vmd"  # module loaded
-cmd = f"{vmd} -dispdev none -m topo-in.xyz -e tempfile"
+cmd = f"vmd {xyz} -dispdev text -e create_lmp.tcl"
 sp.check_output(cmd, shell=True)
 
-### SUBSTITUTE IN ORIG NAMES ------------------------------
-
-newLines = []
-
-# SWITCH VALUES AND KEYS IN DICT FOR EASY ACCESS
-elemDict = {y: x for x, y in elemDict.items()}
-
-# FOR EACH LINE IN TOPO FILE
-lines = open("topo.out", "r+").readlines()
-for line in lines:
-
-    # FOR EACH NEW SYMBOL TO REPLACE
-    for newID in elemDict.keys():
-
-        # IF SYMBOL AFTER A HASH
-        if re.search("#.*" + newID, line):
-            # GET ORIG NAME
-            sym = elemDict[newID]
-
-            # REPLACE NEW WITH OLD STRING
-            line = line.replace(newID, sym)
-
-    newLines.append(line)
-
-### EDIT DATA FILE ----------------------------------------
-
-# READ LINES
-lines = newLines[:]
-
+with open('topo.out') as f:
+    lines = f.readlines()
 # SWITCHES - TURN ON WHEN FIND IN FILE
 pcoef = False  # Pair Coeffs
 bcoef = False  # Bond Coeffs
@@ -217,7 +156,7 @@ for line in lines:
         pcharges.append(pc)
 
     # FINISHED EDITTING LINES
-    elif re.search("^\s*Bonds\s*$", line):
+    elif re.search(r"^\s*Bonds\s*$", line):
         atoms = False
         newLines.append(line)
 
@@ -245,7 +184,7 @@ for i in range(len(newLines)):
         newLines[i] = "{:6.3f} {:6.3f}  zlo zhi\n".format(
             zvals[0] - 1, zvals[-1] + 1)
 
-    elif re.search("^\s*#\s*$", newLines[i]):
+    elif re.search(r"^\s*#\s*$", newLines[i]):
         newLines[i] = "\n"
 
 # Manually add masses so that odd atom names don't result in the wrong mass
@@ -258,11 +197,12 @@ for ind, line in enumerate(newLines):
         rm_start = ind
         continue
     if found_masses:
-        if re.search('^\s*[A-Z]', line):
+        if re.search(r'^\s*[A-Z]', line):
             rm_end = ind
             break
-
-newLines = newLines[:rm_start] + newLines[rm_end:]
+# if Masses was in the datafile then remove that section
+if rm_start != 0 and rm_end != 0:
+    newLines = newLines[:rm_start] + newLines[rm_end:]
 
 found_pairs = False
 masses = []
@@ -272,13 +212,12 @@ for line in newLines:
         continue
     if "Bond Coeffs" in line:
         break
-    if found_pairs and not re.search("^\s*$", line):
+    if found_pairs and not re.search(r"^\s*$", line):
         line = line.split()
         newline = [line[0], getMass(line[-1], ff), line[-1]]
         newline = "{:4} {:>9.4f}    # {}\n".format(*newline)
         masses.append(newline)
 masses = ["\n", "Masses\n", "\n"] + masses
-
 # add after box length
 zlo = 0
 for ind, line in enumerate(newLines, 1):
@@ -288,14 +227,14 @@ for ind, line in enumerate(newLines, 1):
 newLines = newLines[:zlo] + masses + newLines[zlo:]
 
 # REMOVE EXCESS FILES
-sp.check_output("rm topo-in.xyz topo.out tempfile", shell=True)
+sp.check_output("rm create_lmp.tcl topo.out", shell=True)
 
 # add new line below first line- polymatic's pack.pl needs it
 # lammps doesn't mind it
 newLines.insert(1, "\n")
 
 # WRITE .data FILE
-open(output, "w+").writelines(newLines)
+with open(output, "w+") as f:
+    f.writelines(newLines)
 
-# PRINT SUM OF PARTIAL CHARGES
-print(f"{File}   Charge: {sum(pcharges):5.5}")
+print(f"{xyz}   Charge: {sum(pcharges):5.4f}")
