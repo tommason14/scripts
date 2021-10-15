@@ -1,2 +1,2 @@
 package require pbctools
-pbc wrap -all
+pbc unwrap
