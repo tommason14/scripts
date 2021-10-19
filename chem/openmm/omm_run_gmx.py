@@ -49,16 +49,34 @@ def arguments():
         default=10000,
         type=int,
     )
+    parser.add_argument(
+        "-s",
+        "--scalecharge",
+        help="Scale atomic charges by a multiplication factor",
+        type=float,
+    )
     return parser.parse_args()
 
 
 def gen_simulation(
-    grofile, topfile, chk=None, temp=300, press=None, timestep=1, interval=10000
+    grofile,
+    topfile,
+    chk=None,
+    temp=300,
+    press=None,
+    timestep=1,
+    interval=10000,
+    charge_factor=None,
 ):
     # OpenMM parsers can't read virtual sites, so use parmed to be safe
     gro = load_file(grofile)
     top = load_file(topfile)
     top.box = gro.box[:]
+
+    if charge_factor is not None:
+        for atom in top.atoms:
+            atom.charge *= charge_factor
+
     system = top.createSystem(
         nonbondedMethod=PME,
         nonbondedCutoff=12 * angstroms,
@@ -117,6 +135,7 @@ def main():
         press=args.press,
         timestep=args.timestep,
         interval=args.interval,
+        charge_factor=args.scalecharge,
     )
     sim.step(args.steps)
 
