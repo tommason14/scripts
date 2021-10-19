@@ -4,6 +4,7 @@ from simtk.openmm import *
 from simtk.unit import *
 from parmed import load_file
 from mdtraj.reporters import XTCReporter
+import ommhelper as oh
 import sys
 import argparse
 
@@ -17,6 +18,11 @@ def arguments():
         "--top",
         help="Gromacs coordinate file, default = topol.top",
         default="topol.top",
+    )
+    parser.add_argument(
+        "--thermostat",
+        help="Choice of langevin or nose-hoover, default = langevin",
+        default="langevin",
     )
     parser.add_argument(
         "-t",
@@ -77,6 +83,7 @@ def gen_simulation(
     grofile,
     topfile,
     chk=None,
+    thermostat="langevin",
     temp=300,
     press=None,
     timestep=1,
@@ -116,9 +123,17 @@ def gen_simulation(
             force.addParticle(i, list(gro.positions[i]))
         system.addForce(force)
 
-    integrator = LangevinIntegrator(
-        temp * kelvin, 1 / picosecond, timestep * femtoseconds
-    )
+    if thermostat == "langevin":
+        integrator = LangevinIntegrator(
+            temp * kelvin, 1 / picosecond, timestep * femtoseconds
+        )
+    elif thermostat == "nose-hoover":
+        integrator = LangevinIntegrator(
+            temp * kelvin, 1 / picosecond, timestep * femtoseconds
+        )
+    else:
+        raise AttributeError("Thermostat not supported - use langevin or nose-hoover")
+
     simulation = Simulation(top.topology, system, integrator)
     if chk is not None:
         simulation.loadCheckpoint(chk)
@@ -136,7 +151,7 @@ def gen_simulation(
         simulation.context.setVelocitiesToTemperature(temp * kelvin)
 
     simulation.reporters.append(XTCReporter("traj.xtc", interval))
-    simulation.reporters.append(CheckpointReporter("restart.chk", interval))
+    simulation.reporters.append(oh.CheckpointReporter("cpt.cpt", interval))
     simulation.reporters.append(
         StateDataReporter(
             sys.stdout,
@@ -161,6 +176,7 @@ def main():
         grofile=args.gro,
         topfile=args.top,
         chk=args.chk,
+        thermostat=args.thermostat,
         temp=args.temp,
         press=args.press,
         timestep=args.timestep,
@@ -172,8 +188,13 @@ def main():
     if args.minimise:
         sim.minimizeEnergy()
         state = sim.context.getState(getPositions=True)
-        with open("min.pdb", "w") as f:
-            PDBFile.writeFile(sim.topology, state.getPositions(), f)
+        with open("min.gro", "w") as f:
+            oh.GroFile.writeFile(
+                sim.topology,
+                state.getPositions(asNumpy=True),
+                state.getPeriodicBoxVectors(),
+                f,
+            )
 
     sim.step(args.steps)
 
