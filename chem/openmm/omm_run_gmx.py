@@ -128,7 +128,7 @@ def gen_simulation(
             temp * kelvin, 1 / picosecond, timestep * femtoseconds
         )
     elif thermostat == "nose-hoover":
-        integrator = LangevinIntegrator(
+        integrator = NoseHooverIntegrator(
             temp * kelvin, 1 / picosecond, timestep * femtoseconds
         )
     else:
