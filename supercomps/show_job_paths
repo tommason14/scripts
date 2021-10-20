@@ -5,16 +5,7 @@ slurmpaths(){
 }
 
 pbspaths(){
-  # Assuming that the job path doesn't span more than two lines of the original qstat -f output
-  JobIDs="$(qstat -f | grep  "Job Id" | awk '{print $NF}')"
-  paths="$(qstat -f | sed -n '/PBS_O_WORKDIR/,/PBS_O/p' | sed 's/,PBS.*//;s/PBS_O_WORKDIR=//')"
-
-  partial_paths=()
-  while read line1 line2; do
-    partial_paths+=("$(echo "$line1 $line2" | tr -d '\n' | sed 's/\s//g' | awk -F'/' '{OFS="/"; print $(NF-3),$(NF-2),$(NF-1)}')")
-  done < <(printf "%s\n" "${paths[@]}" | xargs -n2)
-
-  paste <(printf "%s\n" "${JobIDs[@]}") <(printf "%s\n" "${partial_paths[@]}") | column -t
+  paste <(qstat | grep $USER | awk '{print $1}') <(qstat -f -F json | jq '.Jobs | .[].Variable_List.PBS_O_WORKDIR' | sed 's/"//g') | column -t
 }
 
 if env | grep -Fq SLURM || env | grep -Fq TACC

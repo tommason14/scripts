@@ -4,5 +4,5 @@ if env | grep -Fq SLURM || env | grep -Fq TACC
 then
   squeue -o "%10i %40j %t" -u $USER
 else
-  echo "Needs configuring for PBS" 
+  qstat -f | grep 'Job Id\|Job_Name' | awk '{print $NF}' | paste -s -d ' \n' | column -t
 fi
