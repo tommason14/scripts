@@ -165,11 +165,17 @@ def lammps_mdanalysis(data, traj):
     format_needed = any(traj.endswith(x) for x in ("lmp", "lammpstrj"))
     top_needed = not data.endswith("data")
     if format_needed and top_needed:
-        u = mda.Universe(data, traj, topology_format="DATA", format="LAMMPSDUMP")
+        u = mda.Universe(data,
+                         traj,
+                         topology_format="DATA",
+                         format="LAMMPSDUMP")
     elif format_needed:
         u = mda.Universe(data, traj, format="LAMMPSDUMP")
     elif top_needed:
-        u = mda.Universe(data, traj, topology_format="DATA", format="LAMMPSDUMP")
+        u = mda.Universe(data,
+                         traj,
+                         topology_format="DATA",
+                         format="LAMMPSDUMP")
     else:
         u = mda.Universe(data, traj)
 
@@ -264,3 +270,27 @@ def completion(iterable):
         yield val
         sys.stdout.write(f"\r{num/total*100:.2f} % complete")
     sys.stdout.write("\n")
+
+
+def pipe(original):
+    """
+    Use as a decorator on any function.
+    For example:
+    @pipe
+    def func(*args, **kwargs):
+        ...
+
+    obj >> func()
+    """
+    class PipeInto(object):
+        data = {'function': original}
+
+        def __init__(self, *args, **kwargs):
+            self.data['args'] = args
+            self.data['kwargs'] = kwargs
+
+        def __rrshift__(self, other):
+            return self.data['function'](other, *self.data['args'],
+                                         **self.data['kwargs'])
+
+    return PipeInto
