@@ -89,7 +89,8 @@ def convert_traj(args):
         print('Wrapping trajectory')
         ag = sel.atoms
         transform = mda.transformations.wrap(ag, compound='residues')
-        frames.add_transformations(transform)
+        # can't add transformations to a slice...
+        u.trajectory.add_transformations(transform)
 
     with mda.Writer(args.output, sel.n_atoms) as f:
         for _ in completion(frames):
