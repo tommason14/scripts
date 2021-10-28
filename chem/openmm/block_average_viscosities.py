@@ -10,13 +10,14 @@ FEMTOSECONDS_TO_NANOSECONDS = 1e-15 / 1e-9
 def command_line_args():
     parser = argparse.ArgumentParser(
         description="""\
-    Average viscosities over various simulation lengths. Uses output from the openmm-velocity-verlet plugin that computes viscosity as a
-    function of applied cosine-acceleration.
+Average viscosities over various simulation lengths. 
+Uses output from the openmm-velocity-verlet plugin that computes viscosity as a
+function of applied cosine-acceleration.
 
-    Example usage:
-    block_average_viscosities.py -f viscosity.txt viscosity2.txt -b 0 10 0 20
-    
-    To take in values from two log files and compute average viscosities from 0-10 ns and 0-20 ns
+Example usage:
+block_average_viscosities.py -f viscosity.txt viscosity2.txt -b 0 10 0 20
+
+To take in values from two log files and compute average viscosities from 0-10 ns and 0-20 ns
     """,
         formatter_class=argparse.RawTextHelpFormatter,
     )
@@ -25,6 +26,7 @@ def command_line_args():
         "--files",
         help="Output files containing cosine acceleration data from OpenMM",
         nargs="+",
+        required=True,
     )
     parser.add_argument(
         "-b",
@@ -32,6 +34,7 @@ def command_line_args():
         help="Space-separated regions to average over, in ns",
         nargs="+",
         type=float,
+        required=True,
     )
     parser.add_argument(
         "-dt", "--timestep", help="Timestep in fs. Default = 1", default=1, type=int
