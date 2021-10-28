@@ -5,6 +5,7 @@ from simtk.unit import *
 from parmed import load_file
 from mdtraj.reporters import XTCReporter
 import ommhelper as oh
+import os
 import sys
 import argparse
 
@@ -140,17 +141,18 @@ def gen_simulation(
         simulation.currentStep = (
             round(
                 simulation.context.getState().getTime().value_in_unit(picoseconds)
-                / timestep
+                / (timestep / 1000)
                 / 10
             )
             * 10
         )
-        simulation.context.setTime(simulation.currentStep * timestep)
+        simulation.context.setTime(simulation.currentStep * (timestep / 1000))
     else:
         simulation.context.setPositions(gro.positions)
         simulation.context.setVelocitiesToTemperature(temp * kelvin)
 
-    simulation.reporters.append(XTCReporter("traj.xtc", interval))
+    append_xtc = "traj.xtc" in os.listdir(".")
+    simulation.reporters.append(XTCReporter("traj.xtc", interval, append=append_xtc))
     simulation.reporters.append(oh.CheckpointReporter("cpt.cpt", interval))
     simulation.reporters.append(
         StateDataReporter(

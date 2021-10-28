@@ -8,20 +8,20 @@ import seaborn as sns
 import sys
 from tqdm import tqdm
 
-if len(sys.argv) != 3 or any("-h" in x for x in sys.argv[1:]):
-    print("Syntax: radius_of_gyration.py file.tpr file.xtc")
+if len(sys.argv) < 3 or any("-h" in x for x in sys.argv[1:]):
+    print("Syntax: radius_of_gyration.py file.tpr file.xtc [file2.xtc...]")
     sys.exit(1)
 
-u = mda.Universe(sys.argv[1], sys.argv[2])
+u = mda.Universe(sys.argv[1], *sys.argv[2:])
 
-cr61 = u.select_atoms("resname pol")
+pol = u.select_atoms("resname pol")
 
 # Rg for multiple polymers
-resids = np.unique(cr61.resids)
+resids = np.unique(pol.resids)
 rg = []
 for ts in tqdm(u.trajectory):
     for res in resids:
-        polymer = cr61.select_atoms(f"resid {res}")
+        polymer = pol.select_atoms(f"resid {res}")
         rg.append((res, ts.time, polymer.radius_of_gyration()))
 df = pd.DataFrame(rg, columns=["Residue", "Time (ps)", "Rg"])
 df["Time (ns)"] = df["Time (ps)"] / 1000
