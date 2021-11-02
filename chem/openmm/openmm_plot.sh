@@ -16,7 +16,7 @@ Syntax: $(basename $0) output" && exit 1
 
 plot_with_csv(){
   # remove Step from choice for user, then add one to their choice to find correct column
-  opts=$(head -1 $1 | tr ',' '\n' | tail -n +2 | nl)
+  opts=$(grep Step $1 | head -1 | tr ',' '\n' | tail -n +2 | nl)
 
   # read stdin so that "echo density | openmm_plot.sh output.csv" works
   if [[ -p /dev/stdin ]]
