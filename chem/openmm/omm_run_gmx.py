@@ -12,9 +12,9 @@ import argparse
 
 def arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--gro", help="Gromacs coordinate file, default = conf.gro", default="conf.gro"
-    )
+    parser.add_argument("--gro",
+                        help="Gromacs coordinate file, default = conf.gro",
+                        default="conf.gro")
     parser.add_argument(
         "--top",
         help="Gromacs coordinate file, default = topol.top",
@@ -46,9 +46,10 @@ def arguments():
         type=float,
     )
     parser.add_argument("--chk", help="Checkpoint file to restart simulation")
-    parser.add_argument(
-        "-n", "--steps", help="Number of steps to run simulation for", type=int
-    )
+    parser.add_argument("-n",
+                        "--steps",
+                        help="Number of steps to run simulation for",
+                        type=int)
     parser.add_argument(
         "-i",
         "--interval",
@@ -65,10 +66,8 @@ def arguments():
     parser.add_argument(
         "-r",
         "--restrain",
-        help=(
-            "Add position restraints to these residues. "
-            "Pass in a list of residue names separated by spaces"
-        ),
+        help=("Add position restraints to these residues. "
+              "Pass in a list of residue names separated by spaces"),
         nargs="+",
     )
     parser.add_argument(
@@ -93,11 +92,13 @@ def gen_simulation(
     restrain=None,
 ):
     # OpenMM parsers can't read virtual sites, so use parmed to be safe
+    print('Creating simulation system...')
     gro = load_file(grofile)
     top = load_file(topfile)
     top.box = gro.box[:]
 
     if charge_factor is not None:
+        print(f'Charge scaling by {charge_factor}...')
         for atom in top.atoms:
             atom.charge *= charge_factor
 
@@ -108,6 +109,7 @@ def gen_simulation(
         rigidWater=True,
     )
     if press is not None:
+        print(f'Applying barostat at {press} bar...')
         baro = MonteCarloBarostat(press * bar, temp * kelvin)
         system.addForce(baro)
 
@@ -116,7 +118,8 @@ def gen_simulation(
             a.idx for a in top.atoms for x in restrain if a.residue.name == x
         ]
         force = CustomExternalForce("k*((x-x0)^2+(y-y0)^2+(z-z0)^2)")
-        force.addGlobalParameter("k", 5.0 * kilocalories_per_mole / angstroms ** 2)
+        force.addGlobalParameter("k",
+                                 5.0 * kilocalories_per_mole / angstroms**2)
         force.addPerParticleParameter("x0")
         force.addPerParticleParameter("y0")
         force.addPerParticleParameter("z0")
@@ -124,35 +127,32 @@ def gen_simulation(
             force.addParticle(i, list(gro.positions[i]))
         system.addForce(force)
 
+    print(f'Applying {thermostat} thermostat at {temp} K...')
     if thermostat == "langevin":
-        integrator = LangevinIntegrator(
-            temp * kelvin, 1 / picosecond, timestep * femtoseconds
-        )
+        integrator = LangevinIntegrator(temp * kelvin, 1 / picosecond,
+                                        timestep * femtoseconds)
     elif thermostat == "nose-hoover":
-        integrator = NoseHooverIntegrator(
-            temp * kelvin, 1 / picosecond, timestep * femtoseconds
-        )
+        integrator = NoseHooverIntegrator(temp * kelvin, 1 / picosecond,
+                                          timestep * femtoseconds)
     else:
-        raise AttributeError("Thermostat not supported - use langevin or nose-hoover")
+        raise AttributeError(
+            "Thermostat not supported - use langevin or nose-hoover")
 
     simulation = Simulation(top.topology, system, integrator)
     if chk is not None:
+        print(f'Loading {chk}...')
         simulation.loadCheckpoint(chk)
-        simulation.currentStep = (
-            round(
-                simulation.context.getState().getTime().value_in_unit(picoseconds)
-                / (timestep / 1000)
-                / 10
-            )
-            * 10
-        )
+        simulation.currentStep = (round(
+            simulation.context.getState().getTime().value_in_unit(picoseconds)
+            / (timestep / 1000) / 10) * 10)
         simulation.context.setTime(simulation.currentStep * (timestep / 1000))
     else:
         simulation.context.setPositions(gro.positions)
         simulation.context.setVelocitiesToTemperature(temp * kelvin)
 
     append_xtc = "traj.xtc" in os.listdir(".")
-    simulation.reporters.append(XTCReporter("traj.xtc", interval, append=append_xtc))
+    simulation.reporters.append(
+        XTCReporter("traj.xtc", interval, append=append_xtc))
     simulation.reporters.append(oh.CheckpointReporter("cpt.cpt", interval))
     simulation.reporters.append(
         StateDataReporter(
@@ -167,8 +167,7 @@ def gen_simulation(
             density=True,
             volume=True,
             speed=True,
-        )
-    )
+        ))
     return simulation
 
 
@@ -188,6 +187,7 @@ def main():
     )
 
     if args.minimise:
+        print('Minimising...')
         sim.minimizeEnergy()
         state = sim.context.getState(getPositions=True)
         with open("min.gro", "w") as f:
@@ -197,7 +197,7 @@ def main():
                 state.getPeriodicBoxVectors(),
                 f,
             )
-
+    print('Running...')
     sim.step(args.steps)
 
 
