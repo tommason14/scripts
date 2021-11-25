@@ -124,6 +124,7 @@ def main():
         results["Viscosity (mPa.s)"].append(f"{mean*1e3:.3f} +/- {std*1e3:.3f}")
 
     responsive_table(results, strings=[3], decimal_places=1)
+    print("Results saved in visc_averages.csv")
     pd.DataFrame(results).to_csv("visc_averages.csv", index=False)
 
 
