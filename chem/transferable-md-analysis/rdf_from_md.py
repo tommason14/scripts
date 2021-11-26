@@ -2,9 +2,27 @@
 import MDAnalysis as mda
 from MDAnalysis.analysis.rdf import InterRDF
 import argparse
+import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+
+
+class COM:
+    def __init__(self, ag):
+        self._groups = list(ag.groupby("resids").values())
+
+    def __len__(self):
+        return len(self._groups)
+
+    @property
+    def positions(self):
+        return np.array([g.center_of_mass() for g in self._groups], dtype=np.float32)
+
+    @property
+    def universe(self):
+        return self._groups[0].universe
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -36,6 +54,12 @@ parser.add_argument(
     type=float,
 )
 parser.add_argument(
+    "-com",
+    "--centre-of-mass",
+    help="Compute RDFs using the centre of mass of each selection",
+    action="store_true",
+)
+parser.add_argument(
     "-i",
     "--intermolecular",
     help="Disregard interactions of atoms in the same residue",
@@ -50,6 +74,10 @@ sel = u.select_atoms(args.sel)
 
 print(f"Reference selection contains {ref.n_atoms} atoms")
 print(f"Mobile selection contains {sel.n_atoms} atoms")
+
+if args.centre_of_mass:
+    ref = COM(ref)
+    sel = COM(sel)
 
 if args.intermolecular:
     ref_atoms = len(ref.residues[0].atoms)
