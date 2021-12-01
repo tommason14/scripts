@@ -140,6 +140,10 @@ def gen_simulation(
     if cos != 0:
         from velocityverletplugin import VVIntegrator
 
+        print(
+            "Note: Nose-Hoover integration is used for all viscosity calculations. "
+            "The periodic perturbation method is implemented as a method of the NH integrator."
+        )
         integrator = VVIntegrator(
             temp * kelvin,
             10 / picoseconds,
@@ -147,6 +151,7 @@ def gen_simulation(
             40 / picoseconds,
             timestep * femtoseconds,
         )
+        integrator.setUseMiddleScheme(True)
         integrator.setCosAcceleration(cos)
     if thermostat == "langevin":
         integrator = LangevinIntegrator(
