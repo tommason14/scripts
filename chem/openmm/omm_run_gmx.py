@@ -72,6 +72,13 @@ def arguments():
         nargs="+",
     )
     parser.add_argument(
+        "--cos",
+        type=float,
+        default=0,
+        help="Cosine acceleration for periodic-perturbation viscosity calculations in units of nm/ps²",
+    )
+
+    parser.add_argument(
         "-min",
         "--minimise",
         help="Minimise energy before simulation",
@@ -91,6 +98,7 @@ def gen_simulation(
     interval=10000,
     charge_factor=None,
     restrain=None,
+    cos=0,
 ):
     # OpenMM parsers can't read virtual sites, so use parmed to be safe
     print("Creating simulation system...")
@@ -128,6 +136,18 @@ def gen_simulation(
         system.addForce(force)
 
     print(f"Applying {thermostat} thermostat at {temp} K...")
+    # use Zheng's integrator if cosine acceleration is desired
+    if cos != 0:
+        from velocityverletplugin import VVIntegrator
+
+        integrator = VVIntegrator(
+            temp * kelvin,
+            10 / picoseconds,
+            1 * kelvin,
+            40 / picoseconds,
+            timestep * femtoseconds,
+        )
+        integrator.setCosAcceleration(cos)
     if thermostat == "langevin":
         integrator = LangevinIntegrator(
             temp * kelvin, 1 / picosecond, timestep * femtoseconds
@@ -190,6 +210,7 @@ def main():
         interval=args.interval,
         charge_factor=args.scalecharge,
         restrain=args.restrain,
+        cos=args.cos,
     )
 
     if args.minimise:
