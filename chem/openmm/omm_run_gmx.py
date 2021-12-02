@@ -135,7 +135,6 @@ def gen_simulation(
             force.addParticle(i, list(gro.positions[i]))
         system.addForce(force)
 
-    print(f"Applying {thermostat} thermostat at {temp} K...")
     # use Zheng's integrator if cosine acceleration is desired
     if cos != 0:
         from velocityverletplugin import VVIntegrator
@@ -144,6 +143,7 @@ def gen_simulation(
             "Note: Nose-Hoover integration is used for all viscosity calculations. "
             "The periodic perturbation method is implemented as a method of the NH integrator."
         )
+        print("Applying NH thermostat at {temp} K...")
         integrator = VVIntegrator(
             temp * kelvin,
             10 / picoseconds,
@@ -153,16 +153,20 @@ def gen_simulation(
         )
         integrator.setUseMiddleScheme(True)
         integrator.setCosAcceleration(cos)
-    if thermostat == "langevin":
-        integrator = LangevinIntegrator(
-            temp * kelvin, 1 / picosecond, timestep * femtoseconds
-        )
-    elif thermostat == "nose-hoover":
-        integrator = NoseHooverIntegrator(
-            temp * kelvin, 1 / picosecond, timestep * femtoseconds
-        )
     else:
-        raise AttributeError("Thermostat not supported - use langevin or nose-hoover")
+        print(f"Applying {thermostat} thermostat at {temp} K...")
+        if thermostat == "langevin":
+            integrator = LangevinIntegrator(
+                temp * kelvin, 1 / picosecond, timestep * femtoseconds
+            )
+        elif thermostat == "nose-hoover":
+            integrator = NoseHooverIntegrator(
+                temp * kelvin, 1 / picosecond, timestep * femtoseconds
+            )
+        else:
+            raise AttributeError(
+                "Thermostat not supported - use langevin or nose-hoover"
+            )
 
     simulation = Simulation(top.topology, system, integrator)
     if chk is not None:
