@@ -203,6 +203,11 @@ def gen_simulation(
             speed=True,
         )
     )
+    if cos != 0:
+        append_cos = "viscosity.txt" in os.listdir(".")
+        sim.reporters.append(
+            oh.ViscosityReporter("viscosity.txt", 1000, append=append_cos)
+        )
     return simulation
 
 
