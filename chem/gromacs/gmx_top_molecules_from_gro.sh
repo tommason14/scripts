@@ -22,4 +22,6 @@ check_columns(){
 awk '{if($1 ~ /[A-z]/){print $1;} else {print $1$2}}'
 }
 
-sed 1d $1 | sed '1d;$d' | check_columns  | uniq | sed 's/[0-9]\+//' | uniq -c | awk '{print $2," ",$1}' | column -t
+[[ $USER =~ (tmas0023|tommason) ]] && sed='gsed' || sed='sed'
+
+sed 1d $1 | sed '1d;$d' | check_columns  | uniq | $sed 's/[0-9]\+//' | uniq -c | awk '{print $2," ",$1}' | column -t

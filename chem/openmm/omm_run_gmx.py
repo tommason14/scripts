@@ -72,6 +72,13 @@ def arguments():
         nargs="+",
     )
     parser.add_argument(
+        "--cos",
+        type=float,
+        default=0,
+        help="Cosine acceleration for periodic-perturbation viscosity calculations in units of nm/ps²",
+    )
+
+    parser.add_argument(
         "-min",
         "--minimise",
         help="Minimise energy before simulation",
@@ -91,6 +98,7 @@ def gen_simulation(
     interval=10000,
     charge_factor=None,
     restrain=None,
+    cos=0,
 ):
     # OpenMM parsers can't read virtual sites, so use parmed to be safe
     print("Creating simulation system...")
@@ -127,17 +135,38 @@ def gen_simulation(
             force.addParticle(i, list(gro.positions[i]))
         system.addForce(force)
 
-    print(f"Applying {thermostat} thermostat at {temp} K...")
-    if thermostat == "langevin":
-        integrator = LangevinIntegrator(
-            temp * kelvin, 1 / picosecond, timestep * femtoseconds
+    # use Zheng's integrator if cosine acceleration is desired
+    if cos != 0:
+        from velocityverletplugin import VVIntegrator
+
+        print(
+            "Note: Nose-Hoover integration is used for all viscosity calculations. "
+            "The periodic perturbation method is implemented as a method of the NH integrator."
         )
-    elif thermostat == "nose-hoover":
-        integrator = NoseHooverIntegrator(
-            temp * kelvin, 1 / picosecond, timestep * femtoseconds
+        print("Applying NH thermostat at {temp} K...")
+        integrator = VVIntegrator(
+            temp * kelvin,
+            10 / picoseconds,
+            1 * kelvin,
+            40 / picoseconds,
+            timestep * femtoseconds,
         )
+        integrator.setUseMiddleScheme(True)
+        integrator.setCosAcceleration(cos)
     else:
-        raise AttributeError("Thermostat not supported - use langevin or nose-hoover")
+        print(f"Applying {thermostat} thermostat at {temp} K...")
+        if thermostat == "langevin":
+            integrator = LangevinIntegrator(
+                temp * kelvin, 1 / picosecond, timestep * femtoseconds
+            )
+        elif thermostat == "nose-hoover":
+            integrator = NoseHooverIntegrator(
+                temp * kelvin, 1 / picosecond, timestep * femtoseconds
+            )
+        else:
+            raise AttributeError(
+                "Thermostat not supported - use langevin or nose-hoover"
+            )
 
     simulation = Simulation(top.topology, system, integrator)
     if chk is not None:
@@ -174,6 +203,11 @@ def gen_simulation(
             speed=True,
         )
     )
+    if cos != 0:
+        append_cos = "viscosity.txt" in os.listdir(".")
+        simulation.reporters.append(
+            oh.ViscosityReporter("viscosity.txt", 1000, append=append_cos)
+        )
     return simulation
 
 
@@ -190,6 +224,7 @@ def main():
         interval=args.interval,
         charge_factor=args.scalecharge,
         restrain=args.restrain,
+        cos=args.cos,
     )
 
     if args.minimise:
