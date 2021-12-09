@@ -15,7 +15,6 @@ sett.meta.ncpus = 16
 sett.meta.mem = "64gb"
 sett.meta.nodemem = "64gb"
 sett.meta.time = "2:00:00"
-sett.meta.partition = "comp,short"
 
 
 def get_basis(
