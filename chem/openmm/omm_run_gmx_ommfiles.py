@@ -101,7 +101,7 @@ def gen_simulation(
 ):
     print("Creating simulation system...")
     gro = GromacsGroFile(grofile)
-    top = GromacsTopFile(topfile, periodicBoxVectors=gro.getPeriodicBoxVectors)
+    top = GromacsTopFile(topfile, periodicBoxVectors=gro.getPeriodicBoxVectors())
 
     if charge_factor is not None:
         print(f"Charge scaling by {charge_factor}...")
