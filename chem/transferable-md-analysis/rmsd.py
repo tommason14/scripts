@@ -29,7 +29,7 @@ parser.add_argument(
 args = parser.parse_args()
 weights = "mass" if args.mass_weighted else None
 u = mda.Universe(args.coords, *args.trajectory)
-rmsd = rms.RMSD(u, u, "protein or resname HEM", weights=weights).run()
+rmsd = rms.RMSD(u, u, args.selection, weights=weights).run()
 
 df = (
     pd.DataFrame(rmsd.results.rmsd, columns=["Frame", "Time (ps)", "RMSD"])
