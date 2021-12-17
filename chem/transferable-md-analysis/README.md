@@ -39,3 +39,9 @@ in order for a histogram to be plotted
 ## Radial distribution functions (rdf_from_md.py)
 
 - Given reference and selection atom groups, an rdf is calculated within 15 angstroms of the reference
+
+## RMSD (rmsd.py)
+
+- Root mean squared deviation of a given selection
+- Optional mass-weighting
+- CSV saved, optional plot created
