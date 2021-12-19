@@ -3,47 +3,31 @@
 import MDAnalysis as mda
 from MDAnalysis import transformations
 import argparse
-
-
-def completion(iterable):
-    """
-    Write percentage completion of a loop to the screen
-    """
-    import sys
-
-    total = len(iterable)
-    for num, val in enumerate(iterable):
-        yield val
-        sys.stdout.write(f"\r{num/total*100:.2f} % complete")
-    sys.stdout.write("\n")
+from utils import completion
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Convert trajectories to different formats via MDAnalysis")
-    parser.add_argument("-c",
-                        "--coords",
-                        help="Coordinate file (.gro/.psf/.pdb)",
-                        required=True)
-    parser.add_argument("-t",
-                        "--traj",
-                        help="Trajectory file(s) (.dcd/.xtc)",
-                        nargs="+",
-                        required=True)
+        description="Convert trajectories to different formats via MDAnalysis"
+    )
+    parser.add_argument(
+        "-c", "--coords", help="Coordinate file (.gro/.psf/.pdb)", required=True
+    )
+    parser.add_argument(
+        "-t", "--traj", help="Trajectory file(s) (.dcd/.xtc)", nargs="+", required=True
+    )
     parser.add_argument(
         "-o",
         "--output",
-        help=
-        "Filename to write to, default is a pdb with the same name as the trajectory",
+        help="Filename to write to, default is a pdb with the same name as the trajectory",
     )
-    parser.add_argument("-nodrudes",
-                        help="Remove drude particles from trajectory",
-                        action="store_true")
-    parser.add_argument("-novirtuals",
-                        help="Remove virtual sites from trajectory",
-                        action="store_true")
-    parser.add_argument("--sel",
-                        help="Selection of atoms, for example 'resname bf4'")
+    parser.add_argument(
+        "-nodrudes", help="Remove drude particles from trajectory", action="store_true"
+    )
+    parser.add_argument(
+        "-novirtuals", help="Remove virtual sites from trajectory", action="store_true"
+    )
+    parser.add_argument("--sel", help="Selection of atoms, for example 'resname bf4'")
     parser.add_argument(
         "-s",
         "--start",
@@ -57,9 +41,10 @@ def parse_args():
         type=int,
     )
     parser.add_argument(
-        '--wrap',
-        help='Wrap trajectory so that each residue remains intact',
-        action='store_true')
+        "--wrap",
+        help="Wrap trajectory so that each residue remains intact",
+        action="store_true",
+    )
     return parser.parse_args()
 
 
@@ -77,18 +62,18 @@ def convert_traj(args):
         sel = sel.select_atoms(args.sel)
 
     if args.start and args.end:
-        frames = u.trajectory[args.start:args.end]
+        frames = u.trajectory[args.start : args.end]
     elif args.start:
-        frames = u.trajectory[args.start:]
+        frames = u.trajectory[args.start :]
     elif args.end:
-        frames = u.trajectory[:args.end]
+        frames = u.trajectory[: args.end]
     else:
         frames = u.trajectory
 
     if args.wrap:
-        print('Wrapping trajectory')
+        print("Wrapping trajectory")
         ag = sel.atoms
-        transform = mda.transformations.wrap(ag, compound='residues')
+        transform = mda.transformations.wrap(ag, compound="residues")
         # can't add transformations to a slice...
         u.trajectory.add_transformations(transform)
 

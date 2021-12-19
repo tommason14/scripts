@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from utils import get_font
 
 
 class COM:
@@ -96,7 +97,7 @@ df = pd.DataFrame({"bins": rdf.bins, "rdf": rdf.rdf})
 df.to_csv(args.output + ".csv", index=False)
 
 if args.plot:
-    sns.set(style="white", font="Nimbus Sans", rc={"mathtext.default": "regular"})
+    sns.set(style="white", font=get_font(), rc={"mathtext.default": "regular"})
     p = sns.lineplot(x="bins", y="rdf", ci=None, data=df)
     p.set_xlabel(r"Distance (${\AA}$)")
     p.set_ylabel("g(r)")

@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 import MDAnalysis as mda
 from MDAnalysis.analysis import rms
+import MDAnalysis.transformations as trans
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from utils import get_font
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -20,6 +22,11 @@ parser.add_argument(
     "-w", "--mass-weighted", help="Mass-weight RMSD per atom", action="store_true"
 )
 parser.add_argument(
+    "--centre",
+    help="Pre-process the trajectory so that the selected atoms are centred in the each frame before computing RMSDs",
+    action="store_true",
+)
+parser.add_argument(
     "-o", "--output", help="Prefix of saved files, default=rmsd", default="rmsd"
 )
 parser.add_argument(
@@ -29,6 +36,15 @@ parser.add_argument(
 args = parser.parse_args()
 weights = "mass" if args.mass_weighted else None
 u = mda.Universe(args.coords, *args.trajectory)
+if args.centre:
+    selection = u.select_atoms(args.selection)
+    notsel = mda.AtomGroup([a for a in u.atoms if a not in selection])
+    transforms = [
+        trans.unwrap(selection),
+        trans.center_in_box(selection, wrap=True),
+        trans.wrap(notsel),
+    ]
+    u.trajectory.add_transformations(*transforms)
 rmsd = rms.RMSD(u, u, args.selection, weights=weights).run()
 
 df = (
@@ -40,7 +56,7 @@ df.to_csv(args.output + ".csv", index=False)
 if args.plot:
     sns.set(
         style="ticks",
-        font="Nimbus Sans",
+        font=get_font(),
         font_scale=1.2,
         rc={"mathtext.default": "regular"},
     )

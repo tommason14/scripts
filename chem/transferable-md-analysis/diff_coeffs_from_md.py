@@ -9,6 +9,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy.stats import linregress
+from utils import get_font
 
 
 class EinsteinMSD(AnalysisBase):
@@ -312,8 +313,13 @@ def plot_msd(df, start=0.1, end=0.9):
     Filled area represents the region used to compute 
     diffusion coefficients.
     """
-    sns.set(style="white", palette="rainbow")
-    plt.rcParams["mathtext.default"] = "regular"
+    sns.set(
+        style="white",
+        palette="rainbow",
+        font=get_font(),
+        font_scale=1.2,
+        rc={"mathtext.default": "regular"},
+    )
     p = sns.lineplot(x="Time (ns)", y="MSD", hue="resname", data=df, ci=None)
     plt.axvspan(
         start * df["Time (ns)"].max(),

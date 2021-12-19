@@ -5,6 +5,7 @@ import argparse
 import numpy as np
 import pandas as pd
 import sys
+from utils import completion
 
 
 def parse_args():
@@ -12,7 +13,10 @@ def parse_args():
         description="Compute dipole moments via MDAnalysis"
     )
     parser.add_argument(
-        "-p", "--topology", help="Topology file that must contain charges (.top/.psf)", required=True
+        "-p",
+        "--topology",
+        help="Topology file that must contain charges (.top/.psf)",
+        required=True,
     )
     parser.add_argument(
         "-t", "--traj", help="Trajectory file (.dcd/.xtc)", required=True
@@ -92,12 +96,10 @@ def _calc_dipoles_all_frames(selection, frames):
     """
     dipole_moments = {res: [] for res in np.unique(selection.atoms.resnames)}
     numframes = len(frames)
-    for num, ts in enumerate(frames):
+    for ts in completion(frames):
         dipoles = _calc_dipoles(selection)
         for res, dipole_moment_list in dipoles.items():
             dipole_moments[res] += dipole_moment_list
-        sys.stdout.write(f"\r{num/numframes * 100:.2f}% complete")
-    sys.stdout.write("\n")
     return dipole_moments
 
 

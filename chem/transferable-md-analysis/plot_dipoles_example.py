@@ -1,6 +1,7 @@
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from utils import get_font
 
 
 def one_plot(df):
@@ -48,7 +49,7 @@ def main():
     # note that rc params are not used in facetgrid functions (i.e. displot)
     sns.set(
         style="ticks",
-        font="Nimbus Sans",
+        font=get_font(),
         palette="rainbow",
         context="talk",
         rc={"figure.figsize": (5, 5)},

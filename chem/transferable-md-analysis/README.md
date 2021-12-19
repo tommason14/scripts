@@ -40,8 +40,13 @@ in order for a histogram to be plotted
 
 - Given reference and selection atom groups, an rdf is calculated within 15 angstroms of the reference
 
-## RMSD (rmsd.py)
+## RMSD (rmsd_from_md.py)
 
 - Root mean squared deviation of a given selection
 - Optional mass-weighting
+- CSV saved, optional plot created
+
+## RMSF (rmsf_from_md.py)
+
+- Root mean squared fluctuations for each residue of a given selection
 - CSV saved, optional plot created
