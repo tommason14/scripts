@@ -50,3 +50,9 @@ in order for a histogram to be plotted
 
 - Root mean squared fluctuations for each residue of a given selection
 - CSV saved, optional plot created
+
+## Radius of gyration (rgyr_from_md.py)
+
+- Radius of gyration found over time for a given selection, and optionally
+  for each residue of that selection
+- CSV saved, optional plot created
