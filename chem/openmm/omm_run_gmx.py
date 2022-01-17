@@ -47,6 +47,13 @@ def arguments():
     )
     parser.add_argument("--chk", help="Checkpoint file to restart simulation")
     parser.add_argument(
+        "--xml",
+        help=(
+            "If given, write xml versions of checkpoints in addition to binary files."
+            "Give the base name, say chk.xml - this will write files named chk.xml_100000 for example"
+        ),
+    )
+    parser.add_argument(
         "-n", "--steps", help="Number of steps to run simulation for", type=int
     )
     parser.add_argument(
@@ -99,6 +106,7 @@ def gen_simulation(
     charge_factor=None,
     restrain=None,
     cos=0,
+    xml=None,
 ):
     # OpenMM parsers can't read virtual sites, so use parmed to be safe
     print("Creating simulation system...")
@@ -171,7 +179,7 @@ def gen_simulation(
     simulation = Simulation(top.topology, system, integrator)
     if chk is not None:
         print(f"Loading {chk}...")
-        if chk.endswith("xml"):
+        if "xml" in chk:
             with open(chk) as f:
                 state = XmlSerializer.deserialize(f.read())
                 simulation.context.setState(state)
@@ -192,7 +200,7 @@ def gen_simulation(
 
     append_xtc = "traj.xtc" in os.listdir(".")
     simulation.reporters.append(XTCReporter("traj.xtc", interval, append=append_xtc))
-    simulation.reporters.append(oh.CheckpointReporter("cpt.cpt", interval))
+    simulation.reporters.append(oh.CheckpointReporter("cpt.cpt", interval, xml=xml))
     simulation.reporters.append(
         StateDataReporter(
             sys.stdout,
@@ -230,6 +238,7 @@ def main():
         charge_factor=args.scalecharge,
         restrain=args.restrain,
         cos=args.cos,
+        xml=args.xml,
     )
 
     if args.minimise:
