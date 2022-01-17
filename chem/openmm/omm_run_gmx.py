@@ -171,7 +171,12 @@ def gen_simulation(
     simulation = Simulation(top.topology, system, integrator)
     if chk is not None:
         print(f"Loading {chk}...")
-        simulation.loadCheckpoint(chk)
+        if chk.endswith("xml"):
+            with open(chk) as f:
+                state = XmlSerializer.deserialize(f.read())
+                simulation.context.setState(state)
+        else:
+            simulation.loadCheckpoint(chk)
         simulation.currentStep = (
             round(
                 simulation.context.getState().getTime().value_in_unit(picoseconds)
