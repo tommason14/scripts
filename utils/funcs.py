@@ -1,4 +1,5 @@
 import numpy as np
+import seaborn as sns
 import re
 
 
@@ -148,7 +149,7 @@ def datafile_elements(datafile):
     elements = []
     for mass in masses:
         for el, reference in ptable.items():
-            # int rounds down, so int(15.999) = 15 nort 16, fix by adding 0.5
+            # int rounds down, so int(15.999) = 15 not 16, fix by adding 0.5
             if int(mass + 0.5) == int(reference + 0.5):
                 elements.append(el)
     return elements
@@ -156,7 +157,7 @@ def datafile_elements(datafile):
 
 def lammps_mdanalysis(data, traj):
     """
-    Import LAMMPS datafile and trajectory, 
+    Import LAMMPS datafile and trajectory,
     adding atom names by looking up the mass from the datafile
     """
     import MDAnalysis as mda
@@ -165,17 +166,11 @@ def lammps_mdanalysis(data, traj):
     format_needed = any(traj.endswith(x) for x in ("lmp", "lammpstrj"))
     top_needed = not data.endswith("data")
     if format_needed and top_needed:
-        u = mda.Universe(data,
-                         traj,
-                         topology_format="DATA",
-                         format="LAMMPSDUMP")
+        u = mda.Universe(data, traj, topology_format="DATA", format="LAMMPSDUMP")
     elif format_needed:
         u = mda.Universe(data, traj, format="LAMMPSDUMP")
     elif top_needed:
-        u = mda.Universe(data,
-                         traj,
-                         topology_format="DATA",
-                         format="LAMMPSDUMP")
+        u = mda.Universe(data, traj, topology_format="DATA", format="LAMMPSDUMP")
     else:
         u = mda.Universe(data, traj)
 
@@ -216,7 +211,7 @@ def add_elements_to_universe(universe, datafile="pack.lmps"):
 def unwrap_traj(universe):
     """
     Unwrap trajectories of all frames in Universe.
-    Apply to universe defined in the global scope. 
+    Apply to universe defined in the global scope.
     i.e.
     unwrap_traj(u)
     not
@@ -230,22 +225,14 @@ def unwrap_traj(universe):
     universe.trajectory.add_transformations(transform)
 
 
-###################
-#  Seaborn plots  #
-###################
-
-
 def remove_legend_title(plot):
     """
-    Modifies the global state of the plot so return value
-    is needed. 
-    Use like:
-        plot = sns.lineplot(...)
-        remove_legend_title(plot)
+    Removes legend title from any seaborn plot
     """
-    handles, labels = plot.get_legend_handles_labels()
-    # plot.legend(handles=handles[1:], labels=labels[1:]) # old version of seaborn
-    plot.legend(handles=handles, labels=labels)
+    if isinstance(plot, sns.FacetGrid):
+        plot.legend.set_title(None)
+    else:
+        plot.legend().set_title(None)
 
 
 def boltz(diffs):
@@ -282,15 +269,17 @@ def pipe(original):
 
     obj >> func()
     """
+
     class PipeInto(object):
-        data = {'function': original}
+        data = {"function": original}
 
         def __init__(self, *args, **kwargs):
-            self.data['args'] = args
-            self.data['kwargs'] = kwargs
+            self.data["args"] = args
+            self.data["kwargs"] = kwargs
 
         def __rrshift__(self, other):
-            return self.data['function'](other, *self.data['args'],
-                                         **self.data['kwargs'])
+            return self.data["function"](
+                other, *self.data["args"], **self.data["kwargs"]
+            )
 
     return PipeInto
