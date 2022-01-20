@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import seaborn as sns
 import re
 
@@ -283,3 +284,19 @@ def pipe(original):
             )
 
     return PipeInto
+
+
+def read_xvg(fname, columns=None):
+    """
+    Read xmgrace xvg files that are written by Gromacs. 
+    Pass in a list of column names that should be used in the resulting
+    dataframe
+    """
+    data = []
+    ncols = len(columns)
+    with open(fname) as f:
+        for line in f:
+            if line.startswith("#") or line.startswith("@"):
+                continue
+            data.append(line.split()[:ncols])
+    return pd.DataFrame(data, columns=columns).apply(lambda x: pd.to_numeric(x))
