@@ -1,7 +1,9 @@
+import re
+import string
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import re
 
 
 # 5 = coolwarm colours, but darkened the middle white colour from #dddcdc to #b0abab to make it more visible
@@ -307,3 +309,18 @@ def read_xvg(fname, columns=None):
                 continue
             data.append(line.split()[:ncols])
     return pd.DataFrame(data, columns=columns).apply(lambda x: pd.to_numeric(x))
+
+
+def add_alphabetical_labels(xoffset=0):
+    """
+    Add a), b), c) labels to a seaborn FacetGrid plot
+    """
+    fig = plt.gcf()
+    axes = fig.axes
+    if not isinstance(axes[0], list):
+        axes = [axes]
+
+    labels = list(string.ascii_lowercase)
+    for row in axes:
+        for ax in row:
+            ax.set_title(f"{labels.pop(0)})", loc="left", x=xoffset)
