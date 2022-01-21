@@ -52,7 +52,9 @@ plot_with_stdout(){
   sed -n '/Step/,$p' $1 > cleaned.tmp
 
   # remove Step from choice for user, then add one to their choice to find correct column
-  opts=$(head -1 cleaned.tmp | sed -E 's/\s+/\n/g' | tail -n +2 | nl)
+  # NB: this sed command fails with BSD sed on MacOS
+  [[ $(uname) == "Darwin" ]] && sed='gsed' || sed='sed'
+  opts=$(head -1 cleaned.tmp | $sed -E 's/\s+/\n/g' | tail -n +2 | nl)
 
   # read stdin so that "echo density | openmm_plot.sh output.csv" works
   if [[ -p /dev/stdin ]]
