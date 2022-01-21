@@ -237,14 +237,14 @@ def unwrap_traj(universe):
     universe.trajectory.add_transformations(transform)
 
 
-def remove_legend_title(plot):
+def set_legend_title(plot, title):
     """
-    Removes legend title from any seaborn plot
+    Sets legend title for any seaborn plot
     """
     if isinstance(plot, sns.FacetGrid):
-        plot.legend.set_title(None)
+        plot.legend.set_title(title)
     else:
-        plot.legend().set_title(None)
+        plot.legend().set_title(title)
 
 
 def boltz(diffs):
