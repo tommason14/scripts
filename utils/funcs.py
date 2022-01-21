@@ -7,9 +7,11 @@ import seaborn as sns
 
 
 # 5 = coolwarm colours, but darkened the middle white colour from #dddcdc to #b0abab to make it more visible
+# "peach" palette is saved at coolors.co
 colours = {
     3: ["#545775", "#FFA686", "#53B3CB"],
     5: ["#6f92f3", "#aac7fd", "#b0abab", "#f7b89c", "#e7745b"],
+    "peach": ["#355070", "#6d597a", "#b56576", "#e56b6f", "#eaac8b",],
 }
 
 
