@@ -56,3 +56,9 @@ in order for a histogram to be plotted
 - Radius of gyration found over time for a given selection, and optionally
   for each residue of that selection
 - CSV saved, optional plot created
+
+## Protein secondary structure (dssp_from_md.py)
+
+- Calculate proportion of helices, strands and coils across each frame
+- Uses MDTraj selection syntax
+- CSV saved, optional plot created
