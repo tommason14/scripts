@@ -45,17 +45,7 @@ def arguments():
         default=1,
         type=float,
     )
-    parser.add_argument("--chk", help="Checkpoint file to restart simulation")
-    parser.add_argument(
-        "-n", "--steps", help="Number of steps to run simulation for", type=int
-    )
-    parser.add_argument(
-        "-i",
-        "--interval",
-        help="Number of steps to save trajectory, default = 10000",
-        default=10000,
-        type=int,
-    )
+    parser.add_argument("--chk", help="Checkpoint file to serialise")
     parser.add_argument(
         "-s",
         "--scalecharge",
@@ -94,7 +84,6 @@ def gen_simulation(
     temp=300,
     press=None,
     timestep=1,
-    interval=10000,
     charge_factor=None,
     restrain=None,
     cos=0,
@@ -180,33 +169,6 @@ def gen_simulation(
             * 10
         )
         simulation.context.setTime(simulation.currentStep * (timestep / 1000))
-    else:
-        simulation.context.setPositions(gro.positions)
-        simulation.context.setVelocitiesToTemperature(temp * kelvin)
-
-    append_xtc = "traj.xtc" in os.listdir(".")
-    simulation.reporters.append(XTCReporter("traj.xtc", interval, append=append_xtc))
-    simulation.reporters.append(oh.CheckpointReporter("cpt.cpt", interval))
-    simulation.reporters.append(
-        StateDataReporter(
-            sys.stdout,
-            1000,
-            step=True,
-            time=True,
-            kineticEnergy=True,
-            potentialEnergy=True,
-            totalEnergy=True,
-            temperature=True,
-            density=True,
-            volume=True,
-            speed=True,
-        )
-    )
-    if cos != 0:
-        append_cos = "viscosity.txt" in os.listdir(".")
-        simulation.reporters.append(
-            oh.ViscosityReporter("viscosity.txt", 1000, append=append_cos)
-        )
     return simulation
 
 
@@ -220,7 +182,6 @@ def main():
         temp=args.temp,
         press=args.press,
         timestep=args.timestep,
-        interval=args.interval,
         charge_factor=args.scalecharge,
         restrain=args.restrain,
         cos=args.cos,
