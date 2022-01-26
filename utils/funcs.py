@@ -5,6 +5,12 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
+sns_settings = {
+    "style": "ticks",
+    "font": "DejaVu Sans",
+    "font_scale": 1.1,
+    "rc": {"mathtext.default": "regular"},
+}
 
 # 5 = coolwarm colours, but darkened the middle white colour from #dddcdc to #b0abab to make it more visible
 # "peach" palette is saved at coolors.co
