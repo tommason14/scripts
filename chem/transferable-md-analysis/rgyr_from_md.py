@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from utils import get_font, completion
+from utils import completion
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -54,7 +54,7 @@ df.to_csv(args.output + ".csv", index=False)
 if args.plot:
     sns.set(
         style="ticks",
-        font=get_font(),
+        font='DejaVu Sans',
         font_scale=1.2,
         rc={"mathtext.default": "regular"},
     )

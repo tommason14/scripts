@@ -9,7 +9,6 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy.stats import linregress
-from utils import get_font
 
 
 class EinsteinMSD(AnalysisBase):
@@ -62,7 +61,7 @@ class EinsteinMSD(AnalysisBase):
             the MSD. Otherwise, use the simple "windowed" algorithm.
             The tidynamics package is required for `fft=True`.
         com : bool
-            If ``True``, compute MSDs for the centre of mass of each residue, 
+            If ``True``, compute MSDs for the centre of mass of each residue,
             instead of all atoms
         """
         if isinstance(u, groups.UpdatingAtomGroup):
@@ -97,8 +96,7 @@ class EinsteinMSD(AnalysisBase):
         # self.timeseries not set here
 
     def _parse_msd_type(self):
-        r""" Sets up the desired dimensionality of the MSD.
-        """
+        r"""Sets up the desired dimensionality of the MSD."""
         keys = {
             "x": [0],
             "y": [1],
@@ -122,8 +120,7 @@ class EinsteinMSD(AnalysisBase):
         self.dim_fac = len(self._dim)
 
     def _single_frame(self):
-        r""" Constructs array of positions for MSD calculation.
-        """
+        r"""Constructs array of positions for MSD calculation."""
         # shape of position array set here, use span in last dimension
         # from this point on
         if self.com:
@@ -141,8 +138,7 @@ class EinsteinMSD(AnalysisBase):
             self._conclude_simple()
 
     def _conclude_simple(self):
-        r""" Calculates the MSD via the simple "windowed" algorithm.
-        """
+        r"""Calculates the MSD via the simple "windowed" algorithm."""
         lagtimes = np.arange(1, self.n_frames)
         positions = self._position_array.astype(np.float64)
         for lag in lagtimes:
@@ -152,8 +148,7 @@ class EinsteinMSD(AnalysisBase):
         self.timeseries = self.msds_by_particle.mean(axis=1)
 
     def _conclude_fft(self):  # with FFT, np.float64 bit prescision required.
-        r""" Calculates the MSD via the FCA fast correlation algorithm.
-        """
+        r"""Calculates the MSD via the FCA fast correlation algorithm."""
         try:
             import tidynamics
         except ImportError:
@@ -310,13 +305,13 @@ def compute_diff_coeffs(df, start=0.1, end=0.9, dimensionality="xyz"):
 def plot_msd(df, start=0.1, end=0.9):
     """
     Plot MSD against time, as computed by EinsteinMSD.
-    Filled area represents the region used to compute 
+    Filled area represents the region used to compute
     diffusion coefficients.
     """
     sns.set(
         style="white",
         palette="rainbow",
-        font=get_font(),
+        font="DejaVu Sans",
         font_scale=1.2,
         rc={"mathtext.default": "regular"},
     )
@@ -336,7 +331,7 @@ def plot_msd(df, start=0.1, end=0.9):
 def change_resnames(df, list_of_strings):
     """
     Pass in a list like ['ch+', 'Ch', 'WAT', 'SOL']
-    to change residue names stored in df['resname'] 
+    to change residue names stored in df['resname']
     from ch+ to Ch and WAT to SOL.
     """
     original = list_of_strings[::2]

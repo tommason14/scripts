@@ -5,7 +5,6 @@ import MDAnalysis.transformations as trans
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from utils import get_font
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -56,7 +55,7 @@ df.to_csv(args.output + ".csv", index=False)
 if args.plot:
     sns.set(
         style="ticks",
-        font=get_font(),
+        font='DejaVu Sans',
         font_scale=1.2,
         rc={"mathtext.default": "regular"},
     )
