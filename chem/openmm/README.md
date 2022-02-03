@@ -1,7 +1,6 @@
 # OpenMM scripts
 
-Note that scripts may include the `ommhelper` module - this can be found [here](https://github.com/z-gong/ms-tools/tree/master/mstools/ommhelper). |
-Download and add the directory to your `PYTHONPATH` shell environmental variable.
+Note that scripts may include the `ommhelper` module - this can be found [here](https://github.com/z-gong/ms-tools/tree/master/mstools/ommhelper). Download and add the directory to your `PYTHONPATH` shell environmental variable.
 
 ## Creating an OPLS-based system
 
