@@ -188,7 +188,7 @@ def lammps_mdanalysis(data, traj):
     elif format_needed:
         u = mda.Universe(data, traj, format="LAMMPSDUMP")
     elif top_needed:
-        u = mda.Universe(data, traj, topology_format="DATA", format="LAMMPSDUMP")
+        u = mda.Universe(data, traj, topology_format="DATA")
     else:
         u = mda.Universe(data, traj)
 
@@ -332,3 +332,4 @@ def add_alphabetical_labels(xoffset=0):
     for row in axes:
         for ax in row:
             ax.set_title(f"{labels.pop(0)})", loc="left", x=xoffset)
+
