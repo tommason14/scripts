@@ -184,31 +184,3 @@ class PolSim:
         if fname is not None:
             df.to_csv(fname, index=False)
         return df
-
-    ### when using unwrapped traj, MDAnalysis and vmd are similar in time so might as well just use MDAnalysis
-    # def compute_ion_counts(self):
-    #     """
-    #     Instead of numpy, use vmd to compute ion counts, then read in the csv into a pandas
-    #     DataFrame.
-    #     """
-    #     # first unwrap traj with gmx trjconv - much faster than in vmd
-    #     # assumes sim was created by placing polymer in centre of box first, so that the polymer
-    #     # is the second group in the trjconv output
-    #     self.unwrapped_trajname = "traj_unwrapped.xtc"
-    #     os.system(
-    #         f'echo -e "2\n0" | gmx trjconv -f {self.trajname} -s {self.coordname} -o {self.unwrapped_trajname} -center -pbc mol'
-    #     )
-    #     # vmd can't read tpr files, so convert to gro
-    #     if self.coordname.endswith(".tpr"):
-    #         self.grofile = self.coordname[:-4] + ".gro"
-    #         self.universe.atoms.write(self.grofile)
-    #     else:
-    #         self.grofile = self.coordname
-    #     os.system(
-    #         f"vmd {self.grofile} {self.unwrapped_trajname} -e ~/.local/scripts/chem/vmd/ion_counts_unwrapped.tcl -dispdev text"
-    #     )
-    #     df = pd.read_csv("ion_counts.csv")
-    #     times = np.arange(0, self.traj.n_frames + 1) * self.dt * PS_TO_NS
-    #     df = df.drop(columns=["frame"])
-    #     df.insert(0, "time_ns", times)
-    #     return df
