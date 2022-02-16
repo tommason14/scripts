@@ -1,9 +1,14 @@
+import subprocess as sp
 import sys
+import pandas as pd
 import MDAnalysis as mda
 import MDAnalysis.transformations as trans
 import nglview as nv
 import numpy as np
+import seaborn as sns
 import matplotlib.pyplot as plt
+
+PS_TO_NS = 1e-3
 
 
 def completion(iterable):
@@ -17,29 +22,45 @@ def completion(iterable):
     sys.stdout.write("\n")
 
 
-def plot_ion_counts(counts, ion="CL", save=False, fname=None):
+def plot_ion_counts(counts, fname=None):
     """
     Plot the ion counts in the all regions as a function of time (assumes ns).
-    Pass in residue name of the ion of interest.
 
-    If a filename is given, the plot is saved to that file without having to set save=True.
-    If save=True, the plot is saved to a file named {ion.lower()}_counts.png
+    If a filename is given, the plot is saved.
     """
     ION_NAMES = {"cl": r"Cl$^-$", "na": r"Na$^+$"}
-    _ion = ION_NAMES.get(ion.lower(), ion) # if ion is not in ION_NAMES, use resname given
-    fig, ax = plt.subplots()
-    ax.plot(counts[:, 0], counts[:, 1], label="Saltwater")
-    ax.plot(counts[:, 0], counts[:, 2], label="Membrane")
-    ax.plot(counts[:, 0], counts[:, 3], label="Freshwater")
-    ax.legend()
-    ax.set_xlabel("Time (ns)")
-    ax.set_ylabel(f"{_ion} ion count")
-    max_count = counts[:, 1:].max()
-    ax.set_yticks(np.arange(0, max_count + 1, 2))
-    if save or fname is not None:
-        if fname is None:
-            fname = f"{ion.lower()}_counts.png"
-        fig.savefig(fname, dpi=300)
+    REGIONS = {"salt": "Saltwater", "fresh": "Freshwater", "mem": "Membrane"}
+    tidy = counts.melt(id_vars="time_ns", var_name="ion_region", value_name="count")
+    tidy[["ion", "region"]] = tidy["ion_region"].str.split("_", expand=True)
+    tidy["ion"] = tidy["ion"].map(ION_NAMES)
+    tidy["region"] = tidy["region"].map(REGIONS)
+    sns.set(
+        style="ticks",
+        font_scale=1,
+        font="DejaVu Sans",
+        rc={"mathtext.default": "regular"},
+    )
+    p = sns.relplot(
+        data=tidy,
+        x="time_ns",
+        y="count",
+        hue="region",
+        col="ion",
+        kind="line",
+        height=3,
+        aspect=1,
+        palette="Set2",
+        facet_kws={"sharey": False},
+    )
+    p.set(xlabel="Time (ns)", ylabel="Ion Count")
+    sns.move_legend(
+        p, loc="lower center", ncol=3, title=None
+    )  # no direction param, so control orientation with number of columns
+    p.set_titles(col_template="{col_name}")
+    plt.tight_layout()
+
+    if fname is not None:
+        plt.savefig(fname, dpi=300)
     else:
         plt.show()
 
@@ -61,21 +82,30 @@ class PolSim:
         self.polymer = self.universe.select_atoms("resname pol")
         self.solvent = self.universe.select_atoms("not resname pol")
         self.traj = self.universe.trajectory  # for convenience
+        self.dt = self.traj[1].time - self.traj[0].time  # picoseconds
 
-    def unwrap(self):
+    def unwrap(self, gmx=False):
         """
-        Unwrap the trajectory so that the polymer chain is centred.
-        Be aware that for large trajectories this can take a long time, and
-        using gmx trjconv like so will be significantly faster:
-        $ echo -e "2\n0" | gmx trjconv -f traj.xtc -s topol.tpr -o traj_unwrapped.xtc -center
-        -pbc mol (the polymer chain is the group labelled 2 in this case)
+        Note: only works with tpr files, not gro files.
+        Unwrap the trajectory, and wrap molecules so that the centre of mass
+        lies in the periodic box.
+        For large trajectories, frame-by-frame unwrapping and analysis takes a long time,
+        so gmx trjconv can be used, and the universe is re-created using the unwrapped trajectory.
         """
-        transforms = [
-            trans.unwrap(self.universe.atoms),
-            trans.center_in_box(self.polymer),
-            trans.wrap(self.solvent, compound="residues"),
-        ]
-        self.universe.trajectory.add_transformations(*transforms)
+        if gmx:
+            # Assumes simulation was created with the polymer first, then solvated afterwards - 
+            # this means that the polymer is the group labelled 2
+            _unwrapped = self.trajname.replace(".xtc", "_unwrapped.xtc")
+            sp.call(f'printf "2\n0" | gmx trjconv -f {self.trajname} -s {self.coordname} -o {_unwrapped} -center -pbc mol', shell=True)
+            self.trajname = _unwrapped
+            self.load()
+        else:
+            transforms = [
+                trans.unwrap(self.universe.atoms),
+                trans.center_in_box(self.polymer),
+                trans.wrap(self.solvent, compound="residues"),
+            ]
+            self.universe.trajectory.add_transformations(*transforms)
 
     def show_traj(self, hide_virtual_sites=True):
         """
@@ -90,7 +120,7 @@ class PolSim:
         view.add_representation("ball+stick", "not resname pol")
         return view
 
-    def compute_ion_counts(self, ion="CL", save=True):
+    def compute_ion_counts(self, fname=None):
         """
         Tracking ion numbers in each portion of the simulation box.
         The polymer is defined by the minimum and maximum z-coordinate of the polymer
@@ -98,28 +128,87 @@ class PolSim:
         to the right is designated as freshwater.
         Pass in the residue name of the ion of interest.
 
-        Ion counts are saved per frame (given as time in ns) as a numpy ndarray
-        to a filename of {ion.lower()}_counts.dat
+        Ion counts are computed per frame (given as time in ns) as a pandas dataframe, and
+        (optionally) saved to a csv.
+
+        Returns:
+            Pandas dataframe with columns:
+            time, cl_salt, cl_mem, cl_fresh, na_salt, na_mem, na_fresh
         """
-        counts = np.zeros((self.traj.n_frames, 4))
+        # Polymer bounds constant with a restrained polymer
+        min_z = self.polymer.positions[:, 2].min()
+        max_z = self.polymer.positions[:, 2].max()
+        counts = np.zeros((self.traj.n_frames, 7))
         for i, ts in enumerate(completion(self.traj)):
-            # these may change, so can't really pre-compute bounds...
-            # of course, it would be a lot faster if bounds were only computed once
-            min_z = self.polymer.positions[:, 2].min()
-            max_z = self.polymer.positions[:, 2].max()
-            ions_in_saltwater = self.universe.select_atoms(f"resname {ion} and prop z < {min_z}")
-            ions_in_membrane = self.universe.select_atoms(
-                f"resname {ion} and prop z > {min_z} and prop z < {max_z}"
+            cl_in_saltwater = self.universe.select_atoms(
+                f"resname CL and prop z < {min_z}"
             )
-            ions_in_freshwater = self.universe.select_atoms(f"resname {ion} and prop z > {max_z}")
+            cl_in_membrane = self.universe.select_atoms(
+                f"resname CL and prop z > {min_z} and prop z < {max_z}"
+            )
+            cl_in_freshwater = self.universe.select_atoms(
+                f"resname CL and prop z > {max_z}"
+            )
+            na_in_saltwater = self.universe.select_atoms(
+                f"resname NA and prop z < {min_z}"
+            )
+            na_in_membrane = self.universe.select_atoms(
+                f"resname NA and prop z > {min_z} and prop z < {max_z}"
+            )
+            na_in_freshwater = self.universe.select_atoms(
+                f"resname NA and prop z > {max_z}"
+            )
             counts[i] = [
                 ts.time,
-                ions_in_saltwater.n_atoms,
-                ions_in_membrane.n_atoms,
-                ions_in_freshwater.n_atoms,
+                cl_in_saltwater.n_atoms,
+                cl_in_membrane.n_atoms,
+                cl_in_freshwater.n_atoms,
+                na_in_saltwater.n_atoms,
+                na_in_membrane.n_atoms,
+                na_in_freshwater.n_atoms,
             ]
         # convert time from ps to ns
         counts[:, 0] /= 1000
-        if save:
-            np.savetxt(f"{ion.lower()}_counts.dat", counts)
-        return counts
+        df = pd.DataFrame(
+            counts,
+            columns=[
+                "time_ns",
+                "cl_salt",
+                "cl_mem",
+                "cl_fresh",
+                "na_salt",
+                "na_mem",
+                "na_fresh",
+            ],
+        )
+        if fname is not None:
+            df.to_csv(fname, index=False)
+        return df
+
+    ### when using unwrapped traj, MDAnalysis and vmd are similar in time so might as well just use MDAnalysis
+    # def compute_ion_counts(self):
+    #     """
+    #     Instead of numpy, use vmd to compute ion counts, then read in the csv into a pandas
+    #     DataFrame.
+    #     """
+    #     # first unwrap traj with gmx trjconv - much faster than in vmd
+    #     # assumes sim was created by placing polymer in centre of box first, so that the polymer
+    #     # is the second group in the trjconv output
+    #     self.unwrapped_trajname = "traj_unwrapped.xtc"
+    #     os.system(
+    #         f'echo -e "2\n0" | gmx trjconv -f {self.trajname} -s {self.coordname} -o {self.unwrapped_trajname} -center -pbc mol'
+    #     )
+    #     # vmd can't read tpr files, so convert to gro
+    #     if self.coordname.endswith(".tpr"):
+    #         self.grofile = self.coordname[:-4] + ".gro"
+    #         self.universe.atoms.write(self.grofile)
+    #     else:
+    #         self.grofile = self.coordname
+    #     os.system(
+    #         f"vmd {self.grofile} {self.unwrapped_trajname} -e ~/.local/scripts/chem/vmd/ion_counts_unwrapped.tcl -dispdev text"
+    #     )
+    #     df = pd.read_csv("ion_counts.csv")
+    #     times = np.arange(0, self.traj.n_frames + 1) * self.dt * PS_TO_NS
+    #     df = df.drop(columns=["frame"])
+    #     df.insert(0, "time_ns", times)
+    #     return df
