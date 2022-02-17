@@ -93,10 +93,13 @@ class PolSim:
         so gmx trjconv can be used, and the universe is re-created using the unwrapped trajectory.
         """
         if gmx:
-            # Assumes simulation was created with the polymer first, then solvated afterwards - 
+            # Assumes simulation was created with the polymer first, then solvated afterwards -
             # this means that the polymer is the group labelled 2
             _unwrapped = self.trajname.replace(".xtc", "_unwrapped.xtc")
-            sp.call(f'printf "2\n0" | gmx trjconv -f {self.trajname} -s {self.coordname} -o {_unwrapped} -center -pbc mol', shell=True)
+            sp.call(
+                f'printf "2\n0" | gmx trjconv -f {self.trajname} -s {self.coordname} -o {_unwrapped} -center -pbc mol',
+                shell=True,
+            )
             self.trajname = _unwrapped
             self.load()
         else:
@@ -167,8 +170,7 @@ class PolSim:
                 na_in_membrane.n_atoms,
                 na_in_freshwater.n_atoms,
             ]
-        # convert time from ps to ns
-        counts[:, 0] /= 1000
+        counts[:, 0] *= PS_TO_NS
         df = pd.DataFrame(
             counts,
             columns=[
