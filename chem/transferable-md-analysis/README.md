@@ -62,3 +62,10 @@ in order for a histogram to be plotted
 - Calculate proportion of helices, strands and coils across each frame
 - Uses MDTraj selection syntax
 - CSV saved, optional plot created
+
+## Solvent accessible surface areaa (sasa_from_md.py)
+
+- Calculate area across each frame for a given selection, either for all atoms
+  or per residue
+- Uses MDTraj selection syntax
+- CSV saved, optional plot created
