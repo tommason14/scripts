@@ -1,0 +1,3 @@
+#!/usr/bin/env zsh
+ 
+fd . '/Volumes/GoogleDrive/My Drive/zotero/pdfs' | sed 's|/Volumes/GoogleDrive/My Drive/zotero/pdfs/||' | fzf | xargs -I{} open "/Volumes/GoogleDrive/My Drive/zotero/pdfs/{}"
