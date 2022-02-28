@@ -13,20 +13,32 @@ Warning: this file runs very inefficiently! Use it on a small system, maybe a fe
 molecules to generate the required additional parameters, then copy them into the
 datafile of the larger system.
 """
-from autochem import read_file
 import itertools
 import sys
 import re
 import argparse
 
 
+def read_file(file):
+    with open(file, "r") as f:
+        try:
+            for line in f:
+                yield line
+        except UnicodeDecodeError:
+            pass
+
+
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-l", "--lammps", help="LAMMPS datafile containing all parameters of individual molecules"
+        "-l",
+        "--lammps",
+        help="LAMMPS datafile containing all parameters of individual molecules",
     )
     parser.add_argument(
-        "-f", "--forcefield", help="Forcefield 'dictionary' with all parameters that could be added"
+        "-f",
+        "--forcefield",
+        help="Forcefield 'dictionary' with all parameters that could be added",
     )
     parser.add_argument(
         "-p",
@@ -306,7 +318,9 @@ def compare_db(ff_dihs, all_combos, with_types_that_exist):
             else:
                 # check whether the positions of atoms that aren't X
                 # match the item
-                types_to_check = {idx: val for idx, val in enumerate(line[:4]) if val != "X"}
+                types_to_check = {
+                    idx: val for idx, val in enumerate(line[:4]) if val != "X"
+                }
                 # now check the combo dict
                 types = {idx: val for idx, val in enumerate(types_that_exist)}
                 # make sure all vals from line in ff are the same as in the combo
@@ -365,7 +379,9 @@ def find_combos(atoms, linkers, params_in_original_datafile):
 
 
 def dihs_from_ff(atoms, linkers, ff, params_in_original_datafile):
-    all_combos, with_types_that_exist = find_combos(atoms, linkers, params_in_original_datafile)
+    all_combos, with_types_that_exist = find_combos(
+        atoms, linkers, params_in_original_datafile
+    )
 
     ff_dihs = []
     found = False
@@ -386,7 +402,9 @@ def imps_from_ff(atoms, linkers, ff, params_in_original_datafile):
     Same as dihs from ff, just changing the values in the force field 
     to search for
     """
-    all_combos, with_types_that_exist = find_combos(atoms, linkers, params_in_original_datafile)
+    all_combos, with_types_that_exist = find_combos(
+        atoms, linkers, params_in_original_datafile
+    )
 
     ff_dihs = []
 
@@ -601,9 +619,15 @@ def main():
     params = params_from_initial_datafile(args.lammps)
     addn_atoms, addn_pairs = atoms_from_ff(atom_types_to_add, args.forcefield)
     addn_bonds = bonds_from_ff(atom_types_to_add, linkers, args.forcefield)
-    addn_angles = angles_from_ff(atom_types_to_add, linkers, args.forcefield, params["angles"])
-    addn_dihs = dihs_from_ff(atom_types_to_add, linkers, args.forcefield, params["dihs"])
-    addn_imps = imps_from_ff(atom_types_to_add, linkers, args.forcefield, params["imps"])
+    addn_angles = angles_from_ff(
+        atom_types_to_add, linkers, args.forcefield, params["angles"]
+    )
+    addn_dihs = dihs_from_ff(
+        atom_types_to_add, linkers, args.forcefield, params["dihs"]
+    )
+    addn_imps = imps_from_ff(
+        atom_types_to_add, linkers, args.forcefield, params["imps"]
+    )
 
     with open(args.lammps) as f:
         lmps = f.readlines()

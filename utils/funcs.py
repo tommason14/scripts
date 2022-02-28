@@ -332,4 +332,3 @@ def add_alphabetical_labels(xoffset=0):
     for row in axes:
         for ax in row:
             ax.set_title(f"{labels.pop(0)})", loc="left", x=xoffset)
-

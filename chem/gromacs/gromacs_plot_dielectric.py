@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 import os
 import sys
 
-if not os.path.isfile('epsilon.xvg'):
+if not os.path.isfile("epsilon.xvg"):
     sys.exit(
-        'Error: assumes that a file named epsilon.xvg exists in the current directory.'
+        "Error: assumes that a file named epsilon.xvg exists in the current directory."
     )
 
 df = pd.read_csv(
