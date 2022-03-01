@@ -114,6 +114,9 @@ class PolSim:
             sp.call(
                 f'printf "2\n0" | {gmxexe} trjconv -f {self.trajname} -s {self.coordname} -o {_unwrapped} -center -pbc mol',
                 shell=True,
+                # supress output
+                stdout=sp.DEVNULL,
+                stderr=sp.DEVNULL,
             )
             print("done")
             self.trajname = _unwrapped
