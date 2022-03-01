@@ -198,6 +198,14 @@ class PolSim:
                 na_in_freshwater.n_atoms,
             ]
         counts[:, 0] *= PS_TO_NS
+        if correct_for_initial_salt_in_freshwater:
+            # Remove ions that are present in fresh water at t = 0
+            # chloride
+            counts[:, 3] -= counts[0, 3]
+            counts[:, 3][counts[:, 3] < 0] = 0
+            # sodium
+            counts[:, 6] -= counts[0, 6]
+            counts[:, 6][counts[:, 6] < 0] = 0
         df = pd.DataFrame(
             counts,
             columns=[
@@ -210,14 +218,6 @@ class PolSim:
                 "na_fresh",
             ],
         )
-        if correct_for_initial_salt_in_freshwater:
-            # Remove ions that are present in fresh water at t = 0
-            df.loc[:, "na_fresh"] = np.where(
-                nafresh - nafresh.iloc[0] > 0, nafresh - nafresh.iloc[0], 0
-            )
-            df.loc[:, "cl_fresh"] = np.where(
-                clfresh - clfresh.iloc[0] > 0, clfresh - clfresh.iloc[0], 0
-            )
         if fname is not None:
             df.to_csv(fname, index=False)
         return df
