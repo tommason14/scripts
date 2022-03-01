@@ -1,6 +1,7 @@
 import MDAnalysis as mda
 import MDAnalysis.transformations as trans
 import matplotlib.pyplot as plt
+
 try:
     import nglview as nv
 except ImportError:
@@ -49,7 +50,7 @@ def plot_ion_counts(counts, fname=None):
         y="count",
         hue="region",
         col="ion",
-        col_order=[r'Na$^+$', r'Cl$^-$'],
+        col_order=[r"Na$^+$", r"Cl$^-$"],
         kind="line",
         height=3,
         aspect=1,
@@ -101,7 +102,14 @@ class PolSim:
             # Assumes simulation was created with the polymer first, then solvated afterwards -
             # this means that the polymer is the group labelled 2
             _unwrapped = self.trajname.replace(".xtc", "_unwrapped.xtc")
-            gmxexe = "gmx" if sp.getstatusoutput("gmx")[0] == 0 else "gmx_mpi"
+            if sp.getstatusoutput("gmx")[0] == 0:
+                gmxexe = "gmx"
+            elif sp.getstatusoutput("gmx_mpi")[0] == 0:
+                gmxexe = "gmx_mpi"
+            else:
+                raise RuntimeError(
+                    "gmx or gmx_mpi not found. Please load GROMACS and try again."
+                )
             print(f"Unwrapping trajectory using {gmxexe} trjconv...", end=" ")
             sp.call(
                 f'printf "2\n0" | {gmxexe} trjconv -f {self.trajname} -s {self.coordname} -o {_unwrapped} -center -pbc mol',
@@ -133,7 +141,9 @@ class PolSim:
         view.add_representation("ball+stick", "not resname pol")
         return view
 
-    def compute_ion_counts(self, fname=None, restrained=True):
+    def compute_ion_counts(
+        self, fname=None, restrained=True, correct_for_initial_salt_in_freshwater=False
+    ):
         """
         Tracking ion numbers in each portion of the simulation box.
         The polymer is defined by the minimum and maximum z-coordinate of the polymer
@@ -143,6 +153,10 @@ class PolSim:
 
         Ion counts are computed per frame (given as time in ns) as a pandas dataframe, and
         (optionally) saved to a csv.
+
+        If correct_for_initial_salt_in_freshwater is True, ions that are present in fresh water
+        at t = 0 will be removed from the overall count. These ions are used to neutralise the
+        membrane, and shouldn't contribute to overall ion migration.
 
         Returns:
             Pandas dataframe with columns:
@@ -196,6 +210,14 @@ class PolSim:
                 "na_fresh",
             ],
         )
+        if correct_for_initial_salt_in_freshwater:
+            # Remove ions that are present in fresh water at t = 0
+            df.loc[:, "na_fresh"] = np.where(
+                nafresh - nafresh.iloc[0] > 0, nafresh - nafresh.iloc[0], 0
+            )
+            df.loc[:, "cl_fresh"] = np.where(
+                clfresh - clfresh.iloc[0] > 0, clfresh - clfresh.iloc[0], 0
+            )
         if fname is not None:
             df.to_csv(fname, index=False)
         return df
