@@ -1,7 +1,10 @@
 import MDAnalysis as mda
 import MDAnalysis.transformations as trans
 import matplotlib.pyplot as plt
-import nglview as nv
+try:
+    import nglview as nv
+except ImportError:
+    nv = None
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -119,6 +122,8 @@ class PolSim:
         """
         View the trajectory using NGLView
         """
+        if nv is None:
+            raise ImportError("NGLView not installed")
         _selection = self.universe.atoms
         if hide_virtual_sites:
             _selection = _selection.select_atoms("not name MW")
