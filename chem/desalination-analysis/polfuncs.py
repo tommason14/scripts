@@ -110,15 +110,11 @@ class PolSim:
                 raise RuntimeError(
                     "gmx or gmx_mpi not found. Please load GROMACS and try again."
                 )
-            print(f"Unwrapping trajectory using {gmxexe} trjconv...", end=" ")
+            print(f"Unwrapping trajectory using {gmxexe} trjconv...")
             sp.call(
                 f'printf "2\n0" | {gmxexe} trjconv -f {self.trajname} -s {self.coordname} -o {_unwrapped} -center -pbc mol',
                 shell=True,
-                # supress output
-                stdout=sp.DEVNULL,
-                stderr=sp.DEVNULL,
             )
-            print("done")
             self.trajname = _unwrapped
             self.load()
         else:
