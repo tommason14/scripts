@@ -105,7 +105,7 @@ def main():
         drudes=args.drudes,
     )
 
-    system.export_gromacs(gro_out="conf.gro", top_out=None, mdp_out=None)
+    system.export_gromacs(gro_out="conf.gro", top_out="topol.top", mdp_out=None)
     system.export_charmm(psf_out="topol.psf", prm_out="ff.prm", pdb_out=None)
 
 
