@@ -18,6 +18,10 @@ To compute ion counts:
 from polfuncs import PolSim, plot_ion_counts
 nvt = PolSim('nvt.tpr', 'nvt.xtc')
 nvt.unwrap()
+counts = nvt.compute_ion_counts()  # counts is a pandas DataFrame
+plot_ion_counts(counts, fname='ion_counts.png')
+
+# or using the pandas DataFrame pipe:
 nvt.compute_ion_counts().pipe(plot_ion_counts, fname='ion_counts.png')
 ```
 
@@ -40,4 +44,4 @@ returns a pandas DataFrame:
     .reset_index()
     .pipe(plot_partial_densities)
 )
-```
+``
