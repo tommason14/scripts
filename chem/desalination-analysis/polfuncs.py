@@ -1,5 +1,6 @@
 import MDAnalysis as mda
 import MDAnalysis.transformations as trans
+from MDAnalysis.analysis.lineardensity import LinearDensity
 import matplotlib.pyplot as plt
 
 try:
@@ -70,11 +71,40 @@ def plot_ion_counts(counts, fname=None):
         plt.show()
 
 
+def plot_partial_densities(df, fname=None):
+    """
+    Plot the partial densities of molecules across the simulation box.
+    If a filename is given, the plot is saved.
+    Using PolSim.compute_partial_densities() returns a dataframe with the
+    first column as slices in the desired dimension.
+    This function uses that and obtains the dimension from the name of that column.
+    """
+    sns.set(
+        style="ticks",
+        font_scale=1,
+        font="DejaVu Sans",
+        rc={"mathtext.default": "regular"},
+        palette="Set2",
+    )
+    NAMES = {"pol": "Polymer", "SOL": r"H$_2$O", "NA": r"Na$^+$", "CL": r"Cl$^-$"}
+    dim = df.columns[0].split("_")[0]
+    df.set_index(f"{dim}_coord").rename(columns=NAMES).plot().set(
+        xlabel=f"{dim.upper()}-coordinate (Å)", ylabel="Density (g/cm$^3$)"
+    )
+    plt.tight_layout()
+    if fname is not None:
+        plt.savefig(fname, dpi=300)
+    else:
+        plt.show()
+
+
 class PolSim:
     """
     Class to read in a desalination-type simulation with a polymer in the centre of the box,
     surrounded by two solvent reservoirs - saltwater on the left of the membrane, freshwater
     on the right.
+
+    Expects Gromacs files - tpr files as coordinates, xtc files as trajectories.
     """
 
     def __init__(self, coords, traj):
@@ -125,7 +155,7 @@ class PolSim:
             ]
             self.universe.trajectory.add_transformations(*transforms)
 
-    def show_traj(self, hide_virtual_sites=True):
+    def show_traj(self, hide_virtual_sites=True, hide_graphene=False):
         """
         View the trajectory using NGLView
         """
@@ -134,6 +164,8 @@ class PolSim:
         _selection = self.universe.atoms
         if hide_virtual_sites:
             _selection = _selection.select_atoms("not name MW")
+        if hide_graphene:
+            _selection = _selection.select_atoms("not resname GRA")
         view = nv.show_mdanalysis(_selection)
         view.add_unitcell()
         # solvent not loaded in later versions, so do this explicitly
@@ -220,3 +252,41 @@ class PolSim:
         if fname is not None:
             df.to_csv(fname, index=False)
         return df
+
+    def compute_partial_densities(
+        self,
+        molecules=["pol", "SOL", "NA", "CL"],
+        binwidth=0.25,
+        dim="z",
+        fname=None,
+    ):
+        """
+        Compute the partial densities of molecules in the simulation box.
+        If you wish to change which molecules are included, you can pass a list of
+        resnames as the molecules argument.
+
+        For a much quicker computation, do not unwrap the trajectory before calling this method.
+
+        binwidth is the width of the bins in angstroms - density is computed on slices of the
+        simulation box.
+
+        Data is saved to a csv if fname is not None
+
+        Returns:
+            Pandas dataframe with columns:
+            z-coord, density of each molecule passed in
+        By default: coord, density of polymer, density of water, density of sodium, density of chloride
+
+        """
+        data = {}
+        for res in molecules:
+            _sel = self.universe.select_atoms(f"resname {res}")
+            _lin = LinearDensity(_sel, binwidth=binwidth)
+            _lin.run()
+            data[res] = _lin.results[dim].pos
+
+        data = pd.DataFrame(data)
+        data.insert(0, f"{dim}_coord", np.arange(data.shape[0]) * binwidth)
+        if fname is not None:
+            data.to_csv(fname, index=False)
+        return data
