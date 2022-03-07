@@ -44,4 +44,10 @@ returns a pandas DataFrame:
     .reset_index()
     .pipe(plot_partial_densities)
 )
-``
+```
+
+> When computing partial densities, do not unwrap the trajectory - for a 4 ns
+> test run, the computation took 4.7 seconds on a wrapped trajectory, and 4 min
+> 57 seconds when unwrapped. The reason is that MDAnalysis has to then wrap the
+> coordinates of each atom back inside the box before computing densities of
+> each slice.
