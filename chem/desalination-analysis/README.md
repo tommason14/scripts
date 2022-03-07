@@ -25,7 +25,6 @@ To compute partial densities:
 ```python
 from polfuncs import PolSim, plot_partial_densities
 nvt = PolSim('nvt.tpr', 'nvt.xtc')
-nvt.unwrap()
 nvt.compute_partial_densities().pipe(plot_partial_densities, fname='partial_densities.png')
 ```
 
