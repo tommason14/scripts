@@ -154,10 +154,15 @@ class PolSim:
                 trans.wrap(self.solvent, compound="residues"),
             ]
             self.universe.trajectory.add_transformations(*transforms)
+        return self  # enable chaining
 
-    def show_traj(self, hide_virtual_sites=True, hide_graphene=False):
+    def show_traj(
+        self, hide_virtual_sites=True, hide_graphene=False, hide_water=False, **kwargs
+    ):
         """
-        View the trajectory using NGLView
+        View the trajectory using NGLView.
+        Options such as aspect_ratio can be passed in as keyword arguments,
+        as found in the NGLView docs.
         """
         if nv is None:
             raise ImportError("NGLView not installed")
@@ -166,10 +171,14 @@ class PolSim:
             _selection = _selection.select_atoms("not name MW")
         if hide_graphene:
             _selection = _selection.select_atoms("not resname GRA")
+        if hide_water:
+            _selection = _selection.select_atoms("not resname SOL")
         view = nv.show_mdanalysis(_selection)
         view.add_unitcell()
         # solvent not loaded in later versions, so do this explicitly
-        view.add_representation("ball+stick", "not resname pol")
+        # the show_mdanalysis method creates one structure, so the
+        # options passed in here are used when displaying all molecules
+        view.add_representation("ball+stick", "not resname pol", **kwargs)
         return view
 
     def compute_ion_counts(
