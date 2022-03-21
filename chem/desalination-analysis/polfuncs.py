@@ -71,10 +71,12 @@ def plot_ion_counts(counts, fname=None):
         plt.show()
 
 
-def plot_partial_densities(df, fname=None):
+def plot_partial_densities(df, fname=None, normalise=False):
     """
     Plot the partial densities of molecules across the simulation box.
     If a filename is given, the plot is saved.
+    If normalise is True, the partial densities are normalised against the maximum
+    density for each molecule.
     Using PolSim.compute_partial_densities() returns a dataframe with the
     first column as slices in the desired dimension.
     This function uses that and obtains the dimension from the name of that column.
@@ -88,9 +90,17 @@ def plot_partial_densities(df, fname=None):
     )
     NAMES = {"pol": "Polymer", "SOL": r"H$_2$O", "NA": r"Na$^+$", "CL": r"Cl$^-$"}
     dim = df.columns[0].split("_")[0]
-    df.set_index(f"{dim}_coord").rename(columns=NAMES).plot().set(
-        xlabel=f"{dim.upper()}-coordinate (Å)", ylabel="Density (g/cm$^3$)"
-    )
+    if normalise:
+        df.set_index(f"{dim}_coord").rename(columns=NAMES).apply(
+            lambda x: (x - x.min()) / (x.max() - x.min())
+        ).plot().set(
+            xlabel=f"{dim.upper()}-coordinate (Å)",
+            ylabel="Normalised Density",
+        )
+    else:
+        df.set_index(f"{dim}_coord").rename(columns=NAMES).plot().set(
+            xlabel=f"{dim.upper()}-coordinate (Å)", ylabel="Density (g/cm$^3$)"
+        )
     plt.tight_layout()
     if fname is not None:
         plt.savefig(fname, dpi=300)
