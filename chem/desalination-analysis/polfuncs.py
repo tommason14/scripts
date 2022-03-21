@@ -117,17 +117,22 @@ class PolSim:
     Expects Gromacs files - tpr files as coordinates, xtc files as trajectories.
     """
 
-    def __init__(self, coords, traj):
+    def __init__(self, coords, traj=None):
         self.coordname = coords
         self.trajname = traj
         self.load()
 
     def load(self):
-        self.universe = mda.Universe(self.coordname, self.trajname)
+        # if no traj, just load the coords - still useful to look at the topology
+        if self.trajname is None:
+            self.universe = mda.Universe(self.coordname)
+        else:
+            self.universe = mda.Universe(self.coordname, self.trajname)
+            self.traj = self.universe.trajectory  # for convenience
+            if self.traj.n_frames > 1:
+                self.dt = self.traj[1].time - self.traj[0].time  # picoseconds
         self.polymer = self.universe.select_atoms("resname pol")
         self.solvent = self.universe.select_atoms("not resname pol")
-        self.traj = self.universe.trajectory  # for convenience
-        self.dt = self.traj[1].time - self.traj[0].time  # picoseconds
 
     def unwrap(self, gmx=False):
         """
