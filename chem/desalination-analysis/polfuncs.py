@@ -196,6 +196,24 @@ class PolSim:
         view.add_representation("ball+stick", "not resname pol", **kwargs)
         return view
 
+    def polymer_drift(self):
+        """
+        Compute the change in the centre of mass of each chain relative to the first frame.
+        Returns a dataframe of simulation time along with the drift of each chain.
+        """
+        centre_of_masses = np.array(
+            [
+                self.polymer.center_of_mass(compound="residues")
+                for ts in completion(self.traj)
+            ]
+        )
+        drift = np.linalg.norm(centre_of_masses[:, :] - centre_of_masses[0, :], axis=2)
+        df = pd.DataFrame(
+            drift, columns=[f"{r.resname}_{r.resid}" for r in self.polymer.residues]
+        )
+        df.insert(0, "Time (ns)", np.arange(df.shape[0]) * self.dt * PS_TO_NS)
+        return df
+
     def compute_ion_counts(
         self, fname=None, restrained=True, correct_for_initial_salt_in_freshwater=False
     ):

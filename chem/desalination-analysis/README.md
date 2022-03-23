@@ -32,20 +32,6 @@ nvt = PolSim('nvt.tpr', 'nvt.xtc')
 nvt.compute_partial_densities().pipe(plot_partial_densities, fname='partial_densities.png')
 ```
 
-or to normalise the density of each molecule, ordinary pandas code can be used as `PolSim.compute_partial_densities()`
-returns a pandas DataFrame:
-
-```python
-(
-    nvt
-    .compute_partial_densities()
-    .set_index('z_coord')
-    .apply(lambda x: (x - x.min()) / (x.max() - x.min()))
-    .reset_index()
-    .pipe(plot_partial_densities)
-)
-```
-
 > When computing partial densities, do not unwrap the trajectory - for a 4 ns
 > test run, the computation took 4.7 seconds on a wrapped trajectory, and 4 min
 > 57 seconds when unwrapped. The reason is that MDAnalysis has to then wrap the
