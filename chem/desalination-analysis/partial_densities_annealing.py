@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from polfuncs import PolSim
 import os
 import pandas as pd
