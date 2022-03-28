@@ -94,14 +94,104 @@ def plot_partial_densities(df, fname=None, normalise=False):
         df.set_index(f"{dim}_coord").rename(columns=NAMES).apply(
             lambda x: (x - x.min()) / (x.max() - x.min())
         ).plot().set(
-            xlabel=f"{dim.upper()}-coordinate (Å)",
-            ylabel="Normalised Density",
+            xlabel=f"{dim.upper()}-coordinate (Å)", ylabel="Normalised Density",
         )
     else:
         df.set_index(f"{dim}_coord").rename(columns=NAMES).plot().set(
             xlabel=f"{dim.upper()}-coordinate (Å)", ylabel="Density (g/cm$^3$)"
         )
     plt.tight_layout()
+    if fname is not None:
+        plt.savefig(fname, dpi=300)
+    else:
+        plt.show()
+
+
+def plot_water_counts(counts, fname=None):
+    """
+    Plot the number of water molecules in each region as a function of time (assumes ns).
+
+    If a filename is given, the plot is saved.
+    """
+    REGIONS = {"salt": "Saltwater", "mem": "Membrane", "fresh": "Freshwater"}
+    tidy = counts.melt(id_vars="time_ns", var_name="region", value_name="count")
+    tidy["region"] = tidy["region"].str.split("_").str[1:].str.join("_").map(REGIONS)
+    sns.set(
+        style="ticks",
+        font_scale=1,
+        font="DejaVu Sans",
+        rc={"mathtext.default": "regular", "figure.figsize": (8, 6)},
+    )
+    p = sns.relplot(
+        data=tidy,
+        x="time_ns",
+        y="count",
+        hue="region",
+        kind="line",
+        col="region",
+        col_order=["Saltwater", "Membrane", "Freshwater"],
+        height=3,
+        aspect=1,
+        palette="Set2",
+        facet_kws={"sharey": False},
+        legend=False,
+    )
+    p.set(xlabel="Time (ns)", ylabel="Water Count")
+    p.set_titles(col_template="{col_name}")
+    plt.tight_layout()
+
+    if fname is not None:
+        plt.savefig(fname, dpi=300)
+    else:
+        plt.show()
+
+
+def plot_water_flux(counts, fname=None):
+    """
+    Plot the change in number of water molecules between regions as a function of time (assumes ns).
+
+    If a filename is given, the plot is saved.
+    """
+    REGIONS = {
+        "saltwater_to_mem": r"Saltwater $\rightarrow$ Membrane",
+        "mem_to_freshwater": r"Membrane $\rightarrow$ Freshwater",
+    }
+    tidy = (
+        counts.assign(
+            saltwater_to_mem=counts.water_mem - counts.water_salt,
+            mem_to_freshwater=counts.water_fresh - counts.water_mem,
+        )
+        .drop(columns=["water_salt", "water_mem", "water_fresh"])
+        .melt(id_vars="time_ns", var_name="region", value_name="count")
+        .assign(region=lambda x: x.region.map(REGIONS))
+    )
+    sns.set(
+        style="ticks",
+        font_scale=1,
+        font="DejaVu Sans",
+        rc={"mathtext.default": "regular", "figure.figsize": (8, 6)},
+    )
+    p = sns.relplot(
+        data=tidy,
+        x="time_ns",
+        y="count",
+        hue="region",
+        kind="line",
+        col="region",
+        col_order=[
+            r"Saltwater $\rightarrow$ Membrane",
+            r"Membrane $\rightarrow$ Freshwater",
+        ],
+        height=3,
+        aspect=1,
+        palette="Set2",
+        facet_kws={"sharey": False},
+        legend=False,
+    )
+    p.set(xlabel="Time (ns)", ylabel="Water flux")
+    p.set_titles(col_template="{col_name}")
+    plt.tight_layout()
+
     if fname is not None:
         plt.savefig(fname, dpi=300)
     else:
@@ -233,7 +323,7 @@ class PolSim:
 
         Returns:
             Pandas dataframe with columns:
-            time, cl_salt, cl_mem, cl_fresh, na_salt, na_mem, na_fresh
+            time_ns, cl_salt, cl_mem, cl_fresh, na_salt, na_mem, na_fresh
         """
         # Polymer bounds constant with a restrained polymer
         min_z = self.polymer.positions[:, 2].min()
@@ -296,11 +386,7 @@ class PolSim:
         return df
 
     def compute_partial_densities(
-        self,
-        molecules=["pol", "SOL", "NA", "CL"],
-        binwidth=0.25,
-        dim="z",
-        fname=None,
+        self, molecules=["pol", "SOL", "NA", "CL"], binwidth=0.25, dim="z", fname=None,
     ):
         """
         Compute the partial densities of molecules in the simulation box.
@@ -332,3 +418,49 @@ class PolSim:
         if fname is not None:
             data.to_csv(fname, index=False)
         return data
+
+    def compute_water_counts(self, restrained=True, fname=None):
+        """
+        Tracking water numbers in each portion of the simulation box.
+        The polymer is defined by the minimum and maximum z-coordinate of the polymer
+        in each frame. Anything to the left is designated as saltwater and any space
+        to the right is designated as freshwater. If restrained is True, the bounds of
+        the polymer are computed once to save on computation time.
+
+        Water counts are computed per frame (given as time in ns) as a pandas dataframe, and
+        (optionally) saved to a csv.
+
+        Returns:
+            Pandas dataframe with columns:
+            time_ns, water_salt, water_mem, water_fresh
+        """
+        # Polymer bounds constant with a restrained polymer
+        min_z = self.polymer.positions[:, 2].min()
+        max_z = self.polymer.positions[:, 2].max()
+        counts = np.zeros((self.traj.n_frames, 4))
+        for i, ts in enumerate(completion(self.traj)):
+            if not restrained:  # need to recompute bounds
+                min_z = self.polymer.positions[:, 2].min()
+                max_z = self.polymer.positions[:, 2].max()
+            water_in_saltwater = self.universe.select_atoms(
+                f"resname SOL and prop z < {min_z}"
+            )
+            water_in_membrane = self.universe.select_atoms(
+                f"resname SOL and prop z > {min_z} and prop z < {max_z}"
+            )
+            water_in_freshwater = self.universe.select_atoms(
+                f"resname SOL and prop z > {max_z}"
+            )
+            counts[i] = [
+                ts.time,
+                water_in_saltwater.n_atoms,
+                water_in_membrane.n_atoms,
+                water_in_freshwater.n_atoms,
+            ]
+        counts[:, 0] *= PS_TO_NS
+        df = pd.DataFrame(
+            counts, columns=["time_ns", "water_salt", "water_mem", "water_fresh",],
+        )
+        if fname is not None:
+            df.to_csv(fname, index=False)
+        return df
