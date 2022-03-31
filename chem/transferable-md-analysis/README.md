@@ -22,6 +22,11 @@ All scripts have help messages available - pass in the `-h` flag to see the avai
 - Alternative to `traj_convert.py` that writes a `gro` coordinate file and
   `xtc` binary trajectory of a selection provided by the user
 
+## Combining multiple trajectories (concat_traj.py)
+
+- Write all frames to one output file consecutively
+- Emulating `gmx trjcat` but without the need to specify start times
+
 ## Diffusion coefficients (diff_coeffs_from_md.py)
 
 - Computed via the Einstein relation (1/2N * gradient of MSD against time, N = dimensionality)
