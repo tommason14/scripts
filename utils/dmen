@@ -16,4 +16,4 @@ if [ -z "$C9" ]; then
 fi
 
 # sel background is the most prominent color - default = color1 (red)
-open -a XQuartz; dmenu -i -fn "mononoki-12" -p "Run: " -nb "$CBACK" -nf "$C15" -sb "$C9" -sf "$C15" "$@"
+open -a XQuartz; dmenu -i -fn "mononoki-12" -nb "$CBACK" -nf "$C15" -sb "$C9" -sf "$C15" "$@"
