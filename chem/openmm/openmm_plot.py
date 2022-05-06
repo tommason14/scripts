@@ -14,10 +14,19 @@ def read(fname):
         for line in f:
             if "Step" in line:
                 found = True
-                header = [i.replace('"', "").replace("#", "") for i in line.split(",")]
+                if "," in line:
+                    header = [
+                        i.replace('"', "").replace("#", "") for i in line.split(",")
+                    ]
+                else:
+                    header = [i.replace('"', "").replace("#", "") for i in line.split()]
                 continue
             if found:
-                data.append(line.split(","))
+                if "," in line:
+                    data.append(line.split(","))
+                else:
+                    data.append(line.split())
+
     return pd.DataFrame(data, columns=header).apply(lambda x: pd.to_numeric(x))
 
 
