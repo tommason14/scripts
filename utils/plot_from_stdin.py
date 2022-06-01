@@ -20,11 +20,7 @@ parser.add_argument(
     "--delimeter",
     help="Delimeter is split by, default is to split on any whitespace",
 )
-parser.add_argument(
-    "-o",
-    "--output",
-    help='png filename to save to'
-)
+parser.add_argument("-o", "--output", help="png filename to save to")
 
 args = parser.parse_args()
 
@@ -49,9 +45,9 @@ for i, col in enumerate(data.columns, 1):
 x_col = int(input("Enter the number of x-axis column: ")) - 1
 y_col = int(input("Enter the number of y-axis column: ")) - 1
 
-data.set_index(data.columns[x_col])[data.columns[y_col]].plot().set(
-    xlabel=data.columns[x_col], ylabel=data.columns[y_col]
-)
+xcol = data.columns[x_col]
+ycol = data.columns[y_col]
+data.set_index(xcol)[ycol].plot().set(xlabel=xcol, ylabel=ycol)
 
 if args.output:
     plt.tight_layout()
