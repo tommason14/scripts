@@ -1,3 +1,5 @@
 #!/bin/sh
 
-grep 'SCF Done' ${1:-/dev/stdin} | awk '{print $6}' | plotgnu
+# column number might vary depending on version?
+
+grep 'SCF Done' ${1:-/dev/stdin} | awk '{for(i=1;i<=NF;i++){if($i ~ /^-/){print $i}}}' | plotgnu
