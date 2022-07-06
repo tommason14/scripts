@@ -65,6 +65,13 @@ parser.add_argument(
     help="Disregard interactions of atoms in the same residue",
     action="store_true",
 )
+parser.add_argument(
+    "-b",
+    "--bins",
+    help="Number of intervals to bin distances into, default=200",
+    default=200,
+    type=int,
+)
 
 args = parser.parse_args()
 
@@ -85,18 +92,23 @@ if args.intermolecular:
     rdf = InterRDF(
         ref,
         sel,
-        nbins=200,
+        nbins=args.bins,
         range=(args.start, args.end),
         exclusion_block=(ref_atoms, sel_atoms),
     )
 else:
-    rdf = InterRDF(ref, sel, nbins=200, range=(args.start, args.end))
+    rdf = InterRDF(ref, sel, nbins=args.bins, range=(args.start, args.end))
 rdf.run(verbose=True)
 df = pd.DataFrame({"bins": rdf.bins, "rdf": rdf.rdf})
 df.to_csv(args.output + ".csv", index=False)
 
 if args.plot:
-    sns.set(style="white", font='DejaVu Sans', font_scale=1.2, rc={"mathtext.default": "regular"})
+    sns.set(
+        style="white",
+        font="DejaVu Sans",
+        font_scale=1.2,
+        rc={"mathtext.default": "regular"},
+    )
     p = sns.lineplot(x="bins", y="rdf", ci=None, data=df)
     p.set_xlabel(r"Distance (${\AA}$)")
     p.set_ylabel("g(r)")

@@ -4,6 +4,22 @@ import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 import re
+from matplotlib.ticker import FuncFormatter
+
+
+def formatting(x, pos):
+    """
+    The string formatter directly manipulates the value passed in, so to convert 
+    1000000 into 1x10^6, you have to divide the value by 10^6, like so:
+    f"{x*10**-6}x10$^6$
+    """
+    if x == 0:
+        return 0
+    if x < 1e6:
+        # like 9.5x10^5
+        return f"{x*10**-5:,.1f}x10$^{5}$"
+    # expecting lots of timesteps, so report to 0 dp to allow for more space along axis
+    return f"{x*10**-6:,.0f}x10$^{6}$"
 
 
 def read(fname):
@@ -48,11 +64,11 @@ def column_from_command_line_pipe(df):
 def main():
     logfile = sys.argv[1]
     df = read(logfile)
+    fig, ax = plt.subplots()
     column = column_from_command_line_pipe(df)
     if column:
-        df.set_index("Step")[column].plot().set(xlabel="Step", ylabel=column)
-        plt.tight_layout()
-        plt.show()
+        df.set_index("Step")[column].plot(ax=ax)
+        ax.set(xlabel="Step", ylabel=column)
     else:
         # ask user for column from df - omit Step (the first column)
         choices = [i for i in df.columns[1:]]
@@ -60,11 +76,15 @@ def main():
         for i, choice in enumerate(choices, 1):
             print(f"{i}: {choice}")
         choice = int(input("Enter number: ")) - 1  # -1 because of Step omission
-        df.set_index("Step")[choices[choice]].plot().set(
-            xlabel="Step", ylabel=choices[choice]
-        )
-        plt.tight_layout()
-        plt.show()
+        df.set_index("Step")[choices[choice]].plot(ax=ax)
+        ax.set(xlabel="Step", ylabel=choices[choice])
+    # step number scientific formatting
+    ax.xaxis.set_major_formatter(FuncFormatter(formatting))
+    # if looking at energy, also format y axis
+    if "potential" in ax.yaxis.label._text:
+        ax.yaxis.set_major_formatter(FuncFormatter(formatting))
+    plt.tight_layout()
+    plt.show()
 
 
 if __name__ == "__main__":

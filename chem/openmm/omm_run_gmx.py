@@ -131,6 +131,7 @@ def gen_simulation(
         system.addForce(baro)
 
     if restrain is not None:
+        print(f"Restraining residues named: {restrain}")
         atoms_to_restrain = [
             a.idx for a in top.atoms for x in restrain if a.residue.name == x
         ]
