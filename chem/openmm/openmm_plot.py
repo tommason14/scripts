@@ -9,7 +9,7 @@ from matplotlib.ticker import FuncFormatter
 
 def formatting(x, pos):
     """
-    The string formatter directly manipulates the value passed in, so to convert 
+    The string formatter directly manipulates the value passed in, so to convert
     1000000 into 1x10^6, you have to divide the value by 10^6, like so:
     f"{x*10**-6}x10$^6$
     """
@@ -62,6 +62,12 @@ def column_from_command_line_pipe(df):
 
 
 def main():
+    if len(sys.argv) < 2 or "-h" in sys.argv:
+        print("Usage: openmm_plot.py <file>")
+        print("The column to plot can be piped in from the command line:")
+        print("$ echo 'density' | openmm_plot.py npt.log")
+        print("Otherwise the script will prompt you for the column to plot.")
+        sys.exit(1)
     logfile = sys.argv[1]
     df = read(logfile)
     fig, ax = plt.subplots()
