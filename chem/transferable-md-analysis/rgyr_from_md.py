@@ -3,9 +3,12 @@ import MDAnalysis as mda
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from matplotlib import use
 import matplotlib.pyplot as plt
 from utils import completion
 import argparse
+
+use("Agg")
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--coords", help="Coordinate file (.gro/.pdb)", required=True)
@@ -54,7 +57,7 @@ df.to_csv(args.output + ".csv", index=False)
 if args.plot:
     sns.set(
         style="ticks",
-        font='DejaVu Sans',
+        font="DejaVu Sans",
         font_scale=1.2,
         rc={"mathtext.default": "regular"},
     )
@@ -63,4 +66,4 @@ if args.plot:
     else:
         p = sns.lineplot(x="Time (ns)", y="Rg", ci=None, data=df)
     p.set_ylabel(r"R$_{gyr}$ ($\AA$)")
-    plt.savefig(args.output + ".pdf", dpi=300)
+    plt.savefig(args.output + ".png", dpi=300)

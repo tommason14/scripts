@@ -3,8 +3,11 @@ import MDAnalysis as mda
 from MDAnalysis.analysis import rms, align
 import pandas as pd
 import seaborn as sns
+from matplotlib import use
 import matplotlib.pyplot as plt
 import argparse
+
+use("Agg")
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--coords", help="Coordinate file (.gro/.pdb)", required=True)
@@ -32,7 +35,7 @@ average = align.AverageStructure(u, u, select=args.selection, ref_frame=0).run()
 ref = average.results.universe
 aligner = align.AlignTraj(u, ref, select=args.selection, in_memory=True).run()
 selection = u.select_atoms(args.selection)
-rmsf = rms.RMSF(selection, verbose=True).run()
+rmsf = rms.RMSF(selection).run(verbose=True)
 # RMSF is computed per atom, but the convention is to average over each residue
 # selection.resnums = 1 per atom, so averaged = RMSF for each residue
 df = (
@@ -45,11 +48,11 @@ df.to_csv(args.output + ".csv", index=False)
 if args.plot:
     sns.set(
         style="ticks",
-        font='DejaVu Sans',
+        font="DejaVu Sans",
         font_scale=1.2,
         rc={"mathtext.default": "regular"},
     )
     p = sns.lineplot(x="resid", y="rmsf", ci=None, data=df)
     p.set_xlabel("Residue number")
     p.set_ylabel(r"RMSF ($\AA$)")
-    plt.savefig(args.output + ".pdf", dpi=300)
+    plt.savefig(args.output + ".png", dpi=300)

@@ -3,11 +3,13 @@ import mdtraj as md
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from matplotlib import use
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import argparse
 import warnings
 
+use("Agg")
 
 warnings.filterwarnings(
     "ignore", message="warning: two consecutive residues with same number.*"
@@ -89,4 +91,4 @@ if args.plot:
     else:
         p = sns.lineplot(x="Time (ns)", y="SASA", ci=None, data=df)
     p.set_ylabel(r"SASA (nm$^2$)")
-    plt.savefig(args.output + ".pdf", dpi=300)
+    plt.savefig(args.output + ".png", dpi=300)

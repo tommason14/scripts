@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 import argparse
+from matplotlib import use
 import matplotlib.pyplot as plt
 import mdtraj as md
 import numpy as np
 import pandas as pd
 import seaborn as sns
+
+use("Agg")
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--coords", help="Coordinate file (.gro/.pdb)", required=True)

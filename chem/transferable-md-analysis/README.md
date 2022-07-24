@@ -31,7 +31,7 @@ All scripts have help messages available - pass in the `-h` flag to see the avai
 
 - Computed via the Einstein relation (1/2N * gradient of MSD against time, N = dimensionality)
 - The middle 80 % of trajectory is used by default to compute diffusion coefficients, but easily changed
-- Diffusion coefficients printed to the screen, MSD vs time plot saved as pdf
+- Diffusion coefficients printed to the screen, MSD vs time plot saved as png
 
 ## Dipole moments (dipole_moments_from_md.py)
 

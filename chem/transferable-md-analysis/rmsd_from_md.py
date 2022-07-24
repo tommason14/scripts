@@ -4,9 +4,11 @@ from MDAnalysis.analysis import rms
 import MDAnalysis.transformations as trans
 import pandas as pd
 import seaborn as sns
+from matplotlib import use
 import matplotlib.pyplot as plt
 import argparse
 
+use("Agg")
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--coords", help="Coordinate file (.gro/.pdb)", required=True)
 parser.add_argument(
@@ -44,21 +46,21 @@ if args.centre:
         trans.wrap(notsel),
     ]
     u.trajectory.add_transformations(*transforms)
-rmsd = rms.RMSD(u, u, args.selection, weights=weights).run()
+rmsd = rms.RMSD(u, u, args.selection, weights=weights).run(verbose=True)
 
 df = (
     pd.DataFrame(rmsd.results.rmsd, columns=["Frame", "Time (ps)", "RMSD"])
     .assign(**{"Time (ns)": lambda x: x["Time (ps)"] / 1000})  # expects keyword args
-    .drop("Time (ps)", axis=1)
+    .drop(["Time (ps)", "Frame"], axis=1)
 )
 df.to_csv(args.output + ".csv", index=False)
 if args.plot:
     sns.set(
         style="ticks",
-        font='DejaVu Sans',
+        font="DejaVu Sans",
         font_scale=1.2,
         rc={"mathtext.default": "regular"},
     )
     p = sns.lineplot(x="Time (ns)", y="RMSD", ci=None, data=df)
     p.set_ylabel(r"RMSD ($\AA$)")
-    plt.savefig(args.output + ".pdf", dpi=300)
+    plt.savefig(args.output + ".png", dpi=300)

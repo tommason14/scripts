@@ -7,8 +7,11 @@ import argparse
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from matplotlib import use
 import matplotlib.pyplot as plt
 from scipy.stats import linregress
+
+use("Agg")
 
 
 class EinsteinMSD(AnalysisBase):
@@ -325,7 +328,7 @@ def plot_msd(df, start=0.1, end=0.9):
     p.set_ylabel(r"MSD (${\AA}^2$)")
     p.legend().set_title(None)
     plt.tight_layout()  # y axis label sometimes cut off
-    plt.savefig("msd.pdf", dpi=300)
+    plt.savefig("msd.png", dpi=300)
 
 
 def change_resnames(df, list_of_strings):

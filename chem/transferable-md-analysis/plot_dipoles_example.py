@@ -1,6 +1,9 @@
 import pandas as pd
 import seaborn as sns
+from matplotlib import use
 import matplotlib.pyplot as plt
+
+use("Agg")
 
 
 def one_plot(df):
@@ -13,7 +16,7 @@ def one_plot(df):
     p.get_legend().set_title(None)
     p.set_xlabel(r"$\mu$ (D)")
     plt.tight_layout()
-    plt.savefig("one_plot.pdf", dpi=300)
+    plt.savefig("one_plot.png", dpi=300)
 
 
 def faceted(df):
@@ -38,7 +41,7 @@ def faceted(df):
     p.set_titles("{col_name}")
     p.set(yticks=[])
     sns.despine(left=True, right=True, top=True)
-    plt.savefig("faceted.pdf", dpi=300)
+    plt.savefig("faceted.png", dpi=300)
 
 
 def main():
