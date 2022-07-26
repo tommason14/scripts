@@ -40,14 +40,15 @@ MW           0       0.0000  0.0000  D   0.00000e+00  0.00000e+00
 #include "ions.itp"
 EOF
 
-cat header addn <(echo) footer > polymer.top
-rm header addn footer
+cat header addn <(echo) footer > topol.top
+rm header addn footer polymer.top
 
-$sed -i 's/Generic title/Polymer in salinated water/' polymer.top
+$sed -i 's/Generic title/Polymer in salinated water/' topol.top
+
 
 # additional files
 scriptdir="$(dirname $(realpath $0))"
 cp $scriptdir/gromacs_files/* .
 
-echo "Add the required number of each residue at the bottom of polymer.top after packing,"
+echo "Add the required number of each residue at the bottom of topol.top after packing,"
 echo "then run the job."
