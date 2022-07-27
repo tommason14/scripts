@@ -17,7 +17,13 @@ sns_settings = {
 colours = {
     3: ["#545775", "#FFA686", "#53B3CB"],
     5: ["#6f92f3", "#aac7fd", "#b0abab", "#f7b89c", "#e7745b"],
-    "peach": ["#355070", "#6d597a", "#b56576", "#e56b6f", "#eaac8b",],
+    "peach": [
+        "#355070",
+        "#6d597a",
+        "#b56576",
+        "#e56b6f",
+        "#eaac8b",
+    ],
 }
 
 
@@ -173,10 +179,11 @@ def datafile_elements(datafile):
     return elements
 
 
-def lammps_mdanalysis(data, traj):
+def lammps_mdanalysis(data, traj, define_residues=False):
     """
     Import LAMMPS datafile and trajectory,
-    adding atom names by looking up the mass from the datafile
+    adding atom names by looking up the mass from the datafile.
+    Optionally, can define a residue attribute, and set the residues names to UNK, for unknown.
     """
     import MDAnalysis as mda
 
@@ -204,12 +211,13 @@ def lammps_mdanalysis(data, traj):
 
     # for hydrogen bonding analysis to work, need to assign residues (meaningless for
     # these systems)
-    u.add_TopologyAttr("resnames")
-    u.atoms.residues.resnames = "UNK"  # set to unknown
+    if define_residues:
+        u.add_TopologyAttr("resnames")
+        u.atoms.residues.resnames = "UNK"  # set to unknown
     return u
 
 
-def add_elements_to_universe(universe, datafile="pack.lmps"):
+def add_elements_to_universe(universe, datafile="pack.lmps", define_residues=False):
     universe.add_TopologyAttr("names")
     atoms = datafile_elements(datafile)
 
@@ -221,8 +229,9 @@ def add_elements_to_universe(universe, datafile="pack.lmps"):
     universe.atoms.types = universe.atoms.types.astype(int)
     # for hydrogen bonding analysis to work, need to assign residues (meaningless for
     # these systems)
-    universe.add_TopologyAttr("resnames")
-    universe.atoms.residues.resnames = "UNK"  # set to unknown
+    if define_residues:
+        universe.add_TopologyAttr("resnames")
+        universe.atoms.residues.resnames = "UNK"  # set to unknown
     return universe
 
 
@@ -305,7 +314,7 @@ def pipe(original):
 
 def read_xvg(fname, columns=None):
     """
-    Read xmgrace xvg files that are written by Gromacs. 
+    Read xmgrace xvg files that are written by Gromacs.
     Pass in a list of column names that should be used in the resulting
     dataframe
     """
