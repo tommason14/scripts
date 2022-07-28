@@ -18,7 +18,7 @@ parser.add_argument(
     nargs="+",
     required=True,
 )
-parser.add_argument("-s", "--selection", help="MDAnalysis selection")
+parser.add_argument("-s", "--selection", help="MDAnalysis selection", required=True)
 parser.add_argument(
     "-w", "--mass-weighted", help="Mass-weight RMSD per atom", action="store_true"
 )

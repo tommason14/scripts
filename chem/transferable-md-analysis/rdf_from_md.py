@@ -29,13 +29,20 @@ class COM:
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "-c", "--coords", help="Coordinate/topology file (.gro/.pdb/.psf/.top etc)"
+    "-c",
+    "--coords",
+    help="Coordinate/topology file (.gro/.pdb/.psf/.top etc)",
+    required=True,
 )
 parser.add_argument(
-    "-t", "--trajectory", help="Trajectory file(s) (.dcd/.pdb/.xtc etc)", nargs="+"
+    "-t",
+    "--trajectory",
+    help="Trajectory file(s) (.dcd/.pdb/.xtc etc)",
+    nargs="+",
+    required=True,
 )
-parser.add_argument("-ref", help="Reference MDAnalysis selection")
-parser.add_argument("-sel", help="MDAnalysis selection to search for")
+parser.add_argument("-ref", help="Reference MDAnalysis selection", required=True)
+parser.add_argument("-sel", help="MDAnalysis selection to search for", required=True)
 parser.add_argument(
     "-o", "--output", help="Output prefix. Default = rdf", default="rdf",
 )

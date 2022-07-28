@@ -18,7 +18,7 @@ parser.add_argument(
     nargs="+",
     required=True,
 )
-parser.add_argument("-s", "--selection", help="MDAnalysis selection")
+parser.add_argument("-s", "--selection", help="MDAnalysis selection", required=True)
 
 parser.add_argument(
     "-o", "--output", help="Prefix of saved files, default=rmsf", default="rmsf"
