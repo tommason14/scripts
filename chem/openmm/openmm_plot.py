@@ -90,7 +90,7 @@ def main():
     if "potential" in ax.yaxis.label._text:
         ax.yaxis.set_major_formatter(FuncFormatter(formatting))
     plt.tight_layout()
-    plt.show()
+    plt.savefig("plot.png", dpi=300)
 
 
 if __name__ == "__main__":
