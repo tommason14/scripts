@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
+
 CONF=$(grep include ~/.config/kitty/kitty.conf | awk '{print $NF}' | sed "s|~|$HOME|g")
 C15=$(grep '^color15' $CONF | head -n 1 | awk '{print $NF}')
-# if C15 is not set, use color7 (carbon colourscheme) (white colour for the foreground text)
+# if C15 is not set, use color7 (i.e as in carbon colourscheme) (white colour for the foreground text)
 if [ -z "$C15" ]; then
     C15=$(grep '^color7' $CONF | head -n 1 | awk '{print $NF}')
 fi
@@ -9,11 +10,12 @@ fi
 printf "$CONF" | grep -q light && C15=$(grep '^color0' $CONF | head -n 1 | awk '{print $NF}')
 
 CBACK=$(grep '^background' $CONF | head -n 1 | awk '{print $NF}')
-# use red, but the lighter version if available 
+# use red, but the lighter version if available
 C9=$(grep '^color9' $CONF | head -n 1 | awk '{print $NF}')
 if [ -z "$C9" ]; then
     C9=$(grep '^color1' $CONF | head -n 1 | awk '{print $NF}')
 fi
 
 # sel background is the most prominent color - default = color1 (red)
-open -a XQuartz; dmenu -i -fn "mononoki-12" -nb "$CBACK" -nf "$C15" -sb "$C9" -sf "$C15" "$@"
+
+rmenu --font 'JetBrainsMono Nerd Font' --font-size 16 --height 25 --background-normal "$CBACK" --foreground-normal "$C15" --background-selection "$C9" --foreground-selection "$C15" "$@"

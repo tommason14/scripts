@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+option="$(/bin/ls /Applications | sed 's/.app//' | ~/bin/rmen --prompt " Open:")"
+
+[[ -z $option ]] && exit 1
+
+open "/Applications/$option.app"
