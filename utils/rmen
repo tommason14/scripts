@@ -18,4 +18,4 @@ fi
 
 # sel background is the most prominent color - default = color1 (red)
 
-rmenu --font 'JetBrainsMono Nerd Font' --font-size 16 --height 25 --background-normal "$CBACK" --foreground-normal "$C15" --background-selection "$C9" --foreground-selection "$C15" "$@"
+rmenu --font 'JetBrainsMono Nerd Font' --font-size 14 --height 24 --background-normal "$CBACK" --foreground-normal "$C15" --background-selection "$C9" --foreground-selection "$C15" "$@"

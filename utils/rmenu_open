@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-option="$(/bin/ls /Applications | sed 's/.app//' | ~/bin/rmen --prompt " Open:")"
+option="$(/bin/ls /Applications | sed 's/.app//' | rmen --prompt " Open:")"
 
 [[ -z $option ]] && exit 1
 
